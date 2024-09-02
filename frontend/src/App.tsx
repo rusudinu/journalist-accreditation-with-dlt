@@ -7,6 +7,7 @@ import {
     FileInput,
 } from "@/components/extension/file-uploader";
 import {DropzoneOptions} from "react-dropzone";
+import {Button} from "@/components/ui/button.tsx";
 
 const FileSvgDraw = () => {
     return (
@@ -47,9 +48,8 @@ function App() {
             "application/msword": [".doc"],
             "application/vnd.openxmlformats-officedocument.wordprocessingml.document": [".docx"],
         },
-        multiple: true,
-        maxFiles: 4,
-        maxSize: 1 * 1024 * 1024,
+        multiple: false,
+        maxSize: 1024 * 1024,
     } satisfies DropzoneOptions;
 
     const handleUpload = async () => {
@@ -111,12 +111,12 @@ function App() {
                     ))}
                 </FileUploaderContent>
             </FileUploader>
-            <button
+            <Button
                 onClick={handleUpload}
-                className="mt-4 p-2 bg-blue-500 text-white rounded"
+                className="mt-4"
             >
-                Upload Files
-            </button>
+                Upload File
+            </Button>
         </>
     );
 }
