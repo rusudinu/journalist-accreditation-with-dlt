@@ -94,22 +94,43 @@ function App() {
                     </div>
                 </FileInput>
                 <FileUploaderContent className="flex items-center flex-row gap-2">
-                    {files?.map((file, i) => (
-                        <FileUploaderItem
-                            key={i}
-                            index={i}
-                            className="size-20 p-0 rounded-md overflow-hidden"
-                            aria-roledescription={`file ${i + 1} containing ${file.name}`}
-                        >
-                            <img
-                                src={URL.createObjectURL(file)}
-                                alt={file.name}
-                                height={80}
-                                className="size-20 p-0"
-                            />
-                        </FileUploaderItem>
-                    ))}
+                    {files?.map((file, i) => {
+                        const fileType = file.type;
+                        const isImage = fileType.startsWith("image/");
+                        const isPDF = fileType === "application/pdf";
+
+                        return (
+                            <FileUploaderItem
+                                key={i}
+                                index={i}
+                                className="size-20 p-0 rounded-md overflow-hidden"
+                                aria-roledescription={`file ${i + 1} containing ${file.name}`}
+                            >
+                                {isImage ? (
+                                    <img
+                                        src={URL.createObjectURL(file)}
+                                        alt={file.name}
+                                        height={80}
+                                        className="size-20 p-0"
+                                    />
+                                ) : isPDF ? (
+                                    <div className="flex items-center justify-center h-20 w-20 bg-gray-200 text-gray-700">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
+                                            <path strokeLinecap="round" strokeLinejoin="round"
+                                                  d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z"/>
+                                        </svg>
+
+                                    </div>
+                                ) : (
+                                    <div className="flex items-center justify-center h-20 w-20 bg-gray-200 text-gray-700">
+                                        <span>File</span>
+                                    </div>
+                                )}
+                            </FileUploaderItem>
+                        );
+                    })}
                 </FileUploaderContent>
+
             </FileUploader>
             <Button
                 onClick={handleUpload}
