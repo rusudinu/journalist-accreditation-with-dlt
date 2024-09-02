@@ -1,5 +1,5 @@
-import {useState} from 'react'
-import './App.css'
+import {useState} from 'react';
+import './App.css';
 import {
     FileUploader,
     FileUploaderContent,
@@ -43,12 +43,43 @@ function App() {
     const dropzone = {
         accept: {
             "image/*": [".jpg", ".jpeg", ".png"],
-            "document/*": [".pdf", ".doc", ".docx"],
+            "application/pdf": [".pdf"],
+            "application/msword": [".doc"],
+            "application/vnd.openxmlformats-officedocument.wordprocessingml.document": [".docx"],
         },
         multiple: true,
         maxFiles: 4,
         maxSize: 1 * 1024 * 1024,
     } satisfies DropzoneOptions;
+
+    const handleUpload = async () => {
+        if (!files || files.length === 0) {
+            alert("Please select files to upload.");
+            return;
+        }
+
+        const formData = new FormData();
+        files.forEach(file => {
+            formData.append("file", file);
+        });
+
+        try {
+            const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/v1/documents`, {
+                method: "POST",
+                body: formData,
+            });
+
+            if (response.ok) {
+                alert("Files uploaded successfully!");
+                setFiles([]); // Clear files after successful upload
+            } else {
+                alert("Failed to upload files.");
+            }
+        } catch (error) {
+            console.error("Error uploading files:", error);
+            alert("An error occurred while uploading the files.");
+        }
+    };
 
     return (
         <>
@@ -80,8 +111,14 @@ function App() {
                     ))}
                 </FileUploaderContent>
             </FileUploader>
+            <button
+                onClick={handleUpload}
+                className="mt-4 p-2 bg-blue-500 text-white rounded"
+            >
+                Upload Files
+            </button>
         </>
-    )
+    );
 }
 
-export default App
+export default App;

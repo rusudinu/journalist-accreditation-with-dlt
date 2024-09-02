@@ -14,7 +14,7 @@ public class DocumentController {
     private final DocumentService documentService;
 
 
-    @PostMapping("/upload")
+    @PostMapping
     public String uploadDocument(@RequestParam("file") MultipartFile file) {
         return documentService.uploadDocument(file);
     }
