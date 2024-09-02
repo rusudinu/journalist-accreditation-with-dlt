@@ -1,0 +1,10 @@
+services:
+  journalist-accreditation-postgres:
+    image: postgres:16.2
+    container_name: journalist-accreditation-postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_PASSWORD: root
+      POSTGRES_USER: root
+      POSTGRES_DB: journalist_accreditation
