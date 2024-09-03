@@ -41,7 +41,6 @@ const FileSvgDraw = () => {
 };
 
 function App() {
-    const keycloak = useContext(AuthContext);
     const [files, setFiles] = useState<File[] | null>([]);
 
     const dropzone = {
@@ -55,30 +54,6 @@ function App() {
         maxSize: 1024 * 1024,
     } satisfies DropzoneOptions;
 
-    const testJournalist = async () => {
-        try {
-            const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/v1/documents/only-journalist`, {});
-        } catch (error) {
-            console.error("Error fetching journalist documents:", error);
-        }
-    }
-
-    const testMinistry = async () => {
-        try {
-            const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/v1/documents/only-ministry`, {});
-        } catch (error) {
-            console.error("Error fetching ministry documents:", error);
-        }
-    }
-
-    const testBoth = async () => {
-        try {
-            const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/v1/documents/journalist-and-ministry`, {});
-        } catch (error) {
-            console.error("Error fetching journalist and ministry documents:", error);
-        }
-    }
-
     const handleUpload = async () => {
         if (!files || files.length === 0) {
             alert("Please select files to upload.");
@@ -91,14 +66,15 @@ function App() {
         });
 
         try {
-            const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/v1/documents`, {
-                method: "POST",
-                body: formData,
+            const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/v1/documents`, formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                }
             });
 
-            if (response.ok) {
+            if (response.status === 200) {
                 alert("Files uploaded successfully!");
-                setFiles([]); // Clear files after successful upload
+                setFiles([]);
             } else {
                 alert("Failed to upload files.");
             }
@@ -164,22 +140,6 @@ function App() {
                 className="mt-4"
             >
                 Upload File
-            </Button>
-            <Button
-                onClick={testJournalist}
-                className="mt-4"
-            >T JOURNAL</Button>
-            <Button
-                onClick={testMinistry}
-                className="mt-4"
-            >
-                T MIN
-            </Button>
-            <Button
-                onClick={testBoth}
-                className="mt-4"
-            >
-                T BOTH
             </Button>
         </>
     );
