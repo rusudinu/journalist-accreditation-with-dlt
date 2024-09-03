@@ -23,7 +23,7 @@ const UserDocumentsTable: React.FC<UserDocumentsTableProps> = ({user}) => {
 
     return (
         <Table>
-            <TableCaption>{`Documents of User ID: ${user.id}`}</TableCaption>
+            <TableCaption>{`Documents of User ID: ${user.keycloakId}`}</TableCaption>
             <TableHeader>
                 <TableRow>
                     <TableHead className="w-[100px]">Document ID</TableHead>
