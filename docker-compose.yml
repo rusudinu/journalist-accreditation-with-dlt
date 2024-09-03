@@ -8,3 +8,12 @@ services:
       POSTGRES_PASSWORD: root
       POSTGRES_USER: root
       POSTGRES_DB: journalist_accreditation
+  journalist-accreditation-keycloak:
+    image: quay.io/keycloak/keycloak:21.0.1
+    container_name: journalist-accreditation-keycloak
+    ports:
+      - "9001:8080"
+    command: start --cache=local --http-enabled=true --hostname-strict=false --hostname-strict-https=false -Dkeycloak.migration.action=import -Dkeycloak.migration.provider=dir -Dkeycloak.migration.dir=/tmp -Dkeycloak.migration.strategy=OVERWRITE_EXISTING
+    environment:
+      - KEYCLOAK_ADMIN=admin
+      - KEYCLOAK_ADMIN_PASSWORD=admin
