@@ -5,4 +5,5 @@ Swagger can be found [here](http://localhost:8080/swagger-ui/index.html)
 ## Users
 
 journalist: journalist, journalist
+
 ministry: ministry, ministry
