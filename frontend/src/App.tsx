@@ -1,4 +1,4 @@
-import {useContext, useState} from 'react';
+import {useState} from 'react';
 import './App.css';
 import {
     FileUploader,
@@ -8,8 +8,8 @@ import {
 } from "@/components/extension/file-uploader";
 import {DropzoneOptions} from "react-dropzone";
 import {Button} from "@/components/ui/button.tsx";
-import {AuthContext} from "@/hoc/AuthWrapper.tsx";
 import axios from 'axios';
+import {toast} from "sonner";
 
 const FileSvgDraw = () => {
     return (
@@ -34,7 +34,7 @@ const FileSvgDraw = () => {
                 &nbsp; or drag and drop
             </p>
             <p className="text-xs text-gray-500 dark:text-gray-400">
-                A document in PDF, DOC, DOCX, JPG, JPEG, PNG format
+                A document in PDF format
             </p>
         </>
     );
@@ -45,10 +45,7 @@ function App() {
 
     const dropzone = {
         accept: {
-            "image/*": [".jpg", ".jpeg", ".png"],
             "application/pdf": [".pdf"],
-            "application/msword": [".doc"],
-            "application/vnd.openxmlformats-officedocument.wordprocessingml.document": [".docx"],
         },
         multiple: false,
         maxSize: 1024 * 1024,
@@ -56,7 +53,10 @@ function App() {
 
     const handleUpload = async () => {
         if (!files || files.length === 0) {
-            alert("Please select files to upload.");
+            toast({
+                title: "No files selected",
+                description: "Please select files to upload.",
+            });
             return;
         }
 
@@ -73,14 +73,23 @@ function App() {
             });
 
             if (response.status === 200) {
-                alert("Files uploaded successfully!");
+                toast({
+                    title: "Success",
+                    description: "Files uploaded successfully!",
+                });
                 setFiles([]);
             } else {
-                alert("Failed to upload files.");
+                toast({
+                    title: "Upload failed",
+                    description: "Failed to upload files.",
+                });
             }
         } catch (error) {
             console.error("Error uploading files:", error);
-            alert("An error occurred while uploading the files.");
+            toast({
+                title: "Error",
+                description: "An error occurred while uploading the files.",
+            });
         }
     };
 
