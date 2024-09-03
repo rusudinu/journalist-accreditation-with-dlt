@@ -2,6 +2,7 @@ import {setKeycloakUserInformation} from '@/coreSlice.ts';
 import {useAppDispatch} from '@/hooks.ts';
 import Keycloak from 'keycloak-js';
 import React, {useEffect} from 'react';
+import axios from 'axios';
 
 const keycloakConfig = {
     realm: 'journalist-accreditation',
@@ -33,6 +34,11 @@ export default function AuthWrapper({children}: { children: React.ReactNode }) {
                         roles: keycloak.realmAccess!.roles
                     }),
                 );
+                axios.defaults.headers.common['authorization'] = `Bearer ${keycloak.token}`;
+            } else {
+                keycloak.login().then(() => {
+                    checkKeycloak().then();
+                });
             }
         } catch (error) {
             console.error('Failed to initialize adapter:', error);

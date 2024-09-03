@@ -1,4 +1,4 @@
-import {useState} from 'react';
+import {useContext, useState} from 'react';
 import './App.css';
 import {
     FileUploader,
@@ -8,6 +8,8 @@ import {
 } from "@/components/extension/file-uploader";
 import {DropzoneOptions} from "react-dropzone";
 import {Button} from "@/components/ui/button.tsx";
+import {AuthContext} from "@/hoc/AuthWrapper.tsx";
+import axios from 'axios';
 
 const FileSvgDraw = () => {
     return (
@@ -39,6 +41,7 @@ const FileSvgDraw = () => {
 };
 
 function App() {
+    const keycloak = useContext(AuthContext);
     const [files, setFiles] = useState<File[] | null>([]);
 
     const dropzone = {
@@ -51,6 +54,30 @@ function App() {
         multiple: false,
         maxSize: 1024 * 1024,
     } satisfies DropzoneOptions;
+
+    const testJournalist = async () => {
+        try {
+            const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/v1/documents/only-journalist`, {});
+        } catch (error) {
+            console.error("Error fetching journalist documents:", error);
+        }
+    }
+
+    const testMinistry = async () => {
+        try {
+            const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/v1/documents/only-ministry`, {});
+        } catch (error) {
+            console.error("Error fetching ministry documents:", error);
+        }
+    }
+
+    const testBoth = async () => {
+        try {
+            const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/v1/documents/journalist-and-ministry`, {});
+        } catch (error) {
+            console.error("Error fetching journalist and ministry documents:", error);
+        }
+    }
 
     const handleUpload = async () => {
         if (!files || files.length === 0) {
@@ -137,6 +164,22 @@ function App() {
                 className="mt-4"
             >
                 Upload File
+            </Button>
+            <Button
+                onClick={testJournalist}
+                className="mt-4"
+            >T JOURNAL</Button>
+            <Button
+                onClick={testMinistry}
+                className="mt-4"
+            >
+                T MIN
+            </Button>
+            <Button
+                onClick={testBoth}
+                className="mt-4"
+            >
+                T BOTH
             </Button>
         </>
     );

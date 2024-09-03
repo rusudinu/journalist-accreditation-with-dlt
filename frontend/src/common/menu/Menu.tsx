@@ -1,8 +1,8 @@
-import { useUserHasRole, useUserIsAuthenticated } from '@/common/auth/UserUtils.ts';
-import { NavigationMenu, NavigationMenuItem, NavigationMenuList, NavigationMenuTrigger, NavigationMenuContent, NavigationMenuLink } from '@/components/ui/navigation-menu.tsx';
-import { cn } from '@/lib/utils.ts';
-import React, { useEffect } from 'react';
-import { Link, Outlet, useLocation } from 'react-router-dom';
+import {useUserHasRole, useUserIsAuthenticated} from '@/common/auth/UserUtils.ts';
+import {NavigationMenu, NavigationMenuItem, NavigationMenuList, NavigationMenuTrigger, NavigationMenuContent, NavigationMenuLink} from '@/components/ui/navigation-menu.tsx';
+import {cn} from '@/lib/utils.ts';
+import React, {useEffect} from 'react';
+import {Link, Outlet, useLocation} from 'react-router-dom';
 
 const generalComponents = [
     {
@@ -39,7 +39,7 @@ const MenuComponent = () => {
 
     return (
         showMenu ? <div className="relative max-w-screen-xl mx-auto">
-                <div className="absolute top-5 z-50 left-0 right-0 bottom-0">
+                <div className="absolute top-0 z-50 left-0 right-0 bottom-0">
                     <NavigationMenu>
                         <NavigationMenuList>
                             <NavigationMenuItem>
@@ -79,7 +79,7 @@ const MenuComponent = () => {
                         </NavigationMenuList>
                     </NavigationMenu>
                 </div>
-                <div className="absolute left-0 right-0 top-0 bottom-0">
+                <div className="absolute left-0 right-0 top-14 bottom-0">
                     <Outlet/>
                 </div>
             </div>
@@ -92,7 +92,7 @@ export default MenuComponent;
 const ListItem = React.forwardRef<
     React.ElementRef<typeof Link>,
     React.ComponentPropsWithoutRef<typeof Link>
->(({ className, title, children, ...props }, ref) => {
+>(({className, title, children, ...props}, ref) => {
     return (
         <li>
             <NavigationMenuLink asChild>
