@@ -1,5 +1,4 @@
 import {useState} from 'react';
-import './App.css';
 import {
     FileUploader,
     FileUploaderContent,
@@ -40,7 +39,7 @@ const FileSvgDraw = () => {
     );
 };
 
-function App() {
+function Upload() {
     const [files, setFiles] = useState<File[] | null>([]);
 
     const dropzone = {
@@ -81,7 +80,7 @@ function App() {
                     description: 'Failed to upload files.',
                 });
             }
-        } catch (error) {
+        } catch (error: any) {
             console.error("Error uploading files:", error);
             toast('Error uploading files', {
                 description: `An error occurred while uploading the files: ${error.message}`,
@@ -138,7 +137,6 @@ function App() {
                         );
                     })}
                 </FileUploaderContent>
-
             </FileUploader>
             <Button
                 onClick={handleUpload}
@@ -150,4 +148,4 @@ function App() {
     );
 }
 
-export default App;
+export default Upload;

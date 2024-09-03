@@ -35,9 +35,10 @@ const MenuComponent = () => {
     }, [location]);
 
     return (
-        showMenu ? <div className="relative max-w-screen-xl mx-auto">
+        showMenu ?
+            <div className="relative max-w-screen-xl mx-auto">
                 <div className="absolute top-0 z-50 left-0 right-0 bottom-0">
-                    <NavigationMenu>
+                    <NavigationMenu className="top-2">
                         <NavigationMenuList>
                             <NavigationMenuItem>
                                 <NavigationMenuTrigger>General</NavigationMenuTrigger>
@@ -75,7 +76,6 @@ const MenuComponent = () => {
                             )}
                         </NavigationMenuList>
                     </NavigationMenu>
-                    {/* User ID display and logout button */}
                     {userIsAuthenticated && (
                         <div
                             className="absolute top-0 right-0 p-4 flex items-center space-x-4"
