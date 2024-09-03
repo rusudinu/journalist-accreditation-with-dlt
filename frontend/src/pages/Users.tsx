@@ -1,11 +1,12 @@
 import {useEffect, useState} from 'react';
 import {Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow} from "@/components/ui/table.tsx";
-import {IUser} from "@/bemodel/Api.ts";
+import {IUserDTO} from "@/bemodel/Api.ts";
 import axios from 'axios';
 import {useNavigate} from 'react-router-dom';
+import {Button} from "@/components/ui/button.tsx";
 
 function Users() {
-    const [users, setUsers] = useState<IUser[]>([]);
+    const [users, setUsers] = useState<IUserDTO[]>([]);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -22,7 +23,7 @@ function Users() {
             });
     }, []);
 
-    const handleRedirect = (userId: number | undefined) => {
+    const handleRedirect = (userId: string | undefined) => {
         if (userId !== undefined) {
             navigate(`/user/${userId}`);
         }
@@ -42,7 +43,6 @@ function Users() {
                 </TableHeader>
                 <TableBody>
                     {users.map((user) => {
-                        // Get the last document (assuming the documents array is sorted by createdDate)
                         const lastDocument = user.documents?.[user.documents.length - 1];
 
                         return (
@@ -51,12 +51,11 @@ function Users() {
                                 <TableCell>{user.documents?.length ?? 0}</TableCell>
                                 <TableCell>{lastDocument?.status || 'No documents'}</TableCell>
                                 <TableCell>
-                                    <button
-                                        className="bg-blue-500 text-white px-4 py-2 rounded"
-                                        onClick={() => handleRedirect(user.id)}
+                                    <Button
+                                        onClick={() => handleRedirect(user.keycloakId ?? '')}
                                     >
                                         View Details
-                                    </button>
+                                    </Button>
                                 </TableCell>
                             </TableRow>
                         );

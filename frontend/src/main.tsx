@@ -23,6 +23,10 @@ const router = createBrowserRouter([
                 path: '/users',
                 element: <Users/>,
             },
+            {
+                path: '/user/:userId',
+                element: <Upload/>,
+            },
         ],
     },
 ]);

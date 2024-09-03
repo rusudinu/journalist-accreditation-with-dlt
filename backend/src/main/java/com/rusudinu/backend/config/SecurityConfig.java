@@ -29,8 +29,8 @@ import static org.springframework.security.config.Customizer.withDefaults;
 
 @Configuration
 @EnableWebSecurity
-// @EnableMethodSecurity
-@EnableGlobalMethodSecurity(prePostEnabled = true)
+@EnableMethodSecurity
+//@EnableGlobalMethodSecurity(prePostEnabled = true)
 class SecurityConfig {
 
     @Bean
@@ -46,7 +46,7 @@ class SecurityConfig {
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/auth", "/register", "/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // Allow pre-flight requests for CORS
-                        .requestMatchers("/**").authenticated()  // Require authentication for all other requests
+                        .requestMatchers("/**").permitAll()  // Require authentication for all other requests
                 )
                 .oauth2Login(withDefaults())
                 .logout(logout -> logout

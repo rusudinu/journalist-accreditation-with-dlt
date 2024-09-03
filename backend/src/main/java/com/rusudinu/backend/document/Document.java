@@ -30,7 +30,7 @@ public class Document {
     private String storedDocumentName;
     private String status; // request, approve, deny
 
-    @JsonIgnoreProperties({"documents"})
+    @JsonIgnoreProperties("documents")
     @ManyToOne(fetch = FetchType.LAZY)
     private User user;
 }

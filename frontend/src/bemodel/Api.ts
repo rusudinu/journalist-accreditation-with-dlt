@@ -29,6 +29,28 @@ export interface IUser {
   deleted?: boolean;
 }
 
+export interface IDocumentDTO {
+  /** @format int64 */
+  id?: number;
+  /** @format date-time */
+  createdDate?: string;
+  storedDocumentName?: string;
+  status?: string;
+  /** @format int64 */
+  userId?: number;
+  deleted?: boolean;
+}
+
+export interface IUserDTO {
+  /** @format int64 */
+  id?: number;
+  keycloakId?: string;
+  /** @format date-time */
+  createdDate?: string;
+  documents?: IDocumentDTO[];
+  deleted?: boolean;
+}
+
 import type { AxiosInstance, AxiosRequestConfig, AxiosResponse, HeadersDefaults, ResponseType } from "axios";
 import axios from "axios";
 
@@ -201,7 +223,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @request GET:/api/v1/users
      */
     getAllUsers: (params: RequestParams = {}) =>
-      this.request<IUser[], any>({
+      this.request<IUserDTO[], any>({
         path: `/api/v1/users`,
         method: "GET",
         ...params,

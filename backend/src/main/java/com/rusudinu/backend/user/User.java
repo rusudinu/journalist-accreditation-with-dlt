@@ -1,5 +1,6 @@
 package com.rusudinu.backend.user;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.rusudinu.backend.document.Document;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -26,6 +27,7 @@ public class User {
 
     private boolean isDeleted = false;
 
+    @JsonIgnoreProperties("user")
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "user")
     private List<Document> documents;
 }

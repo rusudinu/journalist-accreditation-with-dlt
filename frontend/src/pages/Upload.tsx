@@ -1,4 +1,4 @@
-import {useState} from 'react';
+import {useEffect, useState} from 'react';
 import {
     FileUploader,
     FileUploaderContent,
@@ -9,6 +9,9 @@ import {DropzoneOptions} from "react-dropzone";
 import {Button} from "@/components/ui/button.tsx";
 import axios from 'axios';
 import {toast} from "sonner";
+import {useParams} from "react-router-dom";
+import {IUserDTO} from "@/bemodel/Api.ts";
+import UserDocumentsTable from "@/pages/UserDocumentsTable.tsx";
 
 const FileSvgDraw = () => {
     return (
@@ -40,7 +43,25 @@ const FileSvgDraw = () => {
 };
 
 function Upload() {
+    const {userId} = useParams<{ userId: string }>();
     const [files, setFiles] = useState<File[] | null>([]);
+    const [user, setUser] = useState<IUserDTO | null>(null);
+
+    useEffect(() => {
+        if (userId) {
+            axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/v1/users/${userId}`, {
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            })
+                .then((response) => {
+                    setUser(response.data);
+                })
+                .catch((error) => {
+                    console.error('Error:', error);
+                });
+        }
+    }, [userId]);
 
     const dropzone = {
         accept: {
@@ -90,6 +111,7 @@ function Upload() {
 
     return (
         <>
+            {user && <div className="pb-12"><UserDocumentsTable user={user}/></div>}
             <FileUploader
                 value={files}
                 onValueChange={setFiles}
