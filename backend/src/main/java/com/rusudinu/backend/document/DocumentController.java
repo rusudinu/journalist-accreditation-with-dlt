@@ -33,9 +33,6 @@ public class DocumentController {
     @GetMapping("/only-ministry")
     @PreAuthorize("hasAuthority('MINISTRY')")
     public String testMinistry() {
-        Authentication authToken = SecurityContextHolder.getContext().getAuthentication();
-        Map<String, Object> attributes = ((JwtAuthenticationToken) authToken).getTokenAttributes();
-        System.out.println(attributes);
         return "hello ministry";
     }
 

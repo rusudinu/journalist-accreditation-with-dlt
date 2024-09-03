@@ -36,6 +36,7 @@ export default function AuthWrapper({children}: { children: React.ReactNode }) {
                         authenticatedUserName: keycloak.idTokenParsed?.name ?? '',
                     }),
                 );
+                axios.defaults.baseURL = import.meta.env.VITE_BACKEND_URL;
                 axios.defaults.headers.common['authorization'] = `Bearer ${keycloak.token}`;
             } else {
                 keycloak.login().then(() => {

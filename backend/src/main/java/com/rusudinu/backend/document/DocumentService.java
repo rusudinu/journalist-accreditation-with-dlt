@@ -32,9 +32,8 @@ public class DocumentService {
 
         Document document = Document.builder()
                 .user(user)
-                .storedDocumentName(file.getOriginalFilename())
+                .storedDocumentName(uniqueFileName)
                 .build();
-
 
         try {
             Files.write(filePath, file.getBytes());
