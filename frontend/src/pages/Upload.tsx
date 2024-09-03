@@ -48,6 +48,10 @@ function Upload() {
     const [user, setUser] = useState<IUserDTO | null>(null);
 
     useEffect(() => {
+        fetchUser();
+    }, [userId]);
+
+    const fetchUser = () => {
         if (userId) {
             axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/v1/users/${userId}`, {
                 headers: {
@@ -61,7 +65,7 @@ function Upload() {
                     console.error('Error:', error);
                 });
         }
-    }, [userId]);
+    }
 
     const dropzone = {
         accept: {
@@ -96,6 +100,7 @@ function Upload() {
                     description: 'Files uploaded successfully!',
                 });
                 setFiles([]);
+                fetchUser();
             } else {
                 toast('Upload failed', {
                     description: 'Failed to upload files.',
