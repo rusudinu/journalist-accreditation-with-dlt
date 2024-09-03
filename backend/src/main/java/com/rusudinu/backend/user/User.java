@@ -1,0 +1,31 @@
+package com.rusudinu.backend.user;
+
+import com.rusudinu.backend.document.Document;
+import jakarta.persistence.*;
+import lombok.Data;
+import lombok.RequiredArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
+
+import java.time.ZonedDateTime;
+import java.util.List;
+
+@Data
+@Entity
+@RequiredArgsConstructor
+@Table(name = "app_users")
+public class User {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    private String keycloakId;
+
+    @Temporal(TemporalType.TIMESTAMP)
+    @CreationTimestamp
+    private ZonedDateTime createdDate;
+
+    private boolean isDeleted = false;
+
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "user")
+    private List<Document> documents;
+}

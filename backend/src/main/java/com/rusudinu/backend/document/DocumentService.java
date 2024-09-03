@@ -1,9 +1,11 @@
 package com.rusudinu.backend.document;
 
+import com.rusudinu.backend.user.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.xml.parsers.DocumentBuilder;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -17,7 +19,7 @@ public class DocumentService {
     private final DocumentRepository documentRepository;
     private static final String UPLOAD_DIR = "uploads/";
 
-    public String uploadDocument(MultipartFile file) {
+    public Document uploadDocument(MultipartFile file, User user) {
         File directory = new File(UPLOAD_DIR);
         if (!directory.exists()) {
             if (!directory.mkdirs()) {
@@ -28,11 +30,17 @@ public class DocumentService {
         String uniqueFileName = System.currentTimeMillis() + "_" + UUID.randomUUID() + "." + file.getOriginalFilename().split("\\.")[1];
         Path filePath = Paths.get(UPLOAD_DIR, uniqueFileName);
 
+        Document document = Document.builder()
+                .user(user)
+                .storedDocumentName(file.getOriginalFilename())
+                .build();
+
+
         try {
             Files.write(filePath, file.getBytes());
-            return "File uploaded successfully: " + file.getOriginalFilename();
+            return documentRepository.save(document);
         } catch (IOException e) {
-            return "Failed to upload file: " + e.getMessage();
+            return null;
         }
     }
 }

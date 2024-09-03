@@ -1,5 +1,7 @@
 package com.rusudinu.backend.document;
 
+import com.rusudinu.backend.user.User;
+import com.rusudinu.backend.user.UserService;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -15,16 +17,17 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class DocumentController {
     private final DocumentService documentService;
+    private final UserService userService;
 
 
     @PostMapping
     @PreAuthorize("hasAnyAuthority('MINISTRY', 'JOURNALIST')")
-    public String uploadDocument(@RequestParam("file") MultipartFile file) {
+    public Document uploadDocument(@RequestParam("file") MultipartFile file) {
         Authentication authToken = SecurityContextHolder.getContext().getAuthentication();
         Map<String, Object> attributes = ((JwtAuthenticationToken) authToken).getTokenAttributes();
-        System.out.println(attributes);
-        System.out.println((String) attributes.get("preferred_username"));
-        return documentService.uploadDocument(file);
+        String userId = (String) attributes.get("sub");
+        User user = userService.findOrCreateByKeycloakId(userId);
+        return documentService.uploadDocument(file, user);
     }
 
     @GetMapping("/only-ministry")

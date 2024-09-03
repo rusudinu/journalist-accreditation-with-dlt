@@ -8,6 +8,7 @@ import React from 'react';
 import {store} from "@/store.ts";
 import Menu from "@/common/menu/Menu.tsx";
 import Upload from "@/pages/Upload.tsx";
+import Users from "@/pages/Users.tsx";
 
 const router = createBrowserRouter([
     {
@@ -17,6 +18,10 @@ const router = createBrowserRouter([
             {
                 path: '/',
                 element: <Upload/>,
+            },
+            {
+                path: '/users',
+                element: <Users/>,
             },
         ],
     },
