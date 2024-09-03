@@ -31,7 +31,9 @@ export default function AuthWrapper({children}: { children: React.ReactNode }) {
             if (authenticated) {
                 dispatch(setKeycloakUserInformation({
                         userUuid: keycloak.subject ?? '',
-                        roles: keycloak.realmAccess!.roles
+                        roles: keycloak.realmAccess!.roles,
+                        authenticatedUserEmail: keycloak.idTokenParsed?.email ?? '',
+                        authenticatedUserName: keycloak.idTokenParsed?.name ?? '',
                     }),
                 );
                 axios.defaults.headers.common['authorization'] = `Bearer ${keycloak.token}`;

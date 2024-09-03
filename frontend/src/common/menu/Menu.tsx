@@ -3,6 +3,7 @@ import {NavigationMenu, NavigationMenuItem, NavigationMenuList, NavigationMenuTr
 import {cn} from '@/lib/utils.ts';
 import React, {useEffect} from 'react';
 import {Link, Outlet, useLocation} from 'react-router-dom';
+import {useAppSelector} from "@/hooks.ts";
 
 const generalComponents = [
     {
@@ -17,21 +18,17 @@ const generalComponents = [
     },
 ]
 
-const adminComponents = [
-    {
-        title: 'Live games & lobbies',
-        href: '/admin/permissions',
-        description: 'View all live games & lobbies',
-    },
-];
+const adminComponents: { title: string, href: string, description: string }[] = [];
 
-const pathsWhereMenuIsHidden = ['/game-lobby', '/game'];
+const pathsWhereMenuIsHidden: string[] = [];
 
 const MenuComponent = () => {
     const location = useLocation();
     const hasAdminRole = useUserHasRole('admin');
     const userIsAuthenticated = useUserIsAuthenticated();
     const [showMenu, setShowMenu] = React.useState(true);
+    const [showLogout, setShowLogout] = React.useState(false);
+    const authenticatedUserName = useAppSelector((state) => state.core.authenticatedUserName);
 
     useEffect(() => {
         setShowMenu(!pathsWhereMenuIsHidden.includes(location.pathname));
@@ -78,6 +75,24 @@ const MenuComponent = () => {
                             )}
                         </NavigationMenuList>
                     </NavigationMenu>
+                    {/* User ID display and logout button */}
+                    {userIsAuthenticated && (
+                        <div
+                            className="absolute top-0 right-0 p-4 flex items-center space-x-4"
+                            onMouseEnter={() => setShowLogout(true)}
+                            onMouseLeave={() => setShowLogout(false)}
+                        >
+                            <span className="text-sm font-medium">{authenticatedUserName}</span>
+                            {showLogout && (
+                                <button
+                                    onClick={() => console.log('Logout action here')} // Replace with actual logout function
+                                    className="text-sm text-red-600 hover:text-red-800"
+                                >
+                                    Logout
+                                </button>
+                            )}
+                        </div>
+                    )}
                 </div>
                 <div className="absolute left-0 right-0 top-14 bottom-0">
                     <Outlet/>

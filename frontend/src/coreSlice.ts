@@ -1,14 +1,15 @@
-import { createSlice } from '@reduxjs/toolkit'
-import { v4 as uuidv4 } from 'uuid';
+import {createSlice} from '@reduxjs/toolkit'
 
 export interface CoreState {
-    userUuid: string;
+    authenticatedUserEmail: string;
+    authenticatedUserName: string;
     authenticatedUserId: string;
     userRoles: string[];
 }
 
 const initialState: CoreState = {
-    userUuid: new URLSearchParams(window.location.search).get('playerId') || uuidv4(),
+    authenticatedUserEmail: '',
+    authenticatedUserName: '',
     authenticatedUserId: '',
     userRoles: [],
 }
@@ -17,9 +18,6 @@ export const coreSlice = createSlice({
     name: 'core',
     initialState,
     reducers: {
-        setUserUuid: (state, action) => {
-            state.userUuid = action.payload;
-        },
         setAuthenticatedUserId: (state, action) => {
             state.authenticatedUserId = action.payload;
         },
@@ -28,17 +26,21 @@ export const coreSlice = createSlice({
         },
         setKeycloakUserInformation: (state, action: {
             payload: {
+                authenticatedUserEmail: string,
+                authenticatedUserName: string,
                 userUuid: string,
                 roles: string[]
             },
         }) => {
             state.authenticatedUserId = action.payload.userUuid;
             state.userRoles = action.payload.roles;
+            state.authenticatedUserEmail = action.payload.authenticatedUserEmail;
+            state.authenticatedUserName = action.payload.authenticatedUserName;
         },
     },
 })
 
 // Action creators are generated for each case reducer function
-export const { setUserUuid, setAuthenticatedUserId, setUserRoles, setKeycloakUserInformation } = coreSlice.actions
+export const {setAuthenticatedUserId, setUserRoles, setKeycloakUserInformation} = coreSlice.actions
 
 export default coreSlice.reducer
