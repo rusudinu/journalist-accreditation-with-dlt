@@ -6,7 +6,8 @@ pragma solidity ^0.8.24;
 
 contract DocumentRegistry {
     address public owner;
-    mapping(address => string) public documents;
+    mapping(address => bool) public issuers;
+    mapping(string => string) public documents; // document id from postgres mapped to document hash
 
     constructor() {
         owner = msg.sender;
@@ -14,6 +15,11 @@ contract DocumentRegistry {
 
     modifier onlyOwner() {
         require(msg.sender == owner, "Only owner can call this function");
+        _;
+    }
+
+    modifier onlyIssuer() {
+        require(issuers[msg.sender], "Only issuer can call this function");
         _;
     }
 }
