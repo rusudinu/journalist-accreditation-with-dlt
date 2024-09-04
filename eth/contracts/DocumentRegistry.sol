@@ -22,4 +22,16 @@ contract DocumentRegistry {
         require(issuers[msg.sender], "Only issuer can call this function");
         _;
     }
+
+    function addIssuer(address _issuer) public onlyOwner {
+        issuers[_issuer] = true;
+    }
+
+    function removeIssuer(address _issuer) public onlyOwner {
+        issuers[_issuer] = false;
+    }
+
+    function addDocument(string memory _documentId, string memory _documentHash) public onlyIssuer {
+        documents[_documentId] = _documentHash;
+    }
 }
