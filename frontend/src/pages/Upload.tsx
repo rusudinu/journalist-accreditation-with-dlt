@@ -12,6 +12,13 @@ import {toast} from "sonner";
 import {useParams} from "react-router-dom";
 import {IUserDTO} from "@/bemodel/Api.ts";
 import UserDocumentsTable from "@/pages/UserDocumentsTable.tsx";
+import {ComboboxPopover, Status} from "@/components/extension/Combobox.tsx";
+
+const statuses: Status[] = [
+    {value: "accepted", label: "Accepted",},
+    {value: "requested", label: "Requested",},
+    {value: "denied", label: "Denied",},
+]
 
 const FileSvgDraw = () => {
     return (
@@ -165,12 +172,14 @@ function Upload() {
                     })}
                 </FileUploaderContent>
             </FileUploader>
-            <Button
-                onClick={handleUpload}
-                className="mt-4"
-            >
-                Upload File
-            </Button>
+            <div className="flex flex-row space-x-2 items-center content-center mt-4">
+                <Button
+                    onClick={handleUpload}
+                >
+                    Upload File with
+                </Button>
+                <ComboboxPopover statuses={statuses} defaultStatus={statuses[1]}/>
+            </div>
         </>
     );
 }
