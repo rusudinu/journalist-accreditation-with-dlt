@@ -13,12 +13,7 @@ import {useParams} from "react-router-dom";
 import {IUserDTO} from "@/bemodel/Api.ts";
 import UserDocumentsTable from "@/pages/UserDocumentsTable.tsx";
 import {ComboboxPopover, Status} from "@/components/extension/Combobox.tsx";
-
-const statuses: Status[] = [
-    {value: "accepted", label: "Accepted",},
-    {value: "requested", label: "Requested",},
-    {value: "denied", label: "Denied",},
-]
+import {useUserHasRole} from "@/common/auth/UserUtils.ts";
 
 const FileSvgDraw = () => {
     return (
@@ -53,6 +48,21 @@ function Upload() {
     const {userId} = useParams<{ userId: string }>();
     const [files, setFiles] = useState<File[] | null>([]);
     const [user, setUser] = useState<IUserDTO | null>(null);
+    const hasAdminRole = useUserHasRole('MINISTRY');
+    const [statuses, setStatuses] = useState<Status[]>([{value: "requested", label: "Requested",}]);
+    const ministryStatuses: Status[] = [
+        {value: "accepted", label: "Accepted",},
+        {value: "requested", label: "Requested",},
+        {value: "denied", label: "Denied",},
+    ];
+
+    const journalistStatuses: Status[] = [
+        {value: "requested", label: "Requested",},
+    ];
+
+    useEffect(() => {
+        setStatuses(hasAdminRole ? ministryStatuses : journalistStatuses);
+    }, [hasAdminRole]);
 
     useEffect(() => {
         fetchUser();
@@ -178,7 +188,7 @@ function Upload() {
                 >
                     Upload File with
                 </Button>
-                <ComboboxPopover statuses={statuses} defaultStatus={statuses[1]}/>
+                <ComboboxPopover statuses={statuses} defaultStatus={statuses[0]}/>
             </div>
         </>
     );
