@@ -1,42 +1,40 @@
 import React from 'react';
 import {Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow} from "@/components/ui/table.tsx";
-import {IUserDTO} from "@/bemodel/Api.ts";
+import {IRequest} from "@/bemodel/Api.ts";
 import {Button} from "@/components/ui/button.tsx";
 
 interface UserDocumentsTableProps {
-    user: IUserDTO | null;
+    request: IRequest | null;
 }
 
-const UserDocumentsTable: React.FC<UserDocumentsTableProps> = ({user}) => {
+const RequestsDocumentTable: React.FC<UserDocumentsTableProps> = ({request}) => {
     const handlePreview = (documentName: string | undefined) => {
         if (documentName) {
             window.open(`${import.meta.env.VITE_BACKEND_URL}/api/v1/documents/${documentName}`, '_blank');
         }
     };
 
-    if (!user || !user.documents || user.documents.length === 0) {
-        return <p>No documents available for this user.</p>;
+    if (!request || !request.documents || request.documents.length === 0) {
+        return <p>No documents available for this request.</p>;
     }
 
     return (
         <Table>
-            <TableCaption>{`Documents of User ID: ${user.keycloakId}`}</TableCaption>
+            <TableCaption>{`Documents of Request: ${request.id}`}</TableCaption>
             <TableHeader>
                 <TableRow>
                     <TableHead className="w-[100px]">Document ID</TableHead>
                     <TableHead>Stored Document Name</TableHead>
                     <TableHead>Created Date</TableHead>
-                    <TableHead>Status</TableHead>
                     <TableHead>Action</TableHead>
                 </TableRow>
             </TableHeader>
             <TableBody>
-                {user.documents.map((document) => (
+                {request.documents.map((document) => (
                     <TableRow key={document.id}>
                         <TableCell className="font-medium">{document.id}</TableCell>
                         <TableCell>{document.storedDocumentName}</TableCell>
                         <TableCell>{document.createdDate}</TableCell>
-                        <TableCell>{document.status}</TableCell>
                         <TableCell>
                             <Button
                                 onClick={() => handlePreview(document.storedDocumentName)}
@@ -51,4 +49,4 @@ const UserDocumentsTable: React.FC<UserDocumentsTableProps> = ({user}) => {
     );
 };
 
-export default UserDocumentsTable;
+export default RequestsDocumentTable;

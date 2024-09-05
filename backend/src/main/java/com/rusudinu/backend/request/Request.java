@@ -36,7 +36,7 @@ public class Request {
     private RequestStatus status;
 
     @JsonIgnoreProperties("requests")
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     private User user;
 
     @JsonIgnoreProperties("request")

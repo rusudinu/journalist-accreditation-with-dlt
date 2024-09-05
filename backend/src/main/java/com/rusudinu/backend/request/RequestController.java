@@ -37,7 +37,6 @@ public class RequestController {
         LinkedTreeMap<String, Object> roles = (LinkedTreeMap<String, Object>) attributes.get("realm_access");
         List<String> rolesList = (List<String>) roles.get("roles");
         List<Request> requests = requestService.fetchHomePageRequests(user.getId(), rolesList);
-        System.out.println(requests.get(0).getCreatedDate());
         return requests;
     }
 

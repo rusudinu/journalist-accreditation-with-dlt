@@ -7,7 +7,7 @@ import AuthWrapper from "@/hoc/AuthWrapper.tsx";
 import React from 'react';
 import {store} from "@/store.ts";
 import Menu from "@/common/menu/Menu.tsx";
-import Upload from "@/pages/Upload.tsx";
+import RequestPage from "@/pages/RequestPage.tsx";
 import Users from "@/pages/Users.tsx";
 import Home from "@/pages/Home.tsx";
 
@@ -29,8 +29,8 @@ const router = createBrowserRouter([
                 element: <Users/>,
             },
             {
-                path: '/user/:userId',
-                element: <Upload/>,
+                path: '/request/:requestId',
+                element: <RequestPage/>,
             },
         ],
     },

@@ -1,5 +1,6 @@
 package com.rusudinu.backend.user;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.rusudinu.backend.request.Request;
 import jakarta.persistence.*;
@@ -23,8 +24,8 @@ public class User {
 
     private String keycloakId;
 
-    @Temporal(TemporalType.TIMESTAMP)
     @CreationTimestamp
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     private ZonedDateTime createdDate;
 
     private boolean isDeleted = false;

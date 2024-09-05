@@ -10,8 +10,8 @@ import {Button} from "@/components/ui/button.tsx";
 import axios from 'axios';
 import {toast} from "sonner";
 import {useParams} from "react-router-dom";
-import {IUserDTO} from "@/bemodel/Api.ts";
-import UserDocumentsTable from "@/pages/UserDocumentsTable.tsx";
+import {IRequest} from "@/bemodel/Api.ts";
+import RequestsDocumentTable from "@/pages/RequestsDocumentTable.tsx";
 import {ComboboxPopover, Status} from "@/components/extension/Combobox.tsx";
 import {useUserHasRole} from "@/common/auth/UserUtils.ts";
 
@@ -44,21 +44,22 @@ const FileSvgDraw = () => {
     );
 };
 
-function Upload() {
-    const {userId} = useParams<{ userId: string }>();
+function RequestPage() {
+    const {requestId} = useParams<{ requestId: string }>();
     const [files, setFiles] = useState<File[] | null>([]);
-    const [user, setUser] = useState<IUserDTO | null>(null);
+    const [request, setRequest] = useState<IRequest | null>(null);
     const [selectedStatus, setSelectedStatus] = useState<Status | null>(null);
     const hasAdminRole = useUserHasRole('MINISTRY');
-    const [statuses, setStatuses] = useState<Status[]>([{value: "requested", label: "Requested",}]);
     const ministryStatuses: Status[] = [
-        {value: "accepted", label: "Accepted",},
-        {value: "requested", label: "Requested",},
-        {value: "denied", label: "Denied",},
+        {value: "CREATED", label: "Created",},
+        {value: "VALIDATED", label: "Validated",},
+        {value: "APPROVED", label: "Approved",},
+        {value: "REJECTED", label: "Rejected",},
     ];
+    const [statuses, setStatuses] = useState<Status[]>([ministryStatuses[0]]);
 
     const journalistStatuses: Status[] = [
-        {value: "requested", label: "Requested",},
+        {value: "CREATED", label: "Created",},
     ];
 
     useEffect(() => {
@@ -66,21 +67,24 @@ function Upload() {
     }, [hasAdminRole]);
 
     useEffect(() => {
-        fetchUser();
-    }, [userId]);
+        fetchRequest();
+    }, [requestId]);
 
-    const fetchUser = () => {
-        if (userId) {
-            axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/v1/users/${userId}`, {
+    const fetchRequest = () => {
+        if (requestId) {
+            axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/v1/requests/${requestId}`, {
                 headers: {
                     'Content-Type': 'application/json',
                 },
             })
                 .then((response) => {
-                    setUser(response.data);
+                    setRequest(response.data);
                 })
                 .catch((error) => {
                     console.error('Error:', error);
+                    setTimeout(() => {
+                        fetchRequest();
+                    }, 200);
                 });
         }
     }
@@ -110,11 +114,8 @@ function Upload() {
             formData.append("file", file);
         });
 
-        const uploadedForUserWithId = hasAdminRole ? user?.id : userId;
-
         try {
-            const url = hasAdminRole ? `${import.meta.env.VITE_BACKEND_URL}/api/v1/documents?status=${selectedStatus?.value}&uploadedForUserWithId=${uploadedForUserWithId}` : `${import.meta.env.VITE_BACKEND_URL}/api/v1/documents?status=${selectedStatus?.value}`;
-            const response = await axios.post(url, formData, {
+            const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/v1/documents?status=${selectedStatus?.value}&requestId=${requestId}`, formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data'
                 }
@@ -125,7 +126,7 @@ function Upload() {
                     description: 'Files uploaded successfully!',
                 });
                 setFiles([]);
-                fetchUser();
+                fetchRequest();
             } else {
                 toast('Upload failed', {
                     description: 'Failed to upload files.',
@@ -141,7 +142,7 @@ function Upload() {
 
     return (
         <>
-            {user && <div className="pb-12"><UserDocumentsTable user={user}/></div>}
+            {request && <div className="pb-12"><RequestsDocumentTable request={request}/></div>}
             <FileUploader
                 value={files}
                 onValueChange={setFiles}
@@ -202,4 +203,4 @@ function Upload() {
     );
 }
 
-export default Upload;
+export default RequestPage;
