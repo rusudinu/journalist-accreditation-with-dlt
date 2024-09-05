@@ -1,9 +1,10 @@
 import {useUserHasRole, useUserIsAuthenticated} from '@/common/auth/UserUtils.ts';
 import {NavigationMenu, NavigationMenuItem, NavigationMenuList, NavigationMenuTrigger, NavigationMenuContent, NavigationMenuLink} from '@/components/ui/navigation-menu.tsx';
 import {cn} from '@/lib/utils.ts';
-import React, {useEffect} from 'react';
+import React, {useContext, useEffect} from 'react';
 import {Link, Outlet, useLocation} from 'react-router-dom';
 import {useAppSelector} from "@/hooks.ts";
+import {AuthContext} from "@/hoc/AuthWrapper.tsx";
 
 const generalComponents = [
     {
@@ -23,6 +24,7 @@ const adminComponents: { title: string, href: string, description: string }[] = 
 const pathsWhereMenuIsHidden: string[] = [];
 
 const MenuComponent = () => {
+    const keycloak = useContext(AuthContext);
     const location = useLocation();
     const hasAdminRole = useUserHasRole('admin');
     const userIsAuthenticated = useUserIsAuthenticated();
@@ -33,6 +35,10 @@ const MenuComponent = () => {
     useEffect(() => {
         setShowMenu(!pathsWhereMenuIsHidden.includes(location.pathname));
     }, [location]);
+
+    const logout = () => {
+        keycloak.logout().then();
+    }
 
     return (
         showMenu ?
@@ -85,7 +91,7 @@ const MenuComponent = () => {
                             <span className="text-sm font-medium">{authenticatedUserName}</span>
                             {showLogout && (
                                 <button
-                                    onClick={() => console.log('Logout action here')} // Replace with actual logout function
+                                    onClick={logout} // Replace with actual logout function
                                     className="text-sm text-red-600 hover:text-red-800"
                                 >
                                     Logout
