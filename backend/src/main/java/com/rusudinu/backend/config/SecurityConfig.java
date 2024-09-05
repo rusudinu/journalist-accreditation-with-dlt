@@ -30,7 +30,6 @@ import static org.springframework.security.config.Customizer.withDefaults;
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
-//@EnableGlobalMethodSecurity(prePostEnabled = true)
 class SecurityConfig {
 
     @Bean

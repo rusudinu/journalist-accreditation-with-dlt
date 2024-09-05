@@ -1,5 +1,8 @@
 package com.rusudinu.backend.document;
 
+import com.rusudinu.backend.request.Request;
+import com.rusudinu.backend.request.RequestService;
+import com.rusudinu.backend.request.RequestStatus;
 import com.rusudinu.backend.user.User;
 import com.rusudinu.backend.user.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -17,11 +20,12 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class DocumentService {
-    private final DocumentRepository documentRepository;
-    private final UserRepository userRepository;
     private static final String UPLOAD_DIR = "uploads/";
 
-    public Document uploadDocument(MultipartFile file, User user, String status, Optional<Long> uploadedForUserWithIdOpt) {
+    private final DocumentRepository documentRepository;
+    private final RequestService requestService;
+
+    public Document uploadDocument(MultipartFile file, RequestStatus status, Long requestId) {
         File directory = new File(UPLOAD_DIR);
         if (!directory.exists()) {
             if (!directory.mkdirs()) {
@@ -29,28 +33,21 @@ public class DocumentService {
             }
         }
 
-        User userLinkedToDocument = user;
-        Long uploadedForUserWithId = uploadedForUserWithIdOpt.orElse(user.getId());
-
-        if (!user.getId().equals(uploadedForUserWithId)) {
-            userLinkedToDocument = userRepository.findById(uploadedForUserWithId).orElseThrow(
-                    () -> new RuntimeException("User with id " + uploadedForUserWithId + " not found")
-            );
-        }
+        Request request = requestService.getRequestById(requestId);
 
         String uniqueFileName = System.currentTimeMillis() + "_" + UUID.randomUUID() + "." + file.getOriginalFilename().split("\\.")[1];
         Path filePath = Paths.get(UPLOAD_DIR, uniqueFileName);
 
         Document document = Document.builder()
-                .user(userLinkedToDocument)
-                .uploadedByUserId(uploadedForUserWithId)
-                .status(status)
+                .request(request)
                 .storedDocumentName(uniqueFileName)
                 .build();
 
         try {
             Files.write(filePath, file.getBytes());
-            return documentRepository.save(document);
+            Document documentEntity = documentRepository.save(document);
+            requestService.updateRequestStatus(requestId, status);
+            return documentEntity;
         } catch (IOException e) {
             return null;
         }

@@ -1,5 +1,6 @@
 package com.rusudinu.backend.document;
 
+import com.rusudinu.backend.request.RequestStatus;
 import com.rusudinu.backend.user.User;
 import com.rusudinu.backend.user.UserService;
 import org.springframework.http.*;
@@ -24,12 +25,8 @@ public class DocumentController {
 
     @PostMapping
     @PreAuthorize("hasAnyAuthority('MINISTRY', 'JOURNALIST')")
-    public Document uploadDocument(@RequestParam("file") MultipartFile file, @RequestParam(defaultValue = "request") String status, @RequestParam Optional<Long> uploadedForUserWithId) {
-        Authentication authToken = SecurityContextHolder.getContext().getAuthentication();
-        Map<String, Object> attributes = ((JwtAuthenticationToken) authToken).getTokenAttributes();
-        String userId = (String) attributes.get("sub");
-        User user = userService.findOrCreateByKeycloakId(userId);
-        return documentService.uploadDocument(file, user, status, uploadedForUserWithId);
+    public Document uploadDocument(@RequestParam("file") MultipartFile file, @RequestParam RequestStatus status, @RequestParam Long requestId) {
+        return documentService.uploadDocument(file, status, requestId);
     }
 
     @GetMapping("{storedDocumentName}")

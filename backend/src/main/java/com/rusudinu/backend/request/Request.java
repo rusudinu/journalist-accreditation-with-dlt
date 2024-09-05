@@ -1,7 +1,7 @@
-package com.rusudinu.backend.document;
+package com.rusudinu.backend.request;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.rusudinu.backend.request.Request;
+import com.rusudinu.backend.document.Document;
 import com.rusudinu.backend.user.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -11,15 +11,15 @@ import lombok.RequiredArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.ZonedDateTime;
-import java.util.UUID;
+import java.util.List;
 
 @Data
 @Entity
 @Builder
 @AllArgsConstructor
 @RequiredArgsConstructor
-@Table(name = "documents")
-public class Document {
+@Table(name = "requests")
+public class Request {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -28,9 +28,17 @@ public class Document {
     @CreationTimestamp
     private ZonedDateTime createdDate;
 
-    private boolean isDeleted = false;
-    private String storedDocumentName;
-    @JsonIgnoreProperties("documents")
+    // IF STATUS IS CREATED SHOW TO JURIDIC
+    // IF STATUS IS VALIDATED SHOW TO DIRECTOR
+    // IF STATUS IS APPROVED OR DENIED THE REQUEST IS CLOSED
+    @Enumerated(EnumType.STRING)
+    private RequestStatus status;
+
+    @JsonIgnoreProperties("requests")
     @ManyToOne(fetch = FetchType.LAZY)
-    private Request request;
+    private User user;
+
+    @JsonIgnoreProperties("request")
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "request")
+    private List<Document> documents;
 }
