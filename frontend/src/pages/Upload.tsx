@@ -48,6 +48,7 @@ function Upload() {
     const {userId} = useParams<{ userId: string }>();
     const [files, setFiles] = useState<File[] | null>([]);
     const [user, setUser] = useState<IUserDTO | null>(null);
+    const [selectedStatus, setSelectedStatus] = useState<Status | null>(null);
     const hasAdminRole = useUserHasRole('MINISTRY');
     const [statuses, setStatuses] = useState<Status[]>([{value: "requested", label: "Requested",}]);
     const ministryStatuses: Status[] = [
@@ -92,6 +93,10 @@ function Upload() {
         maxSize: 1024 * 1024,
     } satisfies DropzoneOptions;
 
+    const handleStatusChange = (status: Status | null) => {
+        setSelectedStatus(status)
+    }
+
     const handleUpload = async () => {
         if (!files || files.length === 0) {
             toast('No files selected', {
@@ -105,8 +110,11 @@ function Upload() {
             formData.append("file", file);
         });
 
+        const uploadedForUserWithId = hasAdminRole ? user?.id : userId;
+
         try {
-            const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/v1/documents`, formData, {
+            const url = hasAdminRole ? `${import.meta.env.VITE_BACKEND_URL}/api/v1/documents?status=${selectedStatus?.value}&uploadedForUserWithId=${uploadedForUserWithId}` : `${import.meta.env.VITE_BACKEND_URL}/api/v1/documents?status=${selectedStatus?.value}`;
+            const response = await axios.post(url, formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data'
                 }
@@ -182,13 +190,13 @@ function Upload() {
                     })}
                 </FileUploaderContent>
             </FileUploader>
-            <div className="flex flex-row space-x-2 items-center content-center mt-4">
+            <div className="flex flex-row space-x-4 items-center content-center mt-4">
                 <Button
                     onClick={handleUpload}
                 >
                     Upload File with
                 </Button>
-                <ComboboxPopover statuses={statuses} defaultStatus={statuses[0]}/>
+                <ComboboxPopover statuses={statuses} defaultStatus={statuses[0]} onStatusChange={handleStatusChange}/>
             </div>
         </>
     );

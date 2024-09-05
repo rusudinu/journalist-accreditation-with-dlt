@@ -1,25 +1,27 @@
 package com.rusudinu.backend.document;
 
 import com.rusudinu.backend.user.User;
+import com.rusudinu.backend.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.xml.parsers.DocumentBuilder;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
 public class DocumentService {
     private final DocumentRepository documentRepository;
+    private final UserRepository userRepository;
     private static final String UPLOAD_DIR = "uploads/";
 
-    public Document uploadDocument(MultipartFile file, User user) {
+    public Document uploadDocument(MultipartFile file, User user, String status, Optional<Long> uploadedForUserWithIdOpt) {
         File directory = new File(UPLOAD_DIR);
         if (!directory.exists()) {
             if (!directory.mkdirs()) {
@@ -27,11 +29,22 @@ public class DocumentService {
             }
         }
 
+        User userLinkedToDocument = user;
+        Long uploadedForUserWithId = uploadedForUserWithIdOpt.orElse(user.getId());
+
+        if (!user.getId().equals(uploadedForUserWithId)) {
+            userLinkedToDocument = userRepository.findById(uploadedForUserWithId).orElseThrow(
+                    () -> new RuntimeException("User with id " + uploadedForUserWithId + " not found")
+            );
+        }
+
         String uniqueFileName = System.currentTimeMillis() + "_" + UUID.randomUUID() + "." + file.getOriginalFilename().split("\\.")[1];
         Path filePath = Paths.get(UPLOAD_DIR, uniqueFileName);
 
         Document document = Document.builder()
-                .user(user)
+                .user(userLinkedToDocument)
+                .uploadedByUserId(uploadedForUserWithId)
+                .status(status)
                 .storedDocumentName(uniqueFileName)
                 .build();
 

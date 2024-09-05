@@ -16,6 +16,7 @@ import {
     PopoverContent,
     PopoverTrigger,
 } from "@/components/ui/popover"
+import {useEffect} from "react";
 
 export type Status = {
     value: string
@@ -25,11 +26,21 @@ export type Status = {
 type ComboboxPopoverProps = {
     statuses: Status[]
     defaultStatus?: Status | null
+    onStatusChange: (status: Status | null) => void
 }
 
-export function ComboboxPopover({statuses, defaultStatus = null}: ComboboxPopoverProps) {
+export function ComboboxPopover({statuses, defaultStatus = null, onStatusChange}: ComboboxPopoverProps) {
     const [open, setOpen] = React.useState(false)
     const [selectedStatus, setSelectedStatus] = React.useState<Status | null>(defaultStatus)
+
+    useEffect(() => {
+        handleStatusChange(selectedStatus)
+    }, [selectedStatus]);
+
+    const handleStatusChange = (status: Status | null) => {
+        setSelectedStatus(status)
+        onStatusChange(status)
+    }
 
     return (
         <div className="flex items-center space-x-4">

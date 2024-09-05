@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.ZonedDateTime;
+import java.util.UUID;
 
 @Data
 @Entity
@@ -33,4 +34,6 @@ public class Document {
     @JsonIgnoreProperties("documents")
     @ManyToOne(fetch = FetchType.LAZY)
     private User user;
+
+    private Long uploadedByUserId;
 }

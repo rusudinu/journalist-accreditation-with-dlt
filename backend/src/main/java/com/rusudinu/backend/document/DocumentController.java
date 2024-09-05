@@ -11,6 +11,7 @@ import org.springframework.web.multipart.MultipartFile;
 import lombok.RequiredArgsConstructor;
 
 import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/v1/documents")
@@ -22,12 +23,12 @@ public class DocumentController {
 
     @PostMapping
     @PreAuthorize("hasAnyAuthority('MINISTRY', 'JOURNALIST')")
-    public Document uploadDocument(@RequestParam("file") MultipartFile file) {
+    public Document uploadDocument(@RequestParam("file") MultipartFile file, @RequestParam(defaultValue = "request") String status, @RequestParam Optional<Long> uploadedForUserWithId) {
         Authentication authToken = SecurityContextHolder.getContext().getAuthentication();
         Map<String, Object> attributes = ((JwtAuthenticationToken) authToken).getTokenAttributes();
         String userId = (String) attributes.get("sub");
         User user = userService.findOrCreateByKeycloakId(userId);
-        return documentService.uploadDocument(file, user);
+        return documentService.uploadDocument(file, user, status, uploadedForUserWithId);
     }
 
     @GetMapping("/only-ministry")
