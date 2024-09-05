@@ -45,8 +45,8 @@ function RequestsTable() {
                     <TableRow>
                         <TableHead className="w-[100px]">Document ID</TableHead>
                         <TableHead>Uploaded documents</TableHead>
-                        <TableHead>Created Date</TableHead>
                         <TableHead>Status</TableHead>
+                        <TableHead>Created Date</TableHead>
                         <TableHead>Action</TableHead>
                     </TableRow>
                 </TableHeader>
@@ -55,8 +55,8 @@ function RequestsTable() {
                         <TableRow key={request.id}>
                             <TableCell className="font-medium">{request.id}</TableCell>
                             <TableCell>{request.documents?.length}</TableCell>
-                            <TableCell>{request.createdDate}</TableCell>
                             <TableCell><Badge variant={request.status}>{request.status}</Badge></TableCell>
+                            <TableCell>{request.createdDate}</TableCell>
                             <TableCell>
                                 <Button
                                     onClick={() => openRequestPage(request)}

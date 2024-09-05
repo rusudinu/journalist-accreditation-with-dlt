@@ -36,7 +36,9 @@ public class RequestController {
         User user = userService.findOrCreateByKeycloakId(userId);
         LinkedTreeMap<String, Object> roles = (LinkedTreeMap<String, Object>) attributes.get("realm_access");
         List<String> rolesList = (List<String>) roles.get("roles");
-        return requestService.fetchHomePageRequests(user.getId(), rolesList);
+        List<Request> requests = requestService.fetchHomePageRequests(user.getId(), rolesList);
+        System.out.println(requests.get(0).getCreatedDate());
+        return requests;
     }
 
     @GetMapping("{id}")

@@ -1,5 +1,6 @@
 package com.rusudinu.backend.request;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.rusudinu.backend.document.Document;
 import com.rusudinu.backend.user.User;
@@ -24,8 +25,8 @@ public class Request {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Temporal(TemporalType.TIMESTAMP)
     @CreationTimestamp
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     private ZonedDateTime createdDate;
 
     // IF STATUS IS CREATED SHOW TO JURIDIC
