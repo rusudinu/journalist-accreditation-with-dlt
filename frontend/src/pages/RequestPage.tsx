@@ -49,22 +49,46 @@ function RequestPage() {
     const [files, setFiles] = useState<File[] | null>([]);
     const [request, setRequest] = useState<IRequest | null>(null);
     const [selectedStatus, setSelectedStatus] = useState<Status | null>(null);
-    const hasAdminRole = useUserHasRole('MINISTRY');
-    const ministryStatuses: Status[] = [
+    const isJournalist = useUserHasRole('JOURNALIST');
+    const isJuridic = useUserHasRole('JURIDIC');
+    const isDirector = useUserHasRole('DIRECTOR');
+
+    const allStatuses: Status[] = [
         {value: "CREATED", label: "Created",},
         {value: "VALIDATED", label: "Validated",},
         {value: "APPROVED", label: "Approved",},
         {value: "REJECTED", label: "Rejected",},
     ];
-    const [statuses, setStatuses] = useState<Status[]>([ministryStatuses[0]]);
-
     const journalistStatuses: Status[] = [
         {value: "CREATED", label: "Created",},
     ];
 
+    const juridicStatuses: Status[] = [
+        {value: "VALIDATED", label: "Validated",},
+    ];
+
+    const directorStatuses: Status[] = [
+        {value: "APPROVED", label: "Approved",},
+        {value: "REJECTED", label: "Rejected",},
+    ];
+
+    const [defaultStatus, setDefaultStatus] = useState<Status | null>(null);
+
+    const [statuses, setStatuses] = useState<Status[]>([allStatuses[0]]);
+
     useEffect(() => {
-        setStatuses(hasAdminRole ? ministryStatuses : journalistStatuses);
-    }, [hasAdminRole]);
+        if (isJournalist) {
+            setStatuses(journalistStatuses);
+            setDefaultStatus(journalistStatuses[0]);
+        } else if (isJuridic) {
+            setStatuses(juridicStatuses);
+            setDefaultStatus(juridicStatuses[0]);
+        } else if (isDirector) {
+            setStatuses(directorStatuses);
+            setDefaultStatus(directorStatuses[0]);
+        }
+
+    }, [isJournalist, isJuridic, isDirector]);
 
     useEffect(() => {
         fetchRequest();
@@ -197,7 +221,11 @@ function RequestPage() {
                 >
                     Upload File with
                 </Button>
-                <ComboboxPopover statuses={statuses} defaultStatus={statuses[0]} onStatusChange={handleStatusChange}/>
+                {
+                    defaultStatus !== null && (
+                        <ComboboxPopover statuses={statuses} defaultStatus={defaultStatus} onStatusChange={handleStatusChange}/>
+                    )
+                }
             </div>
         </>
     );
