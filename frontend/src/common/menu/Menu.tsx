@@ -8,14 +8,14 @@ import {AuthContext} from "@/hoc/AuthWrapper.tsx";
 
 const generalComponents = [
     {
-        title: 'Packs',
-        href: '/packs',
-        description: 'View all packs',
+        title: 'Home',
+        href: '/home',
+        description: 'View your own documents',
     },
     {
-        title: 'Cards',
-        href: '/cards',
-        description: 'Cards wiki',
+        title: 'Users',
+        href: '/users',
+        description: 'View all users',
     },
 ]
 
