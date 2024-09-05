@@ -90,6 +90,12 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-validation</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.web3j</groupId>
+            <artifactId>core</artifactId>
+            <version>5.0.0</version>
+        </dependency>
+
     </dependencies>
 
     <build>
@@ -104,6 +110,28 @@
                             <artifactId>lombok</artifactId>
                         </exclude>
                     </excludes>
+                </configuration>
+            </plugin>
+            <!-- plugin to compile and generate the sources from the solidity contract-->
+            <plugin>
+                <groupId>org.web3j</groupId>
+                <artifactId>web3j-maven-plugin</artifactId>
+                <version>4.12.1</version>
+                <configuration>
+                    <packageName>com.rusudinu.backend.eth.model</packageName>
+                    <nativeJavaType>true</nativeJavaType>
+                    <outputFormat>java,bin,abi</outputFormat>
+                    <soliditySourceFiles>
+                        <directory>src/main/resources/contracts</directory>
+                        <includes>
+                            <include>*.sol</include>
+                        </includes>
+                    </soliditySourceFiles>
+                    <outputDirectory>
+                        <java>src/main/java</java>
+                        <bin>src/main/resources/bin/generated</bin>
+                        <abi>src/main/resources/abi/generated</abi>
+                    </outputDirectory>
                 </configuration>
             </plugin>
         </plugins>

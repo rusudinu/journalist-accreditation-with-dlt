@@ -138,6 +138,22 @@ function RequestPage() {
             return;
         }
 
+        // files[0].arrayBuffer().then((buffer) => {
+        //     cryptoSignDocument(buffer).then((signature) => {
+        //         console.log("Signature:", signature);
+        //         // selectedStatus?.value
+        //         // requestId
+        //         const credential = {
+        //             signature,
+        //             previousStatus: request?.status,
+        //             currentSelectedStatus: selectedStatus?.value,
+        //             requestId
+        //         }
+        //
+        //         console.log("Credential:", JSON.stringify(credential));
+        //     });
+        // });
+
         const formData = new FormData();
         files.forEach(file => {
             formData.append("file", file);
