@@ -1,7 +1,6 @@
 import React from 'react';
 import {Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow} from "@/components/ui/table.tsx";
 import {IUserDTO} from "@/bemodel/Api.ts";
-import {useNavigate} from 'react-router-dom';
 import {Button} from "@/components/ui/button.tsx";
 
 interface UserDocumentsTableProps {
@@ -9,11 +8,9 @@ interface UserDocumentsTableProps {
 }
 
 const UserDocumentsTable: React.FC<UserDocumentsTableProps> = ({user}) => {
-    const navigate = useNavigate();
-
     const handlePreview = (documentName: string | undefined) => {
         if (documentName) {
-            navigate(`/document/preview/${documentName}`);
+            window.open(`${import.meta.env.VITE_BACKEND_URL}/api/v1/documents/${documentName}`, '_blank');
         }
     };
 

@@ -2,6 +2,7 @@ package com.rusudinu.backend.document;
 
 import com.rusudinu.backend.user.User;
 import com.rusudinu.backend.user.UserService;
+import org.springframework.http.*;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -29,6 +30,18 @@ public class DocumentController {
         String userId = (String) attributes.get("sub");
         User user = userService.findOrCreateByKeycloakId(userId);
         return documentService.uploadDocument(file, user, status, uploadedForUserWithId);
+    }
+
+    @GetMapping("{storedDocumentName}")
+    public ResponseEntity<byte[]> getDocument(@PathVariable String storedDocumentName) {
+        byte[] documentContent = documentService.getDocument(storedDocumentName);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_PDF);
+        headers.setContentDisposition(ContentDisposition.inline().filename(storedDocumentName).build());
+        headers.set("X-Frame-Options", "SAMEORIGIN");
+
+        return new ResponseEntity<>(documentContent, headers, HttpStatus.OK);
     }
 
     @GetMapping("/only-ministry")

@@ -55,4 +55,17 @@ public class DocumentService {
             return null;
         }
     }
+
+    public byte[] getDocument(String storedDocumentName) {
+        try {
+            Path documentPath = Paths.get(UPLOAD_DIR, storedDocumentName);
+            if (!Files.exists(documentPath)) {
+                throw new IOException("File not found: " + storedDocumentName);
+            }
+            return Files.readAllBytes(documentPath);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to retrieve document content", e);
+        }
+    }
+
 }
