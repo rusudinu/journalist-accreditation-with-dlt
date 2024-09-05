@@ -43,7 +43,7 @@ function RequestsTable() {
             <Table>
                 <TableHeader>
                     <TableRow>
-                        <TableHead className="w-[100px]">Document ID</TableHead>
+                        <TableHead className="w-[100px]">Request ID</TableHead>
                         <TableHead>Uploaded documents</TableHead>
                         <TableHead>Status</TableHead>
                         <TableHead>Created Date</TableHead>

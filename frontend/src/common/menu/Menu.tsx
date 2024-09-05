@@ -101,7 +101,9 @@ const MenuComponent = () => {
                     )}
                 </div>
                 <div className="absolute left-0 right-0 top-14 bottom-0">
-                    <Outlet/>
+                    <div className="m-2">
+                        <Outlet/>
+                    </div>
                 </div>
             </div>
             : <Outlet/>
