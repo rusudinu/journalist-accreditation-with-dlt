@@ -39,7 +39,7 @@ public class RequestService {
     public List<Request> fetchHomePageRequests(Long userId, List<String> rolesList) {
         List<RequestStatus> journalistStatusFilter = List.of(RequestStatus.CREATED, RequestStatus.VALIDATED, RequestStatus.APPROVED, RequestStatus.REJECTED);
         List<RequestStatus> juridicStatusFilter = List.of(RequestStatus.CREATED);
-        List<RequestStatus> directorStatusFilter = List.of(RequestStatus.APPROVED);
+        List<RequestStatus> directorStatusFilter = List.of(RequestStatus.VALIDATED);
 
         List<RequestStatus> statusFilter;
 
