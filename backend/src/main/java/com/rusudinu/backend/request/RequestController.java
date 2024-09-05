@@ -7,10 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
@@ -40,5 +37,10 @@ public class RequestController {
         LinkedTreeMap<String, Object> roles = (LinkedTreeMap<String, Object>) attributes.get("realm_access");
         List<String> rolesList = (List<String>) roles.get("roles");
         return requestService.fetchHomePageRequests(user.getId(), rolesList);
+    }
+
+    @GetMapping("{id}")
+    public Request getRequestById(@PathVariable Long id) {
+        return requestService.getRequestById(id);
     }
 }

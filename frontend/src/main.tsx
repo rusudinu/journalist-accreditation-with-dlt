@@ -9,6 +9,7 @@ import {store} from "@/store.ts";
 import Menu from "@/common/menu/Menu.tsx";
 import Upload from "@/pages/Upload.tsx";
 import Users from "@/pages/Users.tsx";
+import Home from "@/pages/Home.tsx";
 
 const router = createBrowserRouter([
     {
@@ -16,8 +17,12 @@ const router = createBrowserRouter([
         element: <Menu/>,
         children: [
             {
+                path: '/',
+                element: <Home/>,
+            },
+            {
                 path: '/home',
-                element: <Upload/>,
+                element: <Home/>,
             },
             {
                 path: '/users',
