@@ -1,6 +1,5 @@
 package com.rusudinu.backend.user;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.rusudinu.backend.document.DocumentDTO;
 import lombok.AllArgsConstructor;
 import lombok.Data;

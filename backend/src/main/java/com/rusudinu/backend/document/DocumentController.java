@@ -1,27 +1,17 @@
 package com.rusudinu.backend.document;
 
 import com.rusudinu.backend.request.RequestStatus;
-import com.rusudinu.backend.user.User;
-import com.rusudinu.backend.user.UserService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.*;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import lombok.RequiredArgsConstructor;
-
-import java.util.Map;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/v1/documents")
 @RequiredArgsConstructor
 public class DocumentController {
     private final DocumentService documentService;
-    private final UserService userService;
-
 
     @PostMapping
     @PreAuthorize("hasAnyAuthority('MINISTRY', 'JOURNALIST')")
