@@ -90,7 +90,7 @@ function Upload() {
             "application/pdf": [".pdf"],
         },
         multiple: false,
-        maxSize: 1024 * 1024,
+        maxSize: 5 * 1024 * 1024, // 5MB
     } satisfies DropzoneOptions;
 
     const handleStatusChange = (status: Status | null) => {
