@@ -59,7 +59,6 @@ public class EthService {
 
     public void testKey() throws UnrecoverableKeyException, KeyStoreException, NoSuchAlgorithmException {
         Path documentPath = Paths.get(KEYS_FOLDER, "ministry_key.jks");
-        System.out.println(documentPath.toFile().getAbsolutePath());
         KeyStore keyStore = null;
         try {
             keyStore = KeyStore.getInstance("JKS");
@@ -68,11 +67,7 @@ public class EthService {
         }
         try {
             keyStore.load(new FileInputStream(documentPath.toFile()), "ministry".toCharArray());
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException(e);
-        } catch (CertificateException e) {
+        } catch (IOException | NoSuchAlgorithmException | CertificateException e) {
             throw new RuntimeException(e);
         }
         Certificate certificate = null;
@@ -83,7 +78,6 @@ public class EthService {
         }
         PublicKey publicKey = certificate.getPublicKey();
         PrivateKey privateKey = (PrivateKey) keyStore.getKey("ministry_key", "ministry".toCharArray());
-        System.out.println(publicKey);
 
         String pdfId = "test.pdf";
         byte[] documentContent = documentService.getDocument(pdfId);
@@ -119,9 +113,7 @@ public class EthService {
         byte[] encryptedMessageHash = null;
         try {
             encryptedMessageHash = cipher.doFinal(hashToEncrypt);
-        } catch (IllegalBlockSizeException e) {
-            throw new RuntimeException(e);
-        } catch (BadPaddingException e) {
+        } catch (IllegalBlockSizeException | BadPaddingException e) {
             throw new RuntimeException(e);
         }
 
@@ -142,9 +134,7 @@ public class EthService {
         byte[] decryptedMessageHash = null;
         try {
             decryptedMessageHash = cipher.doFinal(encryptedMessageHash);
-        } catch (IllegalBlockSizeException e) {
-            throw new RuntimeException(e);
-        } catch (BadPaddingException e) {
+        } catch (IllegalBlockSizeException | BadPaddingException e) {
             throw new RuntimeException(e);
         }
 
