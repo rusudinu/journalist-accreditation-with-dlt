@@ -15,9 +15,17 @@ export interface IDocument {
   /** @format date-time */
   createdDate?: string;
   storedDocumentName?: string;
-  status?: string;
-  user?: IUser;
   deleted?: boolean;
+}
+
+export interface IRequest {
+  /** @format int64 */
+  id?: number;
+  /** @format date-time */
+  createdDate?: string;
+  status?: "CREATED" | "VALIDATED" | "APPROVED" | "REJECTED";
+  user?: IUser;
+  documents?: IDocument[];
 }
 
 export interface IUser {
@@ -196,11 +204,33 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
+     * @tags request-controller
+     * @name CreateRequest
+     * @request POST:/api/v1/requests
+     * @secure
+     */
+    createRequest: (params: RequestParams = {}) =>
+      this.request<IRequest, any>({
+        path: `/api/v1/requests`,
+        method: "POST",
+        secure: true,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
      * @tags document-controller
      * @name UploadDocument
      * @request POST:/api/v1/documents
+     * @secure
      */
     uploadDocument: (
+      query: {
+        status: "CREATED" | "VALIDATED" | "APPROVED" | "REJECTED";
+        /** @format int64 */
+        requestId: number;
+      },
       data: {
         /** @format binary */
         file: File;
@@ -210,7 +240,9 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       this.request<IDocument, any>({
         path: `/api/v1/documents`,
         method: "POST",
+        query: query,
         body: data,
+        secure: true,
         type: ContentType.FormData,
         ...params,
       }),
@@ -221,11 +253,13 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @tags user-controller
      * @name GetAllUsers
      * @request GET:/api/v1/users
+     * @secure
      */
     getAllUsers: (params: RequestParams = {}) =>
       this.request<IUserDTO[], any>({
         path: `/api/v1/users`,
         method: "GET",
+        secure: true,
         ...params,
       }),
 
@@ -235,11 +269,13 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @tags user-controller
      * @name GetUserByKeycloakId
      * @request GET:/api/v1/users/{keycloakId}
+     * @secure
      */
     getUserByKeycloakId: (keycloakId: string, params: RequestParams = {}) =>
       this.request<IUser, any>({
         path: `/api/v1/users/${keycloakId}`,
         method: "GET",
+        secure: true,
         ...params,
       }),
 
@@ -249,11 +285,29 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @tags user-controller
      * @name GetMe
      * @request GET:/api/v1/users/me
+     * @secure
      */
     getMe: (params: RequestParams = {}) =>
       this.request<IUser, any>({
         path: `/api/v1/users/me`,
         method: "GET",
+        secure: true,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags document-controller
+     * @name GetDocument
+     * @request GET:/api/v1/documents/{storedDocumentName}
+     * @secure
+     */
+    getDocument: (storedDocumentName: string, params: RequestParams = {}) =>
+      this.request<string, any>({
+        path: `/api/v1/documents/${storedDocumentName}`,
+        method: "GET",
+        secure: true,
         ...params,
       }),
 
@@ -263,11 +317,13 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @tags document-controller
      * @name TestMinistry
      * @request GET:/api/v1/documents/only-ministry
+     * @secure
      */
     testMinistry: (params: RequestParams = {}) =>
       this.request<string, any>({
         path: `/api/v1/documents/only-ministry`,
         method: "GET",
+        secure: true,
         ...params,
       }),
 
@@ -277,11 +333,13 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @tags document-controller
      * @name TestJournalist
      * @request GET:/api/v1/documents/only-journalist
+     * @secure
      */
     testJournalist: (params: RequestParams = {}) =>
       this.request<string, any>({
         path: `/api/v1/documents/only-journalist`,
         method: "GET",
+        secure: true,
         ...params,
       }),
 
@@ -291,11 +349,13 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @tags document-controller
      * @name TestJournalistAndMinistry
      * @request GET:/api/v1/documents/journalist-and-ministry
+     * @secure
      */
     testJournalistAndMinistry: (params: RequestParams = {}) =>
       this.request<string, any>({
         path: `/api/v1/documents/journalist-and-ministry`,
         method: "GET",
+        secure: true,
         ...params,
       }),
   };

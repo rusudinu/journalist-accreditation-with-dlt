@@ -12,6 +12,7 @@ public class OpenApiConfig {
 
     private static final String OAUTH_SCHEME_NAME = "oAuth";
     private static final String PROTOCOL_URL_FORMAT = "%s/realms/%s/protocol/openid-connect";
+    private static final String CLIENT_ID = "journalist-accreditation";
 
     @Bean
     public OpenAPI customOpenAPI() {
@@ -40,7 +41,7 @@ public class OpenApiConfig {
     }
 
     private OAuthFlow createAuthorizationCodeFlow() {
-        var protocolUrl = String.format(PROTOCOL_URL_FORMAT, "http://localhost:9001", "journalist-accreditation");
+        var protocolUrl = String.format(PROTOCOL_URL_FORMAT, "http://localhost:9001", CLIENT_ID);
 
         return new OAuthFlow()
                 .authorizationUrl(protocolUrl + "/auth")

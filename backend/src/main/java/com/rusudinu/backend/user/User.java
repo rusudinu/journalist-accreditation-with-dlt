@@ -1,11 +1,11 @@
 package com.rusudinu.backend.user;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.rusudinu.backend.document.Document;
 import com.rusudinu.backend.request.Request;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
+import lombok.ToString;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.ZonedDateTime;
@@ -15,6 +15,7 @@ import java.util.List;
 @Entity
 @RequiredArgsConstructor
 @Table(name = "app_users")
+@ToString(exclude = "requests")
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

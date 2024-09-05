@@ -74,6 +74,15 @@
         "attributes": {}
       },
       {
+        "id": "01848538-7ec9-49e8-ac4a-71477a022367",
+        "name": "JURIDIC",
+        "description": "",
+        "composite": false,
+        "clientRole": false,
+        "containerId": "0d9cc297-221d-4127-8993-9e3b2928b40c",
+        "attributes": {}
+      },
+      {
         "id": "a8c7c540-a9b4-4756-829b-dbcf0f880f55",
         "name": "default-roles-journalist-accreditation",
         "description": "${role_default-roles}",
@@ -97,6 +106,15 @@
       {
         "id": "cb17c811-ce84-4013-84d2-da6dd36a2b0d",
         "name": "MINISTRY",
+        "description": "",
+        "composite": false,
+        "clientRole": false,
+        "containerId": "0d9cc297-221d-4127-8993-9e3b2928b40c",
+        "attributes": {}
+      },
+      {
+        "id": "c7b18cc9-6351-4be3-8947-2cfdb474d5c4",
+        "name": "DIRECTOR",
         "description": "",
         "composite": false,
         "clientRole": false,
@@ -498,7 +516,8 @@
       "requiredActions": [],
       "realmRoles": [
         "default-roles-journalist-accreditation",
-        "MINISTRY"
+        "MINISTRY",
+        "DIRECTOR"
       ],
       "notBefore": 0,
       "groups": []
@@ -556,6 +575,7 @@
       "requiredActions": [],
       "realmRoles": [
         "default-roles-journalist-accreditation",
+        "JURIDIC",
         "MINISTRY"
       ],
       "notBefore": 0,
