@@ -12,7 +12,7 @@ public class HyperledgerRegistryService {
         return hyperledgerSnapshotRepositoryClient.getHyperledgerRegistryByRegistryId(requestId);
     }
 
-    public void saveHyperledgerRegistry(HyperledgerRegistry hyperledgerRegistry) {
-        hyperledgerSnapshotRepositoryClient.saveHyperledgerRegistry(hyperledgerRegistry);
+    public void saveOrUpdateHyperledgerRegistry(HyperledgerRegistry hyperledgerRegistry) {
+        hyperledgerSnapshotRepositoryClient.saveOrUpdateHyperledgerRegistry(hyperledgerRegistry);
     }
 }

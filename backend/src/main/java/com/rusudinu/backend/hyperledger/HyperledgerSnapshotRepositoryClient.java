@@ -11,5 +11,5 @@ public interface HyperledgerSnapshotRepositoryClient {
     HyperledgerRegistry getHyperledgerRegistryByRegistryId(@PathVariable("requestId") Long requestId);
 
     @PostMapping("/registry")
-    void saveHyperledgerRegistry(HyperledgerRegistry hyperledgerRegistry);
+    void saveOrUpdateHyperledgerRegistry(HyperledgerRegistry hyperledgerRegistry);
 }

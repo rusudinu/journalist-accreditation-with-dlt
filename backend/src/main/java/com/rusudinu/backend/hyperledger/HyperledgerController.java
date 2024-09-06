@@ -15,7 +15,7 @@ public class HyperledgerController {
     }
 
     @PostMapping("/registry")
-    public void saveHyperledgerRegistry(@RequestBody HyperledgerRegistry hyperledgerRegistry) {
-        hyperledgerRegistryService.saveHyperledgerRegistry(hyperledgerRegistry);
+    public void saveOrUpdateHyperledgerRegistry(@RequestBody HyperledgerRegistry hyperledgerRegistry) {
+        hyperledgerRegistryService.saveOrUpdateHyperledgerRegistry(hyperledgerRegistry);
     }
 }
