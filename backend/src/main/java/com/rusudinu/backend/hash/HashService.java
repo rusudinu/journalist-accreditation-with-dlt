@@ -23,48 +23,39 @@ public class HashService {
 
     @SneakyThrows
     public byte[] hashString(String data) {
-        byte[] dataBytes = data.getBytes();
-        byte[] messageHash = messageDigest.digest(dataBytes);
-
-        DigestAlgorithmIdentifierFinder hashAlgorithmFinder = new DefaultDigestAlgorithmIdentifierFinder();
-        AlgorithmIdentifier hashingAlgorithmIdentifier = hashAlgorithmFinder.find("SHA-256");
-        DigestInfo digestInfo = new DigestInfo(hashingAlgorithmIdentifier, messageHash);
-
-        byte[] hashToEncrypt = digestInfo.getEncoded();
-        Cipher cipher = Cipher.getInstance("RSA");
-        cipher.init(Cipher.ENCRYPT_MODE, ministryPrivateKey);
-        return cipher.doFinal(hashToEncrypt);
+        return encryptWithRSA(createDigestInfo(data.getBytes()));
     }
 
     @SneakyThrows
     public byte[] hashDocument(String documentName) {
-        byte[] documentContent = documentService.getDocument(documentName);
-        byte[] messageHash = messageDigest.digest(documentContent);
-
-        DigestAlgorithmIdentifierFinder hashAlgorithmFinder = new DefaultDigestAlgorithmIdentifierFinder();
-        AlgorithmIdentifier hashingAlgorithmIdentifier = hashAlgorithmFinder.find("SHA-256");
-        DigestInfo digestInfo = new DigestInfo(hashingAlgorithmIdentifier, messageHash);
-
-        byte[] hashToEncrypt = digestInfo.getEncoded();
-        Cipher cipher = Cipher.getInstance("RSA");
-        cipher.init(Cipher.ENCRYPT_MODE, ministryPrivateKey);
-        return cipher.doFinal(hashToEncrypt);
+        return encryptWithRSA(createDigestInfo(documentService.getDocument(documentName)));
     }
 
     @SneakyThrows
     public boolean verifyDocument(byte[] encryptedMessageHash, String documentName) {
-        Cipher cipher = Cipher.getInstance("RSA");
-        cipher.init(Cipher.DECRYPT_MODE, ministryPublicKey);
-        byte[] decryptedMessageHash = cipher.doFinal(encryptedMessageHash);
+        return Arrays.equals(decryptWithRSA(encryptedMessageHash), createDigestInfo(documentService.getDocument(documentName)));
+    }
 
-        byte[] documentToTestContent = documentService.getDocument(documentName);
-        byte[] newMessageHash = messageDigest.digest(documentToTestContent);
-
+    @SneakyThrows
+    private byte[] createDigestInfo(byte[] data) {
+        byte[] messageHash = messageDigest.digest(data);
         DigestAlgorithmIdentifierFinder hashAlgorithmFinder = new DefaultDigestAlgorithmIdentifierFinder();
         AlgorithmIdentifier hashingAlgorithmIdentifier = hashAlgorithmFinder.find("SHA-256");
-        DigestInfo digestInfo = new DigestInfo(hashingAlgorithmIdentifier, newMessageHash);
-        byte[] hashToEncrypt = digestInfo.getEncoded();
+        DigestInfo digestInfo = new DigestInfo(hashingAlgorithmIdentifier, messageHash);
+        return digestInfo.getEncoded();
+    }
 
-        return Arrays.equals(decryptedMessageHash, hashToEncrypt);
+    @SneakyThrows
+    private byte[] encryptWithRSA(byte[] dataToEncrypt) {
+        Cipher cipher = Cipher.getInstance("RSA");
+        cipher.init(Cipher.ENCRYPT_MODE, ministryPrivateKey);
+        return cipher.doFinal(dataToEncrypt);
+    }
+
+    @SneakyThrows
+    private byte[] decryptWithRSA(byte[] dataToDecrypt) {
+        Cipher cipher = Cipher.getInstance("RSA");
+        cipher.init(Cipher.DECRYPT_MODE, ministryPublicKey);
+        return cipher.doFinal(dataToDecrypt);
     }
 }
