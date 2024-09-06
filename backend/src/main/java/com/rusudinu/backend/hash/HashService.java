@@ -10,30 +10,21 @@ import org.bouncycastle.operator.DigestAlgorithmIdentifierFinder;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.Cipher;
-import java.io.FileInputStream;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.security.*;
-import java.security.cert.Certificate;
 import java.util.Arrays;
 
 @Service
 @RequiredArgsConstructor
 public class HashService {
-    private final String KEYS_FOLDER = "keys/";
     private final DocumentService documentService;
+    private final PublicKey ministryPublicKey;
+    private final PrivateKey ministryPrivateKey;
+    private final MessageDigest messageDigest;
 
     @SneakyThrows
-    public byte[] hashDocument(String documentName) {
-        Path documentPath = Paths.get(KEYS_FOLDER, "ministry_key.jks");
-        KeyStore keyStore = KeyStore.getInstance("JKS");
-        keyStore.load(new FileInputStream(documentPath.toFile()), "ministry".toCharArray());
-
-        PrivateKey privateKey = (PrivateKey) keyStore.getKey("ministry_key", "ministry".toCharArray());
-
-        byte[] documentContent = documentService.getDocument(documentName);
-        MessageDigest md = MessageDigest.getInstance("SHA-256");
-        byte[] messageHash = md.digest(documentContent);
+    public byte[] hashString(String data) {
+        byte[] dataBytes = data.getBytes();
+        byte[] messageHash = messageDigest.digest(dataBytes);
 
         DigestAlgorithmIdentifierFinder hashAlgorithmFinder = new DefaultDigestAlgorithmIdentifierFinder();
         AlgorithmIdentifier hashingAlgorithmIdentifier = hashAlgorithmFinder.find("SHA-256");
@@ -41,24 +32,33 @@ public class HashService {
 
         byte[] hashToEncrypt = digestInfo.getEncoded();
         Cipher cipher = Cipher.getInstance("RSA");
-        cipher.init(Cipher.ENCRYPT_MODE, privateKey);
+        cipher.init(Cipher.ENCRYPT_MODE, ministryPrivateKey);
+        return cipher.doFinal(hashToEncrypt);
+    }
+
+    @SneakyThrows
+    public byte[] hashDocument(String documentName) {
+        byte[] documentContent = documentService.getDocument(documentName);
+        byte[] messageHash = messageDigest.digest(documentContent);
+
+        DigestAlgorithmIdentifierFinder hashAlgorithmFinder = new DefaultDigestAlgorithmIdentifierFinder();
+        AlgorithmIdentifier hashingAlgorithmIdentifier = hashAlgorithmFinder.find("SHA-256");
+        DigestInfo digestInfo = new DigestInfo(hashingAlgorithmIdentifier, messageHash);
+
+        byte[] hashToEncrypt = digestInfo.getEncoded();
+        Cipher cipher = Cipher.getInstance("RSA");
+        cipher.init(Cipher.ENCRYPT_MODE, ministryPrivateKey);
         return cipher.doFinal(hashToEncrypt);
     }
 
     @SneakyThrows
     public boolean verifyDocument(byte[] encryptedMessageHash, String documentName) {
-        Path documentPath = Paths.get(KEYS_FOLDER, "ministry_key.jks");
-        KeyStore keyStore = KeyStore.getInstance("JKS");
-        keyStore.load(new FileInputStream(documentPath.toFile()), "ministry".toCharArray());
         Cipher cipher = Cipher.getInstance("RSA");
-        Certificate certificate = keyStore.getCertificate("ministry_key");
-        PublicKey publicKey = certificate.getPublicKey();
-        cipher.init(Cipher.DECRYPT_MODE, publicKey);
+        cipher.init(Cipher.DECRYPT_MODE, ministryPublicKey);
         byte[] decryptedMessageHash = cipher.doFinal(encryptedMessageHash);
 
         byte[] documentToTestContent = documentService.getDocument(documentName);
-        MessageDigest md = MessageDigest.getInstance("SHA-256");
-        byte[] newMessageHash = md.digest(documentToTestContent);
+        byte[] newMessageHash = messageDigest.digest(documentToTestContent);
 
         DigestAlgorithmIdentifierFinder hashAlgorithmFinder = new DefaultDigestAlgorithmIdentifierFinder();
         AlgorithmIdentifier hashingAlgorithmIdentifier = hashAlgorithmFinder.find("SHA-256");
