@@ -1,6 +1,5 @@
 import {join} from 'path';
 import {MiddlewareConsumer, Module} from '@nestjs/common';
-import {MongooseModule} from '@nestjs/mongoose';
 import {ChainUtilsModule} from './chain-utils/chain-utils.module';
 import {GraphQLModule} from '@nestjs/graphql';
 import {ApolloDriver, ApolloDriverConfig} from '@nestjs/apollo';
@@ -20,7 +19,6 @@ import {VitalDataModule} from './vital-data/vital-data.module';
                 quietReqLogger: true,
             },
         }),
-        MongooseModule.forRoot('mongodb://localhost/nest'),
         GraphQLModule.forRoot<ApolloDriverConfig>({
             driver: ApolloDriver,
             // autoSchemaFile: true, // in memory
