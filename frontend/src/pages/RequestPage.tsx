@@ -54,6 +54,7 @@ function RequestPage() {
     const [files, setFiles] = useState<File[] | null>([]);
     const [request, setRequest] = useState<IRequest | null>(null);
     const [selectedStatus, setSelectedStatus] = useState<Status | null>(null);
+    const [verifiedRequest, setVerifiedRequest] = useState<boolean | null>(null);
     const isJournalist = useUserHasRole('JOURNALIST');
     const isJuridic = useUserHasRole('JURIDIC');
     const isDirector = useUserHasRole('DIRECTOR');
@@ -108,6 +109,26 @@ function RequestPage() {
             })
                 .then((response) => {
                     setRequest(response.data);
+                    checkIfRequestIsValid();
+                })
+                .catch((error) => {
+                    console.error('Error:', error);
+                    setTimeout(() => {
+                        fetchRequest();
+                    }, 200);
+                });
+        }
+    }
+
+    const checkIfRequestIsValid = () => {
+        if (requestId) {
+            axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/v1/requests/verify/${requestId}`, {
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            })
+                .then((response) => {
+                    setVerifiedRequest(response.data);
                 })
                 .catch((error) => {
                     console.error('Error:', error);
@@ -137,22 +158,6 @@ function RequestPage() {
             });
             return;
         }
-
-        // files[0].arrayBuffer().then((buffer) => {
-        //     cryptoSignDocument(buffer).then((signature) => {
-        //         console.log("Signature:", signature);
-        //         // selectedStatus?.value
-        //         // requestId
-        //         const credential = {
-        //             signature,
-        //             previousStatus: request?.status,
-        //             currentSelectedStatus: selectedStatus?.value,
-        //             requestId
-        //         }
-        //
-        //         console.log("Credential:", JSON.stringify(credential));
-        //     });
-        // });
 
         const formData = new FormData();
         files.forEach(file => {
@@ -187,6 +192,9 @@ function RequestPage() {
 
     return (
         <>
+            {
+                verifiedRequest === null ? <div>Loading...</div> : <Badge variant={verifiedRequest}>{verifiedRequest ? "Verified" : "Request or its documents were altered."}</Badge>
+            }
             {
                 request && <Table>
                     <TableHeader>

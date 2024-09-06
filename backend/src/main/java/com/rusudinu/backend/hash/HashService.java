@@ -7,6 +7,7 @@ import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.DigestInfo;
 import org.bouncycastle.operator.DefaultDigestAlgorithmIdentifierFinder;
 import org.bouncycastle.operator.DigestAlgorithmIdentifierFinder;
+
 import org.springframework.stereotype.Service;
 
 import javax.crypto.Cipher;
@@ -16,16 +17,16 @@ import java.util.Arrays;
 @Service
 @RequiredArgsConstructor
 public class HashService {
-    private final DocumentService documentService;
     private final PublicKey ministryPublicKey;
     private final PrivateKey ministryPrivateKey;
     private final MessageDigest messageDigest;
+    private final DocumentService documentService;
 
     @SneakyThrows
     public byte[] hashString(String data) {
         return encryptWithRSA(createDigestInfo(data.getBytes()));
     }
-    
+
     @SneakyThrows
     public boolean verifyString(byte[] encryptedMessageHash, String data) {
         return Arrays.equals(decryptWithRSA(encryptedMessageHash), createDigestInfo(data.getBytes()));

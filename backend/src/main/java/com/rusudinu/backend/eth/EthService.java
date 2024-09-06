@@ -1,6 +1,7 @@
 package com.rusudinu.backend.eth;
 
 import com.rusudinu.backend.eth.model.DocumentRegistry;
+import com.rusudinu.backend.hash.HashService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.web3j.crypto.Credentials;
@@ -32,6 +33,15 @@ public class EthService {
             // Output or use the list of document hashes
             System.out.println("Document hashes: " + result);
 
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public String getSnapshotHash(Long requestId) {
+        DocumentRegistry document = DocumentRegistry.load(CONTRACT_ADDRESS, web3, Credentials.create(ACCOUNT_PRIVATE_KEY), new DefaultGasProvider());
+        try {
+            return document.getDocumentsForRequest(String.valueOf(requestId)).send();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

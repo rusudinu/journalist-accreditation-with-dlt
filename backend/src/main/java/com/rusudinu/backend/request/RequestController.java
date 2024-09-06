@@ -1,6 +1,8 @@
 package com.rusudinu.backend.request;
 
 import com.nimbusds.jose.shaded.gson.internal.LinkedTreeMap;
+import com.rusudinu.backend.request.snapshot.RequestSnapshot;
+import com.rusudinu.backend.request.snapshot.SnapshotService;
 import com.rusudinu.backend.user.User;
 import com.rusudinu.backend.user.UserService;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +20,7 @@ import java.util.Map;
 public class RequestController {
     private final RequestService requestService;
     private final UserService userService;
+    private final SnapshotService snapshotService;
 
     @PostMapping
     public Request createRequest() {
@@ -43,5 +46,11 @@ public class RequestController {
     @GetMapping("{id}")
     public Request getRequestById(@PathVariable Long id) {
         return requestService.getRequestById(id);
+    }
+
+    @GetMapping("verify/{id}")
+    public boolean verifyRequestById(@PathVariable Long id) {
+        Request request = requestService.getRequestById(id);
+        return snapshotService.verifyRequest(request);
     }
 }
