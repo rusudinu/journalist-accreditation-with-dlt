@@ -5,6 +5,7 @@ import com.rusudinu.backend.distributedStorage.eth.model.DocumentRegistry;
 import com.rusudinu.backend.distributedStorage.hyperledger.HyperledgerRegistry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import org.web3j.crypto.Credentials;
@@ -18,13 +19,15 @@ import org.web3j.tx.gas.DefaultGasProvider;
 @RequiredArgsConstructor
 public class EthService implements DistributedStorageService {
     private final Web3j web3;
-    private final String CONTRACT_ADDRESS = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
-    private final String ACCOUNT_PRIVATE_KEY = "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80";
+    @Value("${journalist-accreditation.contract-address}")
+    private String contractAddress;
+    @Value("${journalist-accreditation.ministry-account-key}")
+    private String ministryAccountPrivateKey;
 
     @Override
     public String getRegistrySnapshotHashByRequestId(Long requestId) {
         log.info("[ETH] Getting registry snapshot hash for request id: {}", requestId);
-        DocumentRegistry document = DocumentRegistry.load(CONTRACT_ADDRESS, web3, Credentials.create(ACCOUNT_PRIVATE_KEY), new DefaultGasProvider());
+        DocumentRegistry document = DocumentRegistry.load(contractAddress, web3, Credentials.create(ministryAccountPrivateKey), new DefaultGasProvider());
         try {
             String snapshotHash = document.getDocumentsForRequest(String.valueOf(requestId)).send();
             log.info("[ETH] Fetched snapshot hash: {}", snapshotHash);
@@ -38,7 +41,7 @@ public class EthService implements DistributedStorageService {
     @Override
     public void persistRegistrySnapshot(Long requestId, String snapshotHash) {
         log.info("[ETH] Persisting registry snapshot hash for request id: {}", requestId);
-        DocumentRegistry document = DocumentRegistry.load(CONTRACT_ADDRESS, web3, Credentials.create(ACCOUNT_PRIVATE_KEY), new DefaultGasProvider());
+        DocumentRegistry document = DocumentRegistry.load(contractAddress, web3, Credentials.create(ministryAccountPrivateKey), new DefaultGasProvider());
         try {
             document.addDocument(String.valueOf(requestId), snapshotHash).send();
             log.info("[ETH] Persisted snapshot hash: {}", snapshotHash);
