@@ -25,12 +25,7 @@ public class SnapshotService {
 
     @SneakyThrows
     public void createAndPersistRequestSnapshot(RequestStatus status, Long requestId, String documentUniqueName) {
-        RequestSnapshot snapshot = RequestSnapshot.builder()
-                .requestId(requestId)
-                .documentHash(hashService.hashDocument(documentUniqueName))
-                .status(status)
-                .previousSnapshotHash(ethService.getSnapshotHash(requestId))
-                .build();
+        RequestSnapshot snapshot = RequestSnapshot.builder().requestId(requestId).documentHash(hashService.hashDocument(documentUniqueName)).status(status).previousSnapshotHash(ethService.getSnapshotHash(requestId)).build();
 
         snapshot = snapshotRepository.save(snapshot);
 
@@ -50,20 +45,20 @@ public class SnapshotService {
     public boolean verifyRequest(Request request) {
         String snapshotHash = ethService.getSnapshotHash(request.getId());
         RequestSnapshot snapshot = snapshotRepository.findFirstByRequestIdOrderByIdDesc(request.getId());
+
+        if (snapshot == null || snapshotHash == null || snapshotHash.trim().isEmpty()) {
+            return false;
+        }
+
         byte[] documentHash = hashService.hashDocument(request.getDocuments().get(request.getDocuments().size() - 1).getStoredDocumentName());
 
+        // Document hash does not match the one potentially stored on the blockchain
         if (!Arrays.equals(documentHash, snapshot.getDocumentHash())) {
-            throw new RuntimeException("Document hash does not match the one potentially stored on the blockchain");
+            return false;
         }
 
         // rebuild the snapshot such that we can compare with the one stored on the blockchain
-        RequestSnapshot rebuiltSnapshot = RequestSnapshot.builder()
-                .id(snapshot.getId())
-                .requestId(request.getId())
-                .documentHash(documentHash)
-                .status(request.getStatus())
-                .previousSnapshotHash(snapshot.getPreviousSnapshotHash())
-                .build();
+        RequestSnapshot rebuiltSnapshot = RequestSnapshot.builder().id(snapshot.getId()).requestId(request.getId()).documentHash(documentHash).status(request.getStatus()).previousSnapshotHash(snapshot.getPreviousSnapshotHash()).build();
 
         ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
         String json = ow.writeValueAsString(rebuiltSnapshot);
