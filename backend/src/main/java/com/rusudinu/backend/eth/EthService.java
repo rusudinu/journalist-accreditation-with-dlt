@@ -43,7 +43,7 @@ public class EthService {
         try {
             return document.getDocumentsForRequest(String.valueOf(requestId)).send();
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            return "";
         }
     }
 }
