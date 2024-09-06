@@ -1,4 +1,4 @@
-package com.rusudinu.backend.hyperledger;
+package com.rusudinu.backend.distributedStorage.hyperledger;
 
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;

@@ -1,4 +1,4 @@
-package com.rusudinu.backend.hyperledger;
+package com.rusudinu.backend.distributedStorage.hyperledger;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

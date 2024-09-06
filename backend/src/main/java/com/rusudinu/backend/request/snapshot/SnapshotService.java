@@ -2,8 +2,7 @@ package com.rusudinu.backend.request.snapshot;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
-import com.rusudinu.backend.document.DocumentService;
-import com.rusudinu.backend.eth.EthService;
+import com.rusudinu.backend.distributedStorage.DistributedStorageService;
 import com.rusudinu.backend.hash.HashService;
 import com.rusudinu.backend.request.Request;
 import com.rusudinu.backend.request.RequestStatus;
@@ -17,15 +16,19 @@ import java.util.Base64;
 @Service
 @RequiredArgsConstructor
 public class SnapshotService {
-    private final EthService ethService;
+    private final DistributedStorageService distributedStorageService;
     private final HashService hashService;
     private final SnapshotRepository snapshotRepository;
-    private final DocumentService documentService;
 
 
     @SneakyThrows
     public void createAndPersistRequestSnapshot(RequestStatus status, Long requestId, String documentUniqueName) {
-        RequestSnapshot snapshot = RequestSnapshot.builder().requestId(requestId).documentHash(hashService.hashDocument(documentUniqueName)).status(status).previousSnapshotHash(ethService.getSnapshotHash(requestId)).build();
+        RequestSnapshot snapshot = RequestSnapshot.builder()
+                .requestId(requestId)
+                .documentHash(hashService.hashDocument(documentUniqueName))
+                .status(status)
+                .previousSnapshotHash(distributedStorageService.getRegistrySnapshotHashByRequestId(requestId))
+                .build();
 
         snapshot = snapshotRepository.save(snapshot);
 
@@ -38,12 +41,12 @@ public class SnapshotService {
         String newSnapshotHash = Base64.getEncoder().encodeToString(hash);
         System.out.println(newSnapshotHash);
 
-        ethService.saveDocumentSignature(requestId, newSnapshotHash);
+        distributedStorageService.persistRegistrySnapshot(requestId, newSnapshotHash);
     }
 
     @SneakyThrows
     public boolean verifyRequest(Request request) {
-        String snapshotHash = ethService.getSnapshotHash(request.getId());
+        String snapshotHash = distributedStorageService.getRegistrySnapshotHashByRequestId(request.getId());
         RequestSnapshot snapshot = snapshotRepository.findFirstByRequestIdOrderByIdDesc(request.getId());
 
         if (snapshot == null || snapshotHash == null || snapshotHash.trim().isEmpty()) {

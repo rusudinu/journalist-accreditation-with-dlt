@@ -1,4 +1,4 @@
-package com.rusudinu.backend.eth.model;
+package com.rusudinu.backend.distributedStorage.eth.model;
 
 import org.web3j.abi.TypeReference;
 import org.web3j.abi.datatypes.Address;

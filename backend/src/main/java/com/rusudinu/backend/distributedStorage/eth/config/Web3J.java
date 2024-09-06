@@ -1,4 +1,4 @@
-package com.rusudinu.backend.eth.config;
+package com.rusudinu.backend.distributedStorage.eth.config;
 
 import okhttp3.OkHttpClient;
 import org.springframework.context.annotation.Bean;

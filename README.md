@@ -19,3 +19,5 @@ Click on Authorize, then in client_id add journalist-accreditation then press on
 Start the hyperledger chain by running server-boot.sh found in the hyperledger folder.
 
 Remember after changing the contract to run npm run build in its folder.
+
+When running the core backend set either ethereum or hyperledger as profile.
