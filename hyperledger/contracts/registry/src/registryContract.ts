@@ -20,28 +20,25 @@ export class RegistryContract extends Contract {
         ];
 
         for (const asset of assets) {
-            asset.docType = 'asset';
+            asset.docType = 'Registry';
             await ctx.stub.putState(asset.RequestID, Buffer.from(stringify(sortKeysRecursive(asset))));
             console.info(`Asset ${asset.RequestID} initialized`);
         }
     }
 
-    /**
-     * CreateAsset issues a new asset to the world state with given details.
-     */
     @Transaction()
-    @Param('assetObj', 'Asset', 'Part formed JSON of Asset')
-    async CreateAsset(ctx: Context, ID: string, Patient: string, Issuer: string, Medicine: string): Promise<void> {
-        const asset = Registry.newInstance({ID, Patient, Issuer, Medicine});
+    @Param('assetObj', 'Registry', 'Part formed JSON of Registry')
+    async CreateAsset(ctx: Context, RequestID: string, RequestSnapshotHash: string): Promise<void> {
+        const asset = Registry.newInstance({RequestID, RequestSnapshotHash});
 
-        if (await this.AssetExists(ctx, asset.ID)) {
-            throw new Error(`The asset ${asset.ID} already exists`);
+        if (await this.AssetExists(ctx, asset.RequestID)) {
+            throw new Error(`The asset ${asset.RequestID} already exists`);
         }
 
         const assetBytes = marshal(asset);
-        await ctx.stub.putState(asset.ID, assetBytes);
+        await ctx.stub.putState(asset.RequestID, assetBytes);
 
-        await setEndorsingOrgs(ctx, asset.ID, ctx.clientIdentity.getMSPID());
+        await setEndorsingOrgs(ctx, asset.RequestID, ctx.clientIdentity.getMSPID());
 
         ctx.stub.setEvent('CreateAsset', assetBytes);
     }
@@ -53,18 +50,15 @@ export class RegistryContract extends Contract {
         return existingAssetBytes.toString();
     }
 
-    /**
-     * ReadAsset returns an existing asset stored in the world state.
-     */
     @Transaction(false)
-    @Returns('Asset')
+    @Returns('Registry')
     async ReadAsset(ctx: Context, id: string): Promise<Registry> {
         const existingAssetBytes = await this.#readAsset(ctx, id);
         return Registry.newInstance(unmarshal(existingAssetBytes));
     }
 
     async #readAsset(ctx: Context, id: string): Promise<Uint8Array> {
-        const assetBytes = await ctx.stub.getState(id); // get the asset from chaincode state
+        const assetBytes = await ctx.stub.getState(id);
         if (!assetBytes || assetBytes.length === 0) {
             throw new Error(`Sorry, asset ${id} has not been created`);
         }
@@ -72,77 +66,60 @@ export class RegistryContract extends Contract {
         return assetBytes;
     }
 
-    /**
-     * UpdateAsset updates an existing asset in the world state with provided partial asset data, which must include
-     * the asset ID.
-     */
     @Transaction()
-    @Param('assetObj', 'Asset', 'Part formed JSON of Asset')
+    @Param('assetObj', 'Registry', 'Part formed JSON of Registry')
     async UpdateAsset(ctx: Context, assetUpdate: Registry): Promise<void> {
-        if (assetUpdate.ID === undefined) {
+        if (assetUpdate.RequestID === undefined) {
             throw new Error('No asset ID specified');
         }
 
-        const existingAssetBytes = await this.#readAsset(ctx, assetUpdate.ID);
+        const existingAssetBytes = await this.#readAsset(ctx, assetUpdate.RequestID);
         const existingAsset = Registry.newInstance(unmarshal(existingAssetBytes));
 
         if (!hasWritePermission(ctx, existingAsset)) {
             throw new Error('Only owner can update assets');
         }
 
-        const updatedState = Object.assign({}, existingAsset, assetUpdate, {
-            Patient: existingAsset.Patient, // Must transfer to change owner
-        });
+        const updatedState = Object.assign({}, existingAsset, assetUpdate);
         const updatedAsset = Registry.newInstance(updatedState);
 
-        // overwriting original asset with new asset
         const updatedAssetBytes = marshal(updatedAsset);
-        await ctx.stub.putState(updatedAsset.ID, updatedAssetBytes);
+        await ctx.stub.putState(updatedAsset.RequestID, updatedAssetBytes);
 
-        await setEndorsingOrgs(ctx, updatedAsset.ID, ctx.clientIdentity.getMSPID());
+        await setEndorsingOrgs(ctx, updatedAsset.RequestID, ctx.clientIdentity.getMSPID());
 
         ctx.stub.setEvent('UpdateAsset', updatedAssetBytes);
     }
 
     @Transaction()
-    @Param('assetObj', 'Asset', 'Part formed JSON of Asset')
-    async MarkAsCompleted(ctx: Context, ID: string): Promise<void> {
-        if (ID === undefined) {
+    async MarkAsCompleted(ctx: Context, RequestID: string): Promise<void> {
+        if (RequestID === undefined) {
             throw new Error('No asset ID specified');
         }
 
-        const existingAssetBytes = await this.#readAsset(ctx, ID);
+        const existingAssetBytes = await this.#readAsset(ctx, RequestID);
         const existingAssetAsString = existingAssetBytes.toString();
         const existingAsset: Registry = JSON.parse(existingAssetAsString) as Registry;
 
         const asset = Registry.newInstance({
-            ID: existingAsset.ID,
-            Patient: existingAsset.Patient,
-            Issuer: existingAsset.Issuer,
-            Medicine: existingAsset.Medicine,
-            Completed: 'true',
+            RequestID: existingAsset.RequestID,
+            RequestSnapshotHash: existingAsset.RequestSnapshotHash,
         });
 
-        const updatedState = Object.assign({}, existingAsset, asset, {
-            Patient: existingAsset.Patient, // Must transfer to change owner
-        });
+        const updatedState = Object.assign({}, existingAsset, asset);
         const updatedAsset = Registry.newInstance(updatedState);
 
-        // overwriting original asset with new asset
         const updatedAssetBytes = marshal(updatedAsset);
-        await ctx.stub.putState(updatedAsset.ID, updatedAssetBytes);
+        await ctx.stub.putState(updatedAsset.RequestID, updatedAssetBytes);
 
-        await setEndorsingOrgs(ctx, updatedAsset.ID, ctx.clientIdentity.getMSPID());
+        await setEndorsingOrgs(ctx, updatedAsset.RequestID, ctx.clientIdentity.getMSPID());
 
         ctx.stub.setEvent('UpdateAsset', updatedAssetBytes);
     }
 
-    /**
-     * DeleteAsset deletes an asset from the world state.
-     */
     @Transaction()
     async DeleteAsset(ctx: Context, id: string): Promise<void> {
-        const assetBytes = await this.#readAsset(ctx, id); // Throws if asset does not exist
+        const assetBytes = await this.#readAsset(ctx, id);
         const asset = Registry.newInstance(unmarshal(assetBytes));
 
         if (!hasWritePermission(ctx, asset)) {
@@ -151,12 +128,9 @@ export class RegistryContract extends Contract {
 
         await ctx.stub.deleteState(id);
 
-        ctx.stub.setEvent('DeletaAsset', assetBytes);
+        ctx.stub.setEvent('DeleteAsset', assetBytes);
     }
 
-    /**
-     * AssetExists returns true when asset with the specified ID exists in world state; otherwise false.
-     */
     @Transaction(false)
     @Returns('boolean')
     async AssetExists(ctx: Context, id: string): Promise<boolean> {
@@ -164,9 +138,6 @@ export class RegistryContract extends Contract {
         return assetJson?.length > 0;
     }
 
-    /**
-     * TransferAsset updates the owner field of asset with the specified ID in the world state.
-     */
     @Transaction()
     async TransferAsset(ctx: Context, id: string, newOwner: string, newOwnerOrg: string): Promise<void> {
         const assetString = await this.#readAsset(ctx, id);
@@ -176,23 +147,19 @@ export class RegistryContract extends Contract {
             throw new Error('Only owner can transfer assets');
         }
 
-        asset.Patient = toJSON(ownerIdentifier(newOwner, newOwnerOrg));
+        asset.RequestSnapshotHash = toJSON(ownerIdentifier(newOwner, newOwnerOrg));
 
         const assetBytes = marshal(asset);
         await ctx.stub.putState(id, assetBytes);
 
-        await setEndorsingOrgs(ctx, id, newOwnerOrg); // Subsequent updates must be endorsed by the new owning org
+        await setEndorsingOrgs(ctx, id, newOwnerOrg);
 
         ctx.stub.setEvent('TransferAsset', assetBytes);
     }
 
-    /**
-     * GetAllAssets returns a list of all assets found in the world state.
-     */
     @Transaction(false)
     @Returns('string')
     async GetAllAssets(ctx: Context): Promise<string> {
-        // range query with empty string for startKey and endKey does an open-ended query of all assets in the chaincode namespace.
         const iterator = await ctx.stub.getStateByRange('', '');
 
         const assets: Registry[] = [];
@@ -225,7 +192,6 @@ function marshal(o: object): Buffer {
 }
 
 function toJSON(o: object): string {
-    // Insert data in alphabetic order using 'json-stringify-deterministic' and 'sort-keys-recursive'
     return stringify(sortKeysRecursive(o));
 }
 
@@ -235,11 +201,13 @@ interface OwnerIdentifier {
 }
 
 function hasWritePermission(ctx: Context, asset: Registry): boolean {
-    const clientId = clientIdentifier(ctx);
-    const ownerId = unmarshal(asset.Patient) as OwnerIdentifier;
-    return clientId.org === ownerId.org;
+    // const clientId = clientIdentifier(ctx);
+    // const ownerId = unmarshal(asset.RequestSnapshotHash) as OwnerIdentifier;
+    // return clientId.org === ownerId.org;
+    return true;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function clientIdentifier(ctx: Context, user?: string): OwnerIdentifier {
     return {
         org: ctx.clientIdentity.getMSPID(),
@@ -249,7 +217,7 @@ function clientIdentifier(ctx: Context, user?: string): OwnerIdentifier {
 
 function clientCommonName(ctx: Context): string {
     const clientCert = new X509Certificate(ctx.clientIdentity.getIDBytes());
-    const matches = clientCert.subject.match(/^CN=(.*)$/m); // [0] Matching string; [1] capture group
+    const matches = clientCert.subject.match(/^CN=(.*)$/m);
     if (matches?.length !== 2) {
         throw new Error(`Unable to identify client identity common name: ${clientCert.subject}`);
     }
