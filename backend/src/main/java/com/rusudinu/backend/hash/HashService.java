@@ -25,6 +25,11 @@ public class HashService {
     public byte[] hashString(String data) {
         return encryptWithRSA(createDigestInfo(data.getBytes()));
     }
+    
+    @SneakyThrows
+    public boolean verifyString(byte[] encryptedMessageHash, String data) {
+        return Arrays.equals(decryptWithRSA(encryptedMessageHash), createDigestInfo(data.getBytes()));
+    }
 
     @SneakyThrows
     public byte[] hashDocument(String documentName) {
