@@ -20,14 +20,11 @@
     "test:e2e": "jest --config ./test/jest-e2e.json"
   },
   "dependencies": {
-    "@apollo/server": "^4.9.5",
     "@grpc/grpc-js": "^1.9.13",
     "@hyperledger/fabric-gateway": "^1.4.0",
-    "@nestjs/apollo": "^12.0.11",
     "@nestjs/axios": "^3.0.2",
     "@nestjs/common": "^10.0.0",
     "@nestjs/core": "^10.0.0",
-    "@nestjs/graphql": "^12.0.11",
     "@nestjs/platform-express": "^10.0.0",
     "@opentelemetry/api": "^1.6.0",
     "@opentelemetry/auto-instrumentations-node": "^0.39.2",
@@ -37,7 +34,6 @@
     "dotenv": "^16.3.1",
     "env-var": "^7.4.1",
     "fabric-network": "^2.2.20",
-    "graphql": "^16.8.1",
     "nestjs-otel": "^5.1.5",
     "nestjs-pino": "^3.5.0",
     "pg": "^8.11.3",

@@ -19,12 +19,6 @@ import {VitalDataModule} from './vital-data/vital-data.module';
                 quietReqLogger: true,
             },
         }),
-        GraphQLModule.forRoot<ApolloDriverConfig>({
-            driver: ApolloDriver,
-            // autoSchemaFile: true, // in memory
-            autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
-            sortSchema: true,
-        }),
         PrescriptionModule,
         ChainUtilsModule,
         VitalDataModule,
