@@ -34,13 +34,9 @@ public class SnapshotService {
 
         ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
         String json = ow.writeValueAsString(snapshot);
-        System.out.println(json);
-
         byte[] hash = hashService.hashString(json);
-
+        
         String newSnapshotHash = Base64.getEncoder().encodeToString(hash);
-        System.out.println(newSnapshotHash);
-
         distributedStorageService.persistRegistrySnapshot(requestId, newSnapshotHash);
     }
 
