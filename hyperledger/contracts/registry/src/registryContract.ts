@@ -14,34 +14,35 @@ export class RegistryContract extends Contract {
     public async InitLedger(ctx: Context): Promise<void> {
         const assets: Registry[] = [
             {
-                RequestID: '1',
-                RequestSnapshotHash: 'hash1',
+                id: '1',
+                requestSnapshotHash: 'hash1',
             },
         ];
 
         for (const asset of assets) {
             asset.docType = 'Registry';
-            await ctx.stub.putState(asset.RequestID, Buffer.from(stringify(sortKeysRecursive(asset))));
-            console.info(`Asset ${asset.RequestID} initialized`);
+            await ctx.stub.putState(asset.id, Buffer.from(stringify(sortKeysRecursive(asset))));
+            console.info(`Asset ${asset.id} initialized`);
         }
     }
 
     @Transaction()
-    @Param('assetObj', 'Registry', 'Part formed JSON of Registry')
-    async CreateAsset(ctx: Context, RequestID: string, RequestSnapshotHash: string): Promise<void> {
-        const asset = Registry.newInstance({RequestID, RequestSnapshotHash});
+    @Param('assetObj', 'Asset', 'Part formed JSON of Asset')
+    async CreateAsset(ctx: Context, id: string, requestSnapshotHash: string): Promise<void> {
+        const asset = Registry.newInstance({id, requestSnapshotHash});
 
-        if (await this.AssetExists(ctx, asset.RequestID)) {
-            throw new Error(`The asset ${asset.RequestID} already exists`);
-        }
+        // if (await this.AssetExists(ctx, asset.id)) {
+        //     throw new Error(`The asset ${asset.id} already exists`);
+        // }
 
         const assetBytes = marshal(asset);
-        await ctx.stub.putState(asset.RequestID, assetBytes);
-
-        await setEndorsingOrgs(ctx, asset.RequestID, ctx.clientIdentity.getMSPID());
-
+        await ctx.stub.putState(asset.id, assetBytes);
+        console.info('asset is put into state');
+        await setEndorsingOrgs(ctx, asset.id, ctx.clientIdentity.getMSPID());
+        console.log('endorsement is');
         ctx.stub.setEvent('CreateAsset', assetBytes);
     }
+
 
     @Transaction(false)
     @Returns('string')
@@ -50,12 +51,12 @@ export class RegistryContract extends Contract {
         return existingAssetBytes.toString();
     }
 
-    @Transaction(false)
-    @Returns('Registry')
-    async ReadAsset(ctx: Context, id: string): Promise<Registry> {
-        const existingAssetBytes = await this.#readAsset(ctx, id);
-        return Registry.newInstance(unmarshal(existingAssetBytes));
-    }
+    // @Transaction(false)
+    // @Returns('Registry')
+    // async ReadAsset(ctx: Context, id: string): Promise<Registry> {
+    //     const existingAssetBytes = await this.#readAsset(ctx, id);
+    //     return Registry.newInstance(unmarshal(existingAssetBytes));
+    // }
 
     async #readAsset(ctx: Context, id: string): Promise<Uint8Array> {
         const assetBytes = await ctx.stub.getState(id);
@@ -66,96 +67,96 @@ export class RegistryContract extends Contract {
         return assetBytes;
     }
 
-    @Transaction()
-    @Param('assetObj', 'Registry', 'Part formed JSON of Registry')
-    async UpdateAsset(ctx: Context, assetUpdate: Registry): Promise<void> {
-        if (assetUpdate.RequestID === undefined) {
-            throw new Error('No asset ID specified');
-        }
+    // @Transaction()
+    // @Param('assetObj', 'Registry', 'Part formed JSON of Registry')
+    // async UpdateAsset(ctx: Context, assetUpdate: Registry): Promise<void> {
+    //     if (assetUpdate.id === undefined) {
+    //         throw new Error('No asset ID specified');
+    //     }
+    //
+    //     const existingAssetBytes = await this.#readAsset(ctx, assetUpdate.id);
+    //     const existingAsset = Registry.newInstance(unmarshal(existingAssetBytes));
+    //
+    //     if (!hasWritePermission(ctx, existingAsset)) {
+    //         throw new Error('Only owner can update assets');
+    //     }
+    //
+    //     const updatedState = Object.assign({}, existingAsset, assetUpdate);
+    //     const updatedAsset = Registry.newInstance(updatedState);
+    //
+    //     const updatedAssetBytes = marshal(updatedAsset);
+    //     await ctx.stub.putState(updatedAsset.id, updatedAssetBytes);
+    //
+    //     await setEndorsingOrgs(ctx, updatedAsset.id, ctx.clientIdentity.getMSPID());
+    //
+    //     ctx.stub.setEvent('UpdateAsset', updatedAssetBytes);
+    // }
+    //
+    // @Transaction()
+    // async MarkAsCompleted(ctx: Context, id: string): Promise<void> {
+    //     if (ID === undefined) {
+    //         throw new Error('No asset ID specified');
+    //     }
+    //
+    //     const existingAssetBytes = await this.#readAsset(ctx, ID);
+    //     const existingAssetAsString = existingAssetBytes.toString();
+    //     const existingAsset: Registry = JSON.parse(existingAssetAsString) as Registry;
+    //
+    //     const asset = Registry.newInstance({
+    //         id: existingAsset.id,
+    //         requestSnapshotHash: existingAsset.requestSnapshotHash,
+    //     });
+    //
+    //     const updatedState = Object.assign({}, existingAsset, asset);
+    //     const updatedAsset = Registry.newInstance(updatedState);
+    //
+    //     const updatedAssetBytes = marshal(updatedAsset);
+    //     await ctx.stub.putState(updatedAsset.id, updatedAssetBytes);
+    //
+    //     await setEndorsingOrgs(ctx, updatedAsset.id, ctx.clientIdentity.getMSPID());
+    //
+    //     ctx.stub.setEvent('UpdateAsset', updatedAssetBytes);
+    // }
+    //
+    // @Transaction()
+    // async DeleteAsset(ctx: Context, id: string): Promise<void> {
+    //     const assetBytes = await this.#readAsset(ctx, id);
+    //     const asset = Registry.newInstance(unmarshal(assetBytes));
+    //
+    //     if (!hasWritePermission(ctx, asset)) {
+    //         throw new Error('Only owner can delete assets');
+    //     }
+    //
+    //     await ctx.stub.deleteState(id);
+    //
+    //     ctx.stub.setEvent('DeleteAsset', assetBytes);
+    // }
 
-        const existingAssetBytes = await this.#readAsset(ctx, assetUpdate.RequestID);
-        const existingAsset = Registry.newInstance(unmarshal(existingAssetBytes));
-
-        if (!hasWritePermission(ctx, existingAsset)) {
-            throw new Error('Only owner can update assets');
-        }
-
-        const updatedState = Object.assign({}, existingAsset, assetUpdate);
-        const updatedAsset = Registry.newInstance(updatedState);
-
-        const updatedAssetBytes = marshal(updatedAsset);
-        await ctx.stub.putState(updatedAsset.RequestID, updatedAssetBytes);
-
-        await setEndorsingOrgs(ctx, updatedAsset.RequestID, ctx.clientIdentity.getMSPID());
-
-        ctx.stub.setEvent('UpdateAsset', updatedAssetBytes);
-    }
-
-    @Transaction()
-    async MarkAsCompleted(ctx: Context, RequestID: string): Promise<void> {
-        if (RequestID === undefined) {
-            throw new Error('No asset ID specified');
-        }
-
-        const existingAssetBytes = await this.#readAsset(ctx, RequestID);
-        const existingAssetAsString = existingAssetBytes.toString();
-        const existingAsset: Registry = JSON.parse(existingAssetAsString) as Registry;
-
-        const asset = Registry.newInstance({
-            RequestID: existingAsset.RequestID,
-            RequestSnapshotHash: existingAsset.RequestSnapshotHash,
-        });
-
-        const updatedState = Object.assign({}, existingAsset, asset);
-        const updatedAsset = Registry.newInstance(updatedState);
-
-        const updatedAssetBytes = marshal(updatedAsset);
-        await ctx.stub.putState(updatedAsset.RequestID, updatedAssetBytes);
-
-        await setEndorsingOrgs(ctx, updatedAsset.RequestID, ctx.clientIdentity.getMSPID());
-
-        ctx.stub.setEvent('UpdateAsset', updatedAssetBytes);
-    }
-
-    @Transaction()
-    async DeleteAsset(ctx: Context, id: string): Promise<void> {
-        const assetBytes = await this.#readAsset(ctx, id);
-        const asset = Registry.newInstance(unmarshal(assetBytes));
-
-        if (!hasWritePermission(ctx, asset)) {
-            throw new Error('Only owner can delete assets');
-        }
-
-        await ctx.stub.deleteState(id);
-
-        ctx.stub.setEvent('DeleteAsset', assetBytes);
-    }
-
-    @Transaction(false)
-    @Returns('boolean')
-    async AssetExists(ctx: Context, id: string): Promise<boolean> {
-        const assetJson = await ctx.stub.getState(id);
-        return assetJson?.length > 0;
-    }
-
-    @Transaction()
-    async TransferAsset(ctx: Context, id: string, newOwner: string, newOwnerOrg: string): Promise<void> {
-        const assetString = await this.#readAsset(ctx, id);
-        const asset = Registry.newInstance(unmarshal(assetString));
-
-        if (!hasWritePermission(ctx, asset)) {
-            throw new Error('Only owner can transfer assets');
-        }
-
-        asset.RequestSnapshotHash = toJSON(ownerIdentifier(newOwner, newOwnerOrg));
-
-        const assetBytes = marshal(asset);
-        await ctx.stub.putState(id, assetBytes);
-
-        await setEndorsingOrgs(ctx, id, newOwnerOrg);
-
-        ctx.stub.setEvent('TransferAsset', assetBytes);
-    }
+    // @Transaction(false)
+    // @Returns('boolean')
+    // async AssetExists(ctx: Context, id: string): Promise<boolean> {
+    //     const assetJson = await ctx.stub.getState(id);
+    //     return assetJson?.length > 0;
+    // }
+    //
+    // @Transaction()
+    // async TransferAsset(ctx: Context, id: string, newOwner: string, newOwnerOrg: string): Promise<void> {
+    //     const assetString = await this.#readAsset(ctx, id);
+    //     const asset = Registry.newInstance(unmarshal(assetString));
+    //
+    //     if (!hasWritePermission(ctx, asset)) {
+    //         throw new Error('Only owner can transfer assets');
+    //     }
+    //
+    //     asset.requestSnapshotHash = toJSON(ownerIdentifier(newOwner, newOwnerOrg));
+    //
+    //     const assetBytes = marshal(asset);
+    //     await ctx.stub.putState(id, assetBytes);
+    //
+    //     await setEndorsingOrgs(ctx, id, newOwnerOrg);
+    //
+    //     ctx.stub.setEvent('TransferAsset', assetBytes);
+    // }
 
     @Transaction(false)
     @Returns('string')
@@ -201,10 +202,9 @@ interface OwnerIdentifier {
 }
 
 function hasWritePermission(ctx: Context, asset: Registry): boolean {
-    // const clientId = clientIdentifier(ctx);
-    // const ownerId = unmarshal(asset.RequestSnapshotHash) as OwnerIdentifier;
-    // return clientId.org === ownerId.org;
-    return true;
+    const clientId = clientIdentifier(ctx);
+    const ownerId = unmarshal(asset.requestSnapshotHash) as OwnerIdentifier;
+    return clientId.org === ownerId.org;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars

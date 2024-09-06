@@ -1,5 +1,5 @@
-import { PrescriptionContract } from './prescriptionContract';
+import {RegistryContract} from './registryContract';
 
-export { PrescriptionContract } from './prescriptionContract';
+export {RegistryContract} from './registryContract';
 
-export const contracts: any[] = [PrescriptionContract]; // eslint-disable-line @typescript-eslint/no-explicit-any
+export const contracts: any[] = [RegistryContract]; // eslint-disable-line @typescript-eslint/no-explicit-any

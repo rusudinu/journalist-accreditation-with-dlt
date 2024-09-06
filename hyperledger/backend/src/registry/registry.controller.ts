@@ -1,4 +1,4 @@
-import {Body, Controller, Get, Post} from '@nestjs/common';
+import {Body, Controller, Get, Param, Post} from '@nestjs/common';
 import {RegistryService} from './registry.service';
 import {RegistryModel} from './registry.model';
 
@@ -8,6 +8,16 @@ export class RegistryController {
 
     }
 
+    @Get('init')
+    initLedger() {
+        return this.registryService.initChain();
+    }
+
+
+    @Get('all')
+    showEntireLedger() {
+        return this.registryService.findAll();
+    }
 
     @Get()
     getRegistry(): string {
@@ -15,16 +25,13 @@ export class RegistryController {
     }
 
     @Get(':requestId')
-    getRegistryByRequestId(): RegistryModel {
-        return {
-            RequestID: '1',
-            RequestSnapshotHash: 'hash1',
-        };
+    getRegistryByRequestId(@Param('requestId') requestId: string) {
+        return this.registryService.findById(requestId);
     }
 
     @Post()
-    saveOrUpdateRegistry(@Body() request: RegistryModel): void {
-        // this.registryService.saveOrUpdateRegistry(request);
+    saveOrUpdateRegistry(@Body() request: RegistryModel): Promise<void> {
         console.log(request);
+        return this.registryService.createOrUpdateRegistryEntry(request);
     }
 }

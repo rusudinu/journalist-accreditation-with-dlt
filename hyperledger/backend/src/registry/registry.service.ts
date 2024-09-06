@@ -13,7 +13,7 @@ export class RegistryService {
     }
 
     channelName = this.envOrDefault('CHANNEL_NAME', 'mychannel');
-    chaincodeName = this.envOrDefault('CHAINCODE_NAME', 'prescription'); // or 'basic' if setting -ccn to basic when deploying the contract
+    chaincodeName = this.envOrDefault('CHAINCODE_NAME', 'registry'); // or 'basic' if setting -ccn to basic when deploying the contract
     mspId = this.envOrDefault('MSP_ID', 'Org1MSP');
 
     // Path to crypto materials.
@@ -214,15 +214,14 @@ export class RegistryService {
             const network = gateway.getNetwork(this.channelName);
             const contract = network.getContract(this.chaincodeName);
             const resultJson = await this.getAllAssets(contract);
-            const prescriptions: RegistryModel[] = resultJson.map((asset: any) => {
-                //return RegistryModel.createFromChainPrescription(asset);
+            const requests: RegistryModel[] = resultJson.map((asset: any) => {
                 return {
-                    RequestID: "1",
-                    RequestSnapshotHash: "hash",
+                    id: asset.id,
+                    requestSnapshotHash: asset.requestSnapshotHash,
                 };
             });
 
-            return prescriptions;
+            return requests;
         } catch (e) {
             console.log(e);
             return [];
@@ -232,37 +231,81 @@ export class RegistryService {
         }
     }
 
-    // async createPrescription(prescription: CreatePrescriptionInput): Promise<void> {
-    //     console.log('\n--> Submit Transaction: Create Prescription');
-    //     const client = await this.newGrpcConnection();
-    //
-    //     const gateway = connect({
-    //         client,
-    //         identity: await this.newIdentity(),
-    //         signer: await this.newSigner(),
-    //         // Default timeouts for different gRPC calls
-    //         evaluateOptions: () => {
-    //             return { deadline: Date.now() + 5000 }; // 5 seconds
-    //         },
-    //         endorseOptions: () => {
-    //             return { deadline: Date.now() + 15000 }; // 15 seconds
-    //         },
-    //         submitOptions: () => {
-    //             return { deadline: Date.now() + 5000 }; // 5 seconds
-    //         },
-    //         commitStatusOptions: () => {
-    //             return { deadline: Date.now() + 60000 }; // 1 minute
-    //         },
-    //     });
-    //
-    //     const network = gateway.getNetwork(this.channelName);
-    //
-    //     const contract = network.getContract(this.chaincodeName);
-    //
-    //     await contract.submitTransaction('CreateAsset', prescription.ID, prescription.Patient, prescription.Issuer, prescription.Medicine);
-    //
-    //     console.log('*** Transaction committed successfully');
-    // }
+    async findById(id: string) {
+        const client = await this.newGrpcConnection();
+
+        const gateway = connect({
+            client,
+            identity: await this.newIdentity(),
+            signer: await this.newSigner(),
+            // Default timeouts for different gRPC calls
+            evaluateOptions: () => {
+                return {deadline: Date.now() + 5000}; // 5 seconds
+            },
+            endorseOptions: () => {
+                return {deadline: Date.now() + 15000}; // 15 seconds
+            },
+            submitOptions: () => {
+                return {deadline: Date.now() + 5000}; // 5 seconds
+            },
+            commitStatusOptions: () => {
+                return {deadline: Date.now() + 60000}; // 1 minute
+            },
+        });
+
+        try {
+            // Get a network instance representing the channel where the smart contract is deployed.
+            const network = gateway.getNetwork(this.channelName);
+
+            // Get the smart contract from the network.
+            const contract = network.getContract(this.chaincodeName);
+
+            // Initialize a set of asset data on the ledger using the chaincode 'InitLedger' function.
+
+            // Return all the current assets on the ledger.
+            const resultJson = await this.getAssetById(contract, id);
+            return resultJson as unknown as RegistryModel;
+        } catch (e) {
+            console.log(e);
+            return [];
+        } finally {
+            gateway.close();
+            client.close();
+        }
+    }
+
+    async createOrUpdateRegistryEntry(registryModel: RegistryModel): Promise<void> {
+        console.log('\n--> Submit Transaction: Create Prescription');
+        const client = await this.newGrpcConnection();
+
+        const gateway = connect({
+            client,
+            identity: await this.newIdentity(),
+            signer: await this.newSigner(),
+            // Default timeouts for different gRPC calls
+            evaluateOptions: () => {
+                return {deadline: Date.now() + 5000}; // 5 seconds
+            },
+            endorseOptions: () => {
+                return {deadline: Date.now() + 15000}; // 15 seconds
+            },
+            submitOptions: () => {
+                return {deadline: Date.now() + 5000}; // 5 seconds
+            },
+            commitStatusOptions: () => {
+                return {deadline: Date.now() + 60000}; // 1 minute
+            },
+        });
+
+        const network = gateway.getNetwork(this.channelName);
+        const contract = network.getContract(this.chaincodeName);
+        console.log("form contract");
+        console.log(registryModel);
+        await contract.submitTransaction('CreateAsset', registryModel.id, registryModel.requestSnapshotHash);
+
+        console.log('*** Transaction committed successfully');
+    }
+
     //
     // async updatePrescription(prescription: CreatePrescriptionInput): Promise<void> {
     //     console.log('\n--> Submit Transaction: Update prescription');

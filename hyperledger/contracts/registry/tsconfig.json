@@ -7,7 +7,7 @@
     "outDir": "dist",
     "declaration": true,
     "sourceMap": true,
-    "noUnusedLocals": true,
+    "noUnusedLocals": false,
     "noImplicitReturns": true
   },
   "include": [

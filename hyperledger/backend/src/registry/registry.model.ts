@@ -1,15 +1,10 @@
-import {Field, ObjectType} from '@nestjs/graphql';
-
-@ObjectType()
 export class RegistryModel {
-    @Field()
-    RequestID: string;
-    @Field()
-    RequestSnapshotHash: string;
+    id: string; // basically the request ID
+    requestSnapshotHash: string;
 
-    constructor(RequestID: string, RequestSnapshotHash: string) {
-        this.RequestID = RequestID;
-        this.RequestSnapshotHash = RequestSnapshotHash;
+    constructor(id: string, requestSnapshotHash: string) {
+        this.id = id;
+        this.requestSnapshotHash = requestSnapshotHash;
     }
 
     // static createFromChainPrescription(chainPrescription: IChainPrescription): PrescriptionModel {

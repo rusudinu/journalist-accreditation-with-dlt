@@ -5,11 +5,11 @@ export class Registry {
     @Property()
     public docType?: string;
 
-    @Property('RequestID', 'string')
-    RequestID = '';
+    @Property('id', 'string')
+    id = ''; // basically the request ID
 
-    @Property('RequestID', 'string')
-    RequestSnapshotHash = '';
+    @Property('requestSnapshotHash', 'string')
+    requestSnapshotHash = '';
 
     constructor() {
 
@@ -17,10 +17,16 @@ export class Registry {
 
     static newInstance(state: Partial<Registry> = {}): Registry {
         return {
-            docType: 'Registry',
-            RequestID: '',
-            RequestSnapshotHash: '',
-            ...state,
+            id: assertHasValue(state.id, 'RequestID is required'),
+            requestSnapshotHash: assertHasValue(state.requestSnapshotHash, 'RequestSnapshotHash is required'),
         };
     }
+}
+
+function assertHasValue<T>(value: T | undefined | null, message: string): T {
+    if (value == undefined || (typeof value === 'string' && value.length === 0)) {
+        throw new Error(message);
+    }
+
+    return value;
 }
