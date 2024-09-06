@@ -18,7 +18,7 @@ import org.web3j.tx.gas.DefaultGasProvider;
 @RequiredArgsConstructor
 public class EthService implements DistributedStorageService {
     private final Web3j web3;
-    private final String CONTRACT_ADDRESS = "0x0B306BF915C4d645ff596e518fAf3F9669b97016";
+    private final String CONTRACT_ADDRESS = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
     private final String ACCOUNT_PRIVATE_KEY = "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80";
 
     @Override
