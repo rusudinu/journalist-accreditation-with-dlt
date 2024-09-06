@@ -1,20 +1,16 @@
 import * as grpc from '@grpc/grpc-js';
-import { connect, Contract, Identity, Signer, signers } from '@hyperledger/fabric-gateway';
-import { Injectable } from '@nestjs/common';
+import {connect, Contract, Identity, Signer, signers} from '@hyperledger/fabric-gateway';
+import {Injectable} from '@nestjs/common';
 import * as crypto from 'crypto';
-import { promises as fs } from 'fs';
-import * as path from 'path'; // otherwise ERROR [ExceptionHandler] Cannot read properties of undefined (reading 'resolve')
-import { TextDecoder } from 'util';
-import IChainVitalData from '../vital-data/chain-vital-data.interface';
-import { CreateVitalDataInput } from '../vital-data/create-vital-data.input';
-import { VitalDataModel } from '../vital-data/vital-data.model';
-import IChainPrescription from './chain-prescription.interface';
-import { CreatePrescriptionInput } from './create-prescription.input';
-import { PrescriptionModel } from './prescription.model';
+import {promises as fs} from 'fs';
+import * as path from 'path';
+import {TextDecoder} from 'util';
+import {RegistryModel} from './registry.model';
 
 @Injectable()
-export class PrescriptionService {
-    constructor() {}
+export class RegistryService {
+    constructor() {
+    }
 
     channelName = this.envOrDefault('CHANNEL_NAME', 'mychannel');
     chaincodeName = this.envOrDefault('CHAINCODE_NAME', 'prescription'); // or 'basic' if setting -ccn to basic when deploying the contract
@@ -88,7 +84,7 @@ export class PrescriptionService {
 
     async newIdentity(): Promise<Identity> {
         const credentials = await fs.readFile(this.certPath);
-        return { mspId: this.mspId, credentials: credentials };
+        return {mspId: this.mspId, credentials: credentials};
     }
 
     async newSigner(): Promise<Signer> {
@@ -135,7 +131,7 @@ export class PrescriptionService {
         console.log('*** Transaction committed successfully');
     }
 
-    async initChain(): Promise<PrescriptionModel[]> {
+    async initChain(): Promise<RegistryModel[]> {
         console.log(this.cryptoPath);
         // The gRPC client connection should be shared by all Gateway connections to this endpoint.
         const client = await this.newGrpcConnection();
@@ -146,16 +142,16 @@ export class PrescriptionService {
             signer: await this.newSigner(),
             // Default timeouts for different gRPC calls
             evaluateOptions: () => {
-                return { deadline: Date.now() + 5000 }; // 5 seconds
+                return {deadline: Date.now() + 5000}; // 5 seconds
             },
             endorseOptions: () => {
-                return { deadline: Date.now() + 15000 }; // 15 seconds
+                return {deadline: Date.now() + 15000}; // 15 seconds
             },
             submitOptions: () => {
-                return { deadline: Date.now() + 5000 }; // 5 seconds
+                return {deadline: Date.now() + 5000}; // 5 seconds
             },
             commitStatusOptions: () => {
-                return { deadline: Date.now() + 60000 }; // 1 minute
+                return {deadline: Date.now() + 60000}; // 1 minute
             },
         });
 
@@ -192,7 +188,7 @@ export class PrescriptionService {
         }
     }
 
-    async findAll(): Promise<PrescriptionModel[]> {
+    async findAll(): Promise<RegistryModel[]> {
         const client = await this.newGrpcConnection();
 
         const gateway = connect({
@@ -201,16 +197,16 @@ export class PrescriptionService {
             signer: await this.newSigner(),
             // Default timeouts for different gRPC calls
             evaluateOptions: () => {
-                return { deadline: Date.now() + 5000 }; // 5 seconds
+                return {deadline: Date.now() + 5000}; // 5 seconds
             },
             endorseOptions: () => {
-                return { deadline: Date.now() + 15000 }; // 15 seconds
+                return {deadline: Date.now() + 15000}; // 15 seconds
             },
             submitOptions: () => {
-                return { deadline: Date.now() + 5000 }; // 5 seconds
+                return {deadline: Date.now() + 5000}; // 5 seconds
             },
             commitStatusOptions: () => {
-                return { deadline: Date.now() + 60000 }; // 1 minute
+                return {deadline: Date.now() + 60000}; // 1 minute
             },
         });
 
@@ -218,8 +214,12 @@ export class PrescriptionService {
             const network = gateway.getNetwork(this.channelName);
             const contract = network.getContract(this.chaincodeName);
             const resultJson = await this.getAllAssets(contract);
-            const prescriptions: PrescriptionModel[] = resultJson.map((asset: any) => {
-                return PrescriptionModel.createFromChainPrescription(asset);
+            const prescriptions: RegistryModel[] = resultJson.map((asset: any) => {
+                //return RegistryModel.createFromChainPrescription(asset);
+                return {
+                    RequestID: "1",
+                    RequestSnapshotHash: "hash",
+                };
             });
 
             return prescriptions;
@@ -232,113 +232,113 @@ export class PrescriptionService {
         }
     }
 
-    async createPrescription(prescription: CreatePrescriptionInput): Promise<void> {
-        console.log('\n--> Submit Transaction: Create Prescription');
-        const client = await this.newGrpcConnection();
-
-        const gateway = connect({
-            client,
-            identity: await this.newIdentity(),
-            signer: await this.newSigner(),
-            // Default timeouts for different gRPC calls
-            evaluateOptions: () => {
-                return { deadline: Date.now() + 5000 }; // 5 seconds
-            },
-            endorseOptions: () => {
-                return { deadline: Date.now() + 15000 }; // 15 seconds
-            },
-            submitOptions: () => {
-                return { deadline: Date.now() + 5000 }; // 5 seconds
-            },
-            commitStatusOptions: () => {
-                return { deadline: Date.now() + 60000 }; // 1 minute
-            },
-        });
-
-        const network = gateway.getNetwork(this.channelName);
-
-        const contract = network.getContract(this.chaincodeName);
-
-        await contract.submitTransaction('CreateAsset', prescription.ID, prescription.Patient, prescription.Issuer, prescription.Medicine);
-
-        console.log('*** Transaction committed successfully');
-    }
-
-    async updatePrescription(prescription: CreatePrescriptionInput): Promise<void> {
-        console.log('\n--> Submit Transaction: Update prescription');
-        const client = await this.newGrpcConnection();
-
-        const gateway = connect({
-            client,
-            identity: await this.newIdentity(),
-            signer: await this.newSigner(),
-            // Default timeouts for different gRPC calls
-            evaluateOptions: () => {
-                return { deadline: Date.now() + 5000 }; // 5 seconds
-            },
-            endorseOptions: () => {
-                return { deadline: Date.now() + 15000 }; // 15 seconds
-            },
-            submitOptions: () => {
-                return { deadline: Date.now() + 5000 }; // 5 seconds
-            },
-            commitStatusOptions: () => {
-                return { deadline: Date.now() + 60000 }; // 1 minute
-            },
-        });
-
-        const network = gateway.getNetwork(this.channelName);
-
-        const contract = network.getContract(this.chaincodeName);
-
-        await contract.submitTransaction('UpdateAsset', prescription.ID, prescription.Patient, prescription.Issuer, prescription.Medicine);
-
-        console.log('*** Transaction committed successfully');
-    }
-
-    async findById(id: string) {
-        const client = await this.newGrpcConnection();
-
-        const gateway = connect({
-            client,
-            identity: await this.newIdentity(),
-            signer: await this.newSigner(),
-            // Default timeouts for different gRPC calls
-            evaluateOptions: () => {
-                return { deadline: Date.now() + 5000 }; // 5 seconds
-            },
-            endorseOptions: () => {
-                return { deadline: Date.now() + 15000 }; // 15 seconds
-            },
-            submitOptions: () => {
-                return { deadline: Date.now() + 5000 }; // 5 seconds
-            },
-            commitStatusOptions: () => {
-                return { deadline: Date.now() + 60000 }; // 1 minute
-            },
-        });
-
-        try {
-            // Get a network instance representing the channel where the smart contract is deployed.
-            const network = gateway.getNetwork(this.channelName);
-
-            // Get the smart contract from the network.
-            const contract = network.getContract(this.chaincodeName);
-
-            // Initialize a set of asset data on the ledger using the chaincode 'InitLedger' function.
-
-            // Return all the current assets on the ledger.
-            const resultJson = await this.getAssetById(contract, id);
-
-            return PrescriptionModel.createFromChainPrescription(resultJson as unknown as IChainPrescription);
-        } catch (e) {
-            console.log(e);
-            return [];
-        } finally {
-            gateway.close();
-            client.close();
-        }
-    }
+    // async createPrescription(prescription: CreatePrescriptionInput): Promise<void> {
+    //     console.log('\n--> Submit Transaction: Create Prescription');
+    //     const client = await this.newGrpcConnection();
+    //
+    //     const gateway = connect({
+    //         client,
+    //         identity: await this.newIdentity(),
+    //         signer: await this.newSigner(),
+    //         // Default timeouts for different gRPC calls
+    //         evaluateOptions: () => {
+    //             return { deadline: Date.now() + 5000 }; // 5 seconds
+    //         },
+    //         endorseOptions: () => {
+    //             return { deadline: Date.now() + 15000 }; // 15 seconds
+    //         },
+    //         submitOptions: () => {
+    //             return { deadline: Date.now() + 5000 }; // 5 seconds
+    //         },
+    //         commitStatusOptions: () => {
+    //             return { deadline: Date.now() + 60000 }; // 1 minute
+    //         },
+    //     });
+    //
+    //     const network = gateway.getNetwork(this.channelName);
+    //
+    //     const contract = network.getContract(this.chaincodeName);
+    //
+    //     await contract.submitTransaction('CreateAsset', prescription.ID, prescription.Patient, prescription.Issuer, prescription.Medicine);
+    //
+    //     console.log('*** Transaction committed successfully');
+    // }
+    //
+    // async updatePrescription(prescription: CreatePrescriptionInput): Promise<void> {
+    //     console.log('\n--> Submit Transaction: Update prescription');
+    //     const client = await this.newGrpcConnection();
+    //
+    //     const gateway = connect({
+    //         client,
+    //         identity: await this.newIdentity(),
+    //         signer: await this.newSigner(),
+    //         // Default timeouts for different gRPC calls
+    //         evaluateOptions: () => {
+    //             return { deadline: Date.now() + 5000 }; // 5 seconds
+    //         },
+    //         endorseOptions: () => {
+    //             return { deadline: Date.now() + 15000 }; // 15 seconds
+    //         },
+    //         submitOptions: () => {
+    //             return { deadline: Date.now() + 5000 }; // 5 seconds
+    //         },
+    //         commitStatusOptions: () => {
+    //             return { deadline: Date.now() + 60000 }; // 1 minute
+    //         },
+    //     });
+    //
+    //     const network = gateway.getNetwork(this.channelName);
+    //
+    //     const contract = network.getContract(this.chaincodeName);
+    //
+    //     await contract.submitTransaction('UpdateAsset', prescription.ID, prescription.Patient, prescription.Issuer, prescription.Medicine);
+    //
+    //     console.log('*** Transaction committed successfully');
+    // }
+    //
+    // async findById(id: string) {
+    //     const client = await this.newGrpcConnection();
+    //
+    //     const gateway = connect({
+    //         client,
+    //         identity: await this.newIdentity(),
+    //         signer: await this.newSigner(),
+    //         // Default timeouts for different gRPC calls
+    //         evaluateOptions: () => {
+    //             return { deadline: Date.now() + 5000 }; // 5 seconds
+    //         },
+    //         endorseOptions: () => {
+    //             return { deadline: Date.now() + 15000 }; // 15 seconds
+    //         },
+    //         submitOptions: () => {
+    //             return { deadline: Date.now() + 5000 }; // 5 seconds
+    //         },
+    //         commitStatusOptions: () => {
+    //             return { deadline: Date.now() + 60000 }; // 1 minute
+    //         },
+    //     });
+    //
+    //     try {
+    //         // Get a network instance representing the channel where the smart contract is deployed.
+    //         const network = gateway.getNetwork(this.channelName);
+    //
+    //         // Get the smart contract from the network.
+    //         const contract = network.getContract(this.chaincodeName);
+    //
+    //         // Initialize a set of asset data on the ledger using the chaincode 'InitLedger' function.
+    //
+    //         // Return all the current assets on the ledger.
+    //         const resultJson = await this.getAssetById(contract, id);
+    //
+    //         return RegistryModel.createFromChainPrescription(resultJson as unknown as IChainPrescription);
+    //     } catch (e) {
+    //         console.log(e);
+    //         return [];
+    //     } finally {
+    //         gateway.close();
+    //         client.close();
+    //     }
+    // }
 
     async markPrescriptionAsCompleted(id: string): Promise<void> {
         console.log('\n--> Submit Transaction: Mark prescription as completed');
@@ -350,16 +350,16 @@ export class PrescriptionService {
             signer: await this.newSigner(),
             // Default timeouts for different gRPC calls
             evaluateOptions: () => {
-                return { deadline: Date.now() + 5000 }; // 5 seconds
+                return {deadline: Date.now() + 5000}; // 5 seconds
             },
             endorseOptions: () => {
-                return { deadline: Date.now() + 15000 }; // 15 seconds
+                return {deadline: Date.now() + 15000}; // 15 seconds
             },
             submitOptions: () => {
-                return { deadline: Date.now() + 5000 }; // 5 seconds
+                return {deadline: Date.now() + 5000}; // 5 seconds
             },
             commitStatusOptions: () => {
-                return { deadline: Date.now() + 60000 }; // 1 minute
+                return {deadline: Date.now() + 60000}; // 1 minute
             },
         });
 
