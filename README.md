@@ -21,3 +21,8 @@ Start the hyperledger chain by running server-boot.sh found in the hyperledger f
 Remember after changing the contract to run npm run build in its folder.
 
 When running the core backend set either ethereum or hyperledger as profile.
+
+# Block explorer:
+
+https://github.com/web3labs/chainlens-free/blob/master/docker-compose/README.md
+NODE_ENDPOINT=http://host.docker.internal:8545 docker compose up
