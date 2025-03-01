@@ -14,7 +14,9 @@ import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
 import java.util.Base64;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class SnapshotService {
@@ -38,7 +40,9 @@ public class SnapshotService {
 		String newSnapshotHash = Base64.getEncoder().encodeToString(hash);
 		distributedStorageService.persistRegistrySnapshot(requestId, newSnapshotHash);
 
-		if (status == RequestStatus.VALIDATED) {
+		log.info("Persisted snapshot hash: {}", newSnapshotHash);
+		log.info("Persisted snapshot status: {}", status);
+		if (status == RequestStatus.APPROVED) {
 			verifiableCredentialService.createVerifiableCredentialFromDocumentHash(newSnapshotHash, requestId);
 		}
 	}

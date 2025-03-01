@@ -18,9 +18,11 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.stereotype.Service;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class VerifiableCredentialService {
@@ -42,7 +44,7 @@ public class VerifiableCredentialService {
 	 * @return The created verifiable credential
 	 */
 	public VerifiableCredential createVerifiableCredentialFromDocumentHash(String documentHash, Long requestId) {
-		Request request = requestService.getRequestById(requestId);
+		log.info("Creating verifiable credential for request {}", requestId);
 		
 		VerifiableCredential credential = new VerifiableCredential();
 		credential.setContext("https://www.w3.org/2018/credentials/v1");
@@ -66,9 +68,11 @@ public class VerifiableCredentialService {
 		credential.setProof(proof);
 		
 		// Store the credential in the database
-		VerifiableCredentialEntity entity = VerifiableCredentialEntity.fromVerifiableCredential(credential, request);
+		VerifiableCredentialEntity entity = VerifiableCredentialEntity.fromVerifiableCredential(credential, requestId);
+		log.info("Saving verifiable credential entity for request {}, value {}", requestId, entity);
 		verifiableCredentialRepository.save(entity);
 
+		log.info("Created verifiable credential for request {}", requestId);
 		return credential;
 	}
 
@@ -172,8 +176,7 @@ public class VerifiableCredentialService {
 	 * @return The most recent verifiable credential, if any
 	 */
 	public Optional<VerifiableCredential> getLatestVerifiableCredentialForRequest(Long requestId) {
-		Request request = requestService.getRequestById(requestId);
-		return verifiableCredentialRepository.findFirstByRequestOrderByCreatedDateDesc(request)
+		return verifiableCredentialRepository.findFirstByRequestIdOrderByCreatedDateDesc(requestId)
 				.map(VerifiableCredentialEntity::toVerifiableCredential);
 	}
 	

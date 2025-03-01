@@ -43,8 +43,4 @@ public class Request {
     @JsonIgnoreProperties("request")
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "request")
     private List<Document> documents;
-    
-    @JsonIgnoreProperties("request")
-    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "request")
-    private List<VerifiableCredentialEntity> verifiableCredentials;
 }

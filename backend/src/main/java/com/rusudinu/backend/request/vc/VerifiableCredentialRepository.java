@@ -1,6 +1,5 @@
 package com.rusudinu.backend.request.vc;
 
-import com.rusudinu.backend.request.Request;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -11,13 +10,6 @@ import java.util.Optional;
 public interface VerifiableCredentialRepository extends JpaRepository<VerifiableCredentialEntity, Long> {
     
     /**
-     * Find all verifiable credentials for a specific request
-     * @param request The request
-     * @return List of verifiable credentials
-     */
-    List<VerifiableCredentialEntity> findByRequest(Request request);
-    
-    /**
      * Find all verifiable credentials for a request by its ID
      * @param requestId The request ID
      * @return List of verifiable credentials
@@ -26,10 +18,10 @@ public interface VerifiableCredentialRepository extends JpaRepository<Verifiable
     
     /**
      * Find the most recent verifiable credential for a request
-     * @param request The request
+     * @param requestId The request ID
      * @return The most recent verifiable credential, if any
      */
-    Optional<VerifiableCredentialEntity> findFirstByRequestOrderByCreatedDateDesc(Request request);
+    Optional<VerifiableCredentialEntity> findFirstByRequestIdOrderByCreatedDateDesc(Long requestId);
     
     /**
      * Find a verifiable credential by its ID (the W3C ID, not the database ID)

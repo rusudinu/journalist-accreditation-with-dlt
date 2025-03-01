@@ -1,8 +1,6 @@
 package com.rusudinu.backend.request.vc;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.rusudinu.backend.request.Request;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -31,39 +29,37 @@ public class VerifiableCredentialEntity {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     private ZonedDateTime createdDate;
     
-    @JsonIgnoreProperties("verifiableCredentials")
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "request_id")
-    private Request request;
-    
-    @Column(nullable = false)
+    @Column(name = "request_id", nullable = false, columnDefinition = "TEXT")
+    private Long requestId;
+
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String vcId;
     
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String issuer;
     
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String issuanceDate;
     
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String subjectId;
     
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String fileHash;
-    
-    @Column(nullable = false)
+
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String status;
-    
-    @Column(nullable = false)
+
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String proofType;
     
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String proofCreated;
-    
-    @Column(nullable = false)
+
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String proofPurpose;
     
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String verificationMethod;
     
     @Column(nullable = false, columnDefinition = "TEXT")
@@ -72,12 +68,12 @@ public class VerifiableCredentialEntity {
     /**
      * Create entity from a verifiable credential object
      * @param credential The verifiable credential
-     * @param request The associated request
+     * @param requestId The ID of the associated request
      * @return A new entity populated with credential data
      */
-    public static VerifiableCredentialEntity fromVerifiableCredential(VerifiableCredential credential, Request request) {
+    public static VerifiableCredentialEntity fromVerifiableCredential(VerifiableCredential credential, Long requestId) {
         return VerifiableCredentialEntity.builder()
-                .request(request)
+                .requestId(requestId)
                 .vcId(credential.getId())
                 .issuer(credential.getIssuer())
                 .issuanceDate(credential.getIssuanceDate())
