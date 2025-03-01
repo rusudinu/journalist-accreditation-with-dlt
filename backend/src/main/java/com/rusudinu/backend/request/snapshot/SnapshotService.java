@@ -6,8 +6,10 @@ import com.rusudinu.backend.distributedStorage.DistributedStorageService;
 import com.rusudinu.backend.hash.HashService;
 import com.rusudinu.backend.request.Request;
 import com.rusudinu.backend.request.RequestStatus;
+import com.rusudinu.backend.request.VerifiableCredentialService;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
+
 import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
@@ -16,57 +18,61 @@ import java.util.Base64;
 @Service
 @RequiredArgsConstructor
 public class SnapshotService {
-    private final DistributedStorageService distributedStorageService;
-    private final HashService hashService;
-    private final SnapshotRepository snapshotRepository;
+	private final DistributedStorageService distributedStorageService;
+	private final HashService hashService;
+	private final SnapshotRepository snapshotRepository;
+	private final VerifiableCredentialService verifiableCredentialService;
 
 
-    @SneakyThrows
-    public void createAndPersistRequestSnapshot(RequestStatus status, Long requestId, String documentUniqueName) {
-        RequestSnapshot snapshot = RequestSnapshot.builder()
-                .requestId(requestId)
-                .documentHash(hashService.hashDocument(documentUniqueName))
-                .status(status)
-                .previousSnapshotHash(distributedStorageService.getRegistrySnapshotHashByRequestId(requestId))
-                .build();
+	@SneakyThrows
+	public void createAndPersistRequestSnapshot(RequestStatus status, Long requestId, String documentUniqueName) {
+		RequestSnapshot snapshot = RequestSnapshot.builder().requestId(requestId)
+				.documentHash(hashService.hashDocument(documentUniqueName)).status(status)
+				.previousSnapshotHash(distributedStorageService.getRegistrySnapshotHashByRequestId(requestId)).build();
 
-        snapshot = snapshotRepository.save(snapshot);
+		snapshot = snapshotRepository.save(snapshot);
 
-        ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
-        String json = ow.writeValueAsString(snapshot);
-        byte[] hash = hashService.hashString(json);
-        
-        String newSnapshotHash = Base64.getEncoder().encodeToString(hash);
-        distributedStorageService.persistRegistrySnapshot(requestId, newSnapshotHash);
-    }
+		ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
+		String json = ow.writeValueAsString(snapshot); byte[] hash = hashService.hashString(json);
 
-    @SneakyThrows
-    public boolean verifyRequest(Request request) {
-        String snapshotHash = distributedStorageService.getRegistrySnapshotHashByRequestId(request.getId());
-        RequestSnapshot snapshot = snapshotRepository.findFirstByRequestIdOrderByIdDesc(request.getId());
+		String newSnapshotHash = Base64.getEncoder().encodeToString(hash);
+		distributedStorageService.persistRegistrySnapshot(requestId, newSnapshotHash);
 
-        if (snapshot == null || snapshotHash == null || snapshotHash.trim().isEmpty()) {
-            return false;
-        }
+		if (status == RequestStatus.VALIDATED) {
+			verifiableCredentialService.createVerifiableCredentialFromDocumentHash(newSnapshotHash, requestId);
+		}
+	}
 
-        byte[] documentHash = hashService.hashDocument(request.getDocuments().get(request.getDocuments().size() - 1).getStoredDocumentName());
+	@SneakyThrows
+	public boolean verifyRequest(Request request) {
+		String snapshotHash = distributedStorageService.getRegistrySnapshotHashByRequestId(request.getId());
+		RequestSnapshot snapshot = snapshotRepository.findFirstByRequestIdOrderByIdDesc(request.getId());
 
-        // Document hash does not match the one potentially stored on the blockchain
-        if (!Arrays.equals(documentHash, snapshot.getDocumentHash())) {
-            return false;
-        }
+		if (snapshot == null || snapshotHash == null || snapshotHash.trim().isEmpty()) {
+			return false;
+		}
 
-        // rebuild the snapshot such that we can compare with the one stored on the blockchain
-        RequestSnapshot rebuiltSnapshot = RequestSnapshot.builder().id(snapshot.getId()).requestId(request.getId()).documentHash(documentHash).status(request.getStatus()).previousSnapshotHash(snapshot.getPreviousSnapshotHash()).build();
+		byte[] documentHash = hashService.hashDocument(request.getDocuments().get(request.getDocuments().size() - 1)
+				.getStoredDocumentName());
 
-        ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
-        String json = ow.writeValueAsString(rebuiltSnapshot);
+		// Document hash does not match the one potentially stored on the blockchain
+		if (!Arrays.equals(documentHash, snapshot.getDocumentHash())) {
+			return false;
+		}
 
-        byte[] hash = hashService.hashString(json);
+		// rebuild the snapshot such that we can compare with the one stored on the blockchain
+		RequestSnapshot rebuiltSnapshot = RequestSnapshot.builder().id(snapshot.getId()).requestId(request.getId())
+				.documentHash(documentHash).status(request.getStatus())
+				.previousSnapshotHash(snapshot.getPreviousSnapshotHash()).build();
 
-        // if this is false means that the hash was
-        // modified in the database hence
-        // the request was altered
-        return Arrays.equals(hash, Base64.getDecoder().decode(snapshotHash));
-    }
+		ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
+		String json = ow.writeValueAsString(rebuiltSnapshot);
+
+		byte[] hash = hashService.hashString(json);
+
+		// if this is false means that the hash was
+		// modified in the database hence
+		// the request was altered
+		return Arrays.equals(hash, Base64.getDecoder().decode(snapshotHash));
+	}
 }
