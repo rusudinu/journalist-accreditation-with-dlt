@@ -16,7 +16,6 @@ import java.util.Base64;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -110,9 +109,6 @@ public class VerifiableCredentialService {
 					credential.getProof() == null) {
 				return false;
 			}
-			
-			// Verify that the credential is not expired (assuming no expiration date in this implementation,
-			// but you might want to add one in the future)
 			
 			// Extract the JWS parts
 			String jws = credential.getProof().getJws();
