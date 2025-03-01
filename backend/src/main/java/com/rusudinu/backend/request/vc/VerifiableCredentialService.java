@@ -1,8 +1,9 @@
-package com.rusudinu.backend.request;
+package com.rusudinu.backend.request.vc;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.rusudinu.backend.request.vc.VerifiableCredential;
+import com.rusudinu.backend.request.Request;
+import com.rusudinu.backend.request.RequestService;
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -11,9 +12,11 @@ import java.security.PublicKey;
 import java.security.Signature;
 import java.security.SignatureException;
 import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 import java.util.Base64;
+import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.stereotype.Service;
@@ -28,7 +31,19 @@ public class VerifiableCredentialService {
 	
 	private final PublicKey ministryPublicKey;
 	
+	private final VerifiableCredentialRepository verifiableCredentialRepository;
+	
+	private final RequestService requestService;
+	
+	/**
+	 * Create a verifiable credential from a document hash and store it in the database
+	 * @param documentHash The hash of the document
+	 * @param requestId The ID of the request
+	 * @return The created verifiable credential
+	 */
 	public VerifiableCredential createVerifiableCredentialFromDocumentHash(String documentHash, Long requestId) {
+		Request request = requestService.getRequestById(requestId);
+		
 		VerifiableCredential credential = new VerifiableCredential();
 		credential.setContext("https://www.w3.org/2018/credentials/v1");
 		credential.setId("urn:uuid:" + UUID.randomUUID());
@@ -49,6 +64,10 @@ public class VerifiableCredentialService {
 		proof.setVerificationMethod("https://example.com/issuer/keys/" + requestId);
 		proof.setJws(generateJws(credential));
 		credential.setProof(proof);
+		
+		// Store the credential in the database
+		VerifiableCredentialEntity entity = VerifiableCredentialEntity.fromVerifiableCredential(credential, request);
+		verifiableCredentialRepository.save(entity);
 
 		return credential;
 	}
@@ -110,6 +129,9 @@ public class VerifiableCredentialService {
 				return false;
 			}
 			
+			// Verify that the credential is not expired (assuming no expiration date in this implementation,
+			// but you might want to add one in the future)
+			
 			// Extract the JWS parts
 			String jws = credential.getProof().getJws();
 			String[] jwsParts = jws.split("\\.");
@@ -130,5 +152,50 @@ public class VerifiableCredentialService {
 		} catch (NoSuchAlgorithmException | InvalidKeyException | SignatureException e) {
 			throw new RuntimeException("Failed to validate credential: " + e.getMessage(), e);
 		}
+	}
+	
+	/**
+	 * Get all verifiable credentials for a request
+	 * @param requestId The request ID
+	 * @return List of verifiable credentials
+	 */
+	public List<VerifiableCredential> getVerifiableCredentialsForRequest(Long requestId) {
+		return verifiableCredentialRepository.findByRequestId(requestId)
+				.stream()
+				.map(VerifiableCredentialEntity::toVerifiableCredential)
+				.collect(Collectors.toList());
+	}
+	
+	/**
+	 * Get the most recent verifiable credential for a request
+	 * @param requestId The request ID
+	 * @return The most recent verifiable credential, if any
+	 */
+	public Optional<VerifiableCredential> getLatestVerifiableCredentialForRequest(Long requestId) {
+		Request request = requestService.getRequestById(requestId);
+		return verifiableCredentialRepository.findFirstByRequestOrderByCreatedDateDesc(request)
+				.map(VerifiableCredentialEntity::toVerifiableCredential);
+	}
+	
+	/**
+	 * Find a verifiable credential by its ID
+	 * @param credentialId The credential ID (W3C ID)
+	 * @return The verifiable credential, if found
+	 */
+	public Optional<VerifiableCredential> findByCredentialId(String credentialId) {
+		return verifiableCredentialRepository.findByVcId(credentialId)
+				.map(VerifiableCredentialEntity::toVerifiableCredential);
+	}
+	
+	/**
+	 * Find verifiable credentials by file hash
+	 * @param fileHash The hash of the file
+	 * @return List of verifiable credentials
+	 */
+	public List<VerifiableCredential> findByFileHash(String fileHash) {
+		return verifiableCredentialRepository.findByFileHash(fileHash)
+				.stream()
+				.map(VerifiableCredentialEntity::toVerifiableCredential)
+				.collect(Collectors.toList());
 	}
 }

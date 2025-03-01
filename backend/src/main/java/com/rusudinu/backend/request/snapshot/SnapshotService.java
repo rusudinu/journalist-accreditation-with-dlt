@@ -6,7 +6,7 @@ import com.rusudinu.backend.distributedStorage.DistributedStorageService;
 import com.rusudinu.backend.hash.HashService;
 import com.rusudinu.backend.request.Request;
 import com.rusudinu.backend.request.RequestStatus;
-import com.rusudinu.backend.request.VerifiableCredentialService;
+import com.rusudinu.backend.request.vc.VerifiableCredentialService;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 

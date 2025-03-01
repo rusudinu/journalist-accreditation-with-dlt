@@ -1,16 +1,14 @@
 package com.rusudinu.backend.request.vc;
 
-import com.rusudinu.backend.request.VerifiableCredentialService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.Instant;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/v1/verifiable-credentials")
@@ -76,5 +74,51 @@ public class VerifiableCredentialController {
         }
         
         return ResponseEntity.ok(details);
+    }
+    
+    /**
+     * Get all verifiable credentials for a request
+     * @param requestId The request ID
+     * @return List of verifiable credentials
+     */
+    @GetMapping("/request/{requestId}")
+    public ResponseEntity<List<VerifiableCredential>> getCredentialsForRequest(@PathVariable Long requestId) {
+        List<VerifiableCredential> credentials = verifiableCredentialService.getVerifiableCredentialsForRequest(requestId);
+        return ResponseEntity.ok(credentials);
+    }
+    
+    /**
+     * Get the most recent verifiable credential for a request
+     * @param requestId The request ID
+     * @return The most recent verifiable credential
+     */
+    @GetMapping("/request/{requestId}/latest")
+    public ResponseEntity<VerifiableCredential> getLatestCredentialForRequest(@PathVariable Long requestId) {
+        Optional<VerifiableCredential> credential = verifiableCredentialService.getLatestVerifiableCredentialForRequest(requestId);
+        return credential.map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+    
+    /**
+     * Find a verifiable credential by its ID
+     * @param credentialId The credential ID (W3C ID)
+     * @return The verifiable credential
+     */
+    @GetMapping("/{credentialId}")
+    public ResponseEntity<VerifiableCredential> getCredentialById(@PathVariable String credentialId) {
+        Optional<VerifiableCredential> credential = verifiableCredentialService.findByCredentialId(credentialId);
+        return credential.map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+    
+    /**
+     * Find verifiable credentials by file hash
+     * @param fileHash The hash of the file
+     * @return List of verifiable credentials
+     */
+    @GetMapping("/file-hash/{fileHash}")
+    public ResponseEntity<List<VerifiableCredential>> getCredentialsByFileHash(@PathVariable String fileHash) {
+        List<VerifiableCredential> credentials = verifiableCredentialService.findByFileHash(fileHash);
+        return ResponseEntity.ok(credentials);
     }
 } 
