@@ -19,6 +19,7 @@ import {Badge} from "@/components/ui/badge.tsx";
 import {Separator} from "@/components/ui/separator.tsx";
 import {IoIosWarning} from "react-icons/io";
 import {Alert, AlertDescription, AlertTitle} from "@/components/ui/alert.tsx";
+import {CredentialQRCode} from "@/components/extension/CredentialQRCode";
 
 const FileSvgDraw = () => {
     return (
@@ -111,7 +112,7 @@ function RequestPage() {
                     setRequest(response.data);
                     checkIfRequestIsValid();
                 })
-                .catch((error) => {
+                .catch((error: unknown) => {
                     console.error('Error:', error);
                     setTimeout(() => {
                         fetchRequest();
@@ -130,7 +131,7 @@ function RequestPage() {
                 .then((response) => {
                     setVerifiedRequest(response.data);
                 })
-                .catch((error) => {
+                .catch((error: unknown) => {
                     console.error('Error:', error);
                     setTimeout(() => {
                         fetchRequest();
@@ -182,10 +183,10 @@ function RequestPage() {
                     description: 'Failed to upload files.',
                 });
             }
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error("Error uploading files:", error);
             toast('Error uploading files', {
-                description: `An error occurred while uploading the files: ${error.message}`,
+                description: `An error occurred while uploading the files: ${error instanceof Error ? error.message : 'Unknown error'}`,
             });
         }
     };
@@ -193,7 +194,7 @@ function RequestPage() {
     return (
         <>
             {
-                verifiedRequest === null ? <div>Loading...</div> : <Badge variant={verifiedRequest}>{verifiedRequest ? "Verified" : "Request or its documents were altered."}</Badge>
+                verifiedRequest === null ? <div>Loading...</div> : <Badge>{verifiedRequest ? "Verified" : "Request or its documents were altered."}</Badge>
             }
             {
                 request && <Table>
@@ -209,14 +210,27 @@ function RequestPage() {
                         <TableRow key={request.id}>
                             <TableCell className="font-medium">{request.id}</TableCell>
                             <TableCell>{request.documents?.length}</TableCell>
-                            <TableCell><Badge variant={request.status}>{request.status}</Badge></TableCell>
+                            <TableCell><Badge>{request.status}</Badge></TableCell>
                             <TableCell>{request.createdDate}</TableCell>
                         </TableRow>
                     </TableBody>
                 </Table>
             }
             <Separator className="my-4"/>
+            
+            {/* Add the QR Code component if request exists */}
+            {request && (
+                <>
+                    <h2 className="text-xl font-bold mb-4">Verifiable Credential</h2>
+                    <div className="mb-6">
+                        <CredentialQRCode requestId={requestId || ""} />
+                    </div>
+                    <Separator className="my-4"/>
+                </>
+            )}
+            
             {request && <div className="pb-12"><RequestsDocumentTable request={request}/></div>}
+            
             {
                 (request?.status === "APPROVED" || request?.status === "REJECTED") &&
                 <Alert className="mb-2">
@@ -239,54 +253,26 @@ function RequestPage() {
                             </div>
                         </FileInput>
                         <FileUploaderContent className="flex items-center flex-row gap-2">
-                            {files?.map((file, i) => {
-                                const fileType = file.type;
-                                const isImage = fileType.startsWith("image/");
-                                const isPDF = fileType === "application/pdf";
-
-                                return (
-                                    <FileUploaderItem
-                                        key={i}
-                                        index={i}
-                                        className="size-20 p-0 rounded-md overflow-hidden"
-                                        aria-roledescription={`file ${i + 1} containing ${file.name}`}
-                                    >
-                                        {isImage ? (
-                                            <img
-                                                src={URL.createObjectURL(file)}
-                                                alt={file.name}
-                                                height={80}
-                                                className="size-20 p-0"
-                                            />
-                                        ) : isPDF ? (
-                                            <div className="flex items-center justify-center h-20 w-20 bg-gray-200 text-gray-700">
-                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
-                                                    <path strokeLinecap="round" strokeLinejoin="round"
-                                                          d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z"/>
-                                                </svg>
-
-                                            </div>
-                                        ) : (
-                                            <div className="flex items-center justify-center h-20 w-20 bg-gray-200 text-gray-700">
-                                                <span>File</span>
-                                            </div>
-                                        )}
-                                    </FileUploaderItem>
-                                );
-                            })}
+                            {files?.map((file, i) => (
+                                <FileUploaderItem
+                                    key={i}
+                                    index={i}
+                                />
+                            ))}
                         </FileUploaderContent>
                     </FileUploader>
-                    <div className="flex flex-row space-x-4 items-center content-center mt-4">
+                    <div className="mt-4 flex justify-between items-center">
+                        <ComboboxPopover
+                            statuses={statuses}
+                            defaultStatus={defaultStatus}
+                            onStatusChange={handleStatusChange}
+                        />
                         <Button
                             onClick={handleUpload}
+                            disabled={!files || files.length === 0 || !selectedStatus}
                         >
-                            Upload File with
+                            Upload
                         </Button>
-                        {
-                            defaultStatus !== null && (
-                                <ComboboxPopover statuses={statuses} defaultStatus={defaultStatus} onStatusChange={handleStatusChange}/>
-                            )
-                        }
                     </div>
                 </>
             }

@@ -10,6 +10,7 @@ import Menu from "@/common/menu/Menu.tsx";
 import RequestPage from "@/pages/RequestPage.tsx";
 import Users from "@/pages/Users.tsx";
 import Home from "@/pages/Home.tsx";
+import VerifyCredentialPage from '@/pages/VerifyCredentialPage';
 
 const router = createBrowserRouter([
     {
@@ -31,6 +32,10 @@ const router = createBrowserRouter([
             {
                 path: '/request/:requestId',
                 element: <RequestPage/>,
+            },
+            {
+                path: '/verify/:credentialId',
+                element: <VerifyCredentialPage/>,
             },
         ],
     },
