@@ -9,7 +9,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/v1/verifiable-credentials")
 @RequiredArgsConstructor
@@ -106,6 +108,7 @@ public class VerifiableCredentialController {
      */
     @GetMapping("/{credentialId}")
     public ResponseEntity<VerifiableCredential> getCredentialById(@PathVariable String credentialId) {
+        log.info("Get credential by id: {}", credentialId);
         Optional<VerifiableCredential> credential = verifiableCredentialService.findByCredentialId(credentialId);
         return credential.map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
