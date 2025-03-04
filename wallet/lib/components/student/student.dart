@@ -16,13 +16,6 @@ class StudentPage extends StatefulWidget {
 }
 
 class _StudentPageState extends State<StudentPage> {
-  void openProfilePage() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => const ProfilePage()),
-    );
-  }
-
   void addDiplomaToWallet() {
     Navigator.push(
       context,
@@ -61,35 +54,6 @@ class _StudentPageState extends State<StudentPage> {
                   switch (index) {
                     case 0:
                       return GestureDetector(
-                        onTap: openProfilePage,
-                        child: Card(
-                          elevation: 6.0,
-                          shadowColor: Colors.grey[60],
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12.0),
-                          ),
-                          child: Container(
-                            decoration: const BoxDecoration(
-                              gradient: LinearGradient(
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                                colors: [Colors.amber, Colors.deepOrange],
-                              ),
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(12.0)),
-                            ),
-                            child: const Center(
-                              child: Icon(
-                                Icons.person,
-                                color: Colors.white,
-                                size: 50,
-                              ),
-                            ),
-                          ),
-                        ),
-                      );
-                    case 1:
-                      return GestureDetector(
                         onTap: addDiplomaToWallet,
                         child: Card(
                           elevation: 6.0,
@@ -120,14 +84,14 @@ class _StudentPageState extends State<StudentPage> {
                   }
                   return null;
                 },
-                childCount: 2,
+                childCount: 1,
               ),
             ),
             const SliverToBoxAdapter(
               child: Padding(
                 padding: EdgeInsets.only(top: 16, left: 6),
                 child: Text(
-                  'Diplomele tale',
+                  'Credentials',
                   style: TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
