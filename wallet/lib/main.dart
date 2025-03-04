@@ -18,8 +18,7 @@ void main() async {
   Logger.root.level = LOGGING_LEVEL;
   Logger.root.onRecord.listen((record) {
     if (kDebugMode) {
-      print(
-          '${record.level.name}: ${record.time}: [$traceId] ${record.message}');
+      print('${record.level.name}: ${record.time}: [$traceId] ${record.message}');
     }
   });
 
@@ -68,7 +67,7 @@ class _Bac3State extends State<Bac3> {
     return MaterialApp.router(
       routerConfig: router,
       debugShowCheckedModeBanner: false,
-      title: 'BAC3.0 Wallet',
+      title: 'Digital Wallet',
       theme: CustomTheme.lightTheme,
     );
   }

@@ -30,7 +30,7 @@ class _AddDiplomaToWalletState extends State<AddDiplomaToWallet> {
       // show a success message
       _textController.clear();
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text('Diploma adăugată cu succes'),
+        content: Text('Document added successfully'),
         backgroundColor: Colors.green,
       ));
       setState(() {
@@ -60,7 +60,7 @@ class _AddDiplomaToWalletState extends State<AddDiplomaToWallet> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Diploma'),
+        title: const Text('Add Document'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16),
@@ -87,8 +87,7 @@ class _AddDiplomaToWalletState extends State<AddDiplomaToWallet> {
                               end: Alignment.bottomRight,
                               colors: [Colors.green, Colors.lightGreen],
                             ),
-                            borderRadius:
-                                BorderRadius.all(Radius.circular(12.0)),
+                            borderRadius: BorderRadius.all(Radius.circular(12.0)),
                           ),
                           child: const Center(
                             child: Padding(
@@ -136,9 +135,7 @@ class _AddDiplomaToWalletState extends State<AddDiplomaToWallet> {
                                     size: 40,
                                   ),
                             Text(
-                              _selectedMethod == AddDiplomaMethod.addManually
-                                  ? 'Adaugă diploma'
-                                  : 'Adaugă diploma manual',
+                              _selectedMethod == AddDiplomaMethod.addManually ? 'Adaugă diploma' : 'Adaugă diploma manual',
                               style: const TextStyle(color: Colors.white),
                             ),
                           ],

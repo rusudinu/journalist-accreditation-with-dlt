@@ -17,7 +17,7 @@ class _ProfilePageState extends State<ProfilePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Profil'),
+        title: const Text('Profile'),
       ),
       body: Center(
         child: CustomScrollView(
@@ -47,8 +47,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                 end: Alignment.bottomRight,
                                 colors: [Colors.blue, Colors.purple],
                               ),
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(12.0)),
+                              borderRadius: BorderRadius.all(Radius.circular(12.0)),
                             ),
                             child: const Center(
                               child: Icon(

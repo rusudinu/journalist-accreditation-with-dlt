@@ -1,21 +1,17 @@
-import 'dart:async';
 import 'package:bac_web3/common/app_data_bloc.dart';
 import 'package:bac_web3/components/verifier/scanner_error_widget.dart';
-import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 
-import 'package:flutter/material.dart';
-
-class PresentDiplomaByScanning extends StatefulWidget {
-  const PresentDiplomaByScanning({super.key});
+class ScanCredential extends StatefulWidget {
+  const ScanCredential({super.key});
 
   @override
-  State<PresentDiplomaByScanning> createState() =>
-      _PresentDiplomaByScanningState();
+  State<ScanCredential> createState() => _ScanCredentialState();
 }
 
-class _PresentDiplomaByScanningState extends State<PresentDiplomaByScanning> {
+class _ScanCredentialState extends State<ScanCredential> {
   final MobileScannerController controller = MobileScannerController();
   String previousBarcode = '';
   bool loadingCamera = true;
@@ -29,19 +25,27 @@ class _PresentDiplomaByScanningState extends State<PresentDiplomaByScanning> {
       });
       controller.start();
       controller.barcodes.listen((barcodeCapture) {
-        print("barcode scanned");
         if ((barcodeCapture.barcodes.first.displayValue ?? '').isEmpty) return;
-        if (previousBarcode == barcodeCapture.barcodes.first.displayValue)
-          return;
+        if (previousBarcode == barcodeCapture.barcodes.first.displayValue) return;
         previousBarcode = barcodeCapture.barcodes.first.displayValue ?? '';
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Te-ai inscris cu succes in procesul de admitere!'),
-            backgroundColor: Colors.green,
-          ),
-        );
-        controller.stop();
-        Navigator.pop(context);
+
+        try {
+          context.read<AppDataBloc>().addVerifiableCredentialFromQRCode(barcodeCapture.barcodes.first.displayValue ?? '');
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Credential added to your wallet'),
+              backgroundColor: Colors.green,
+            ),
+          );
+          Navigator.pop(context);
+        } catch (e) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Failed to add credential: $e'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
       });
     });
   }
@@ -50,7 +54,6 @@ class _PresentDiplomaByScanningState extends State<PresentDiplomaByScanning> {
     return ValueListenableBuilder(
       valueListenable: controller,
       builder: (context, value, child) {
-        // Not ready.
         if (!value.isInitialized || !value.isRunning || value.error != null) {
           return const SizedBox();
         }
@@ -60,17 +63,13 @@ class _PresentDiplomaByScanningState extends State<PresentDiplomaByScanning> {
           builder: (context, snapshot) {
             final BarcodeCapture? barcodeCapture = snapshot.data;
 
-            // No barcode.
             if (barcodeCapture == null || barcodeCapture.barcodes.isEmpty) {
               return const SizedBox();
             }
 
             final scannedBarcode = barcodeCapture.barcodes.first;
 
-            // No barcode corners, or size, or no camera preview size.
-            if (scannedBarcode.corners.isEmpty ||
-                value.size.isEmpty ||
-                barcodeCapture.size.isEmpty) {
+            if (scannedBarcode.corners.isEmpty || value.size.isEmpty || barcodeCapture.size.isEmpty) {
               return const SizedBox();
             }
 
@@ -92,11 +91,7 @@ class _PresentDiplomaByScanningState extends State<PresentDiplomaByScanning> {
     return ValueListenableBuilder(
       valueListenable: controller,
       builder: (context, value, child) {
-        // Not ready.
-        if (!value.isInitialized ||
-            !value.isRunning ||
-            value.error != null ||
-            value.size.isEmpty) {
+        if (!value.isInitialized || !value.isRunning || value.error != null || value.size.isEmpty) {
           return const SizedBox();
         }
 
@@ -151,8 +146,6 @@ class ScannerOverlay extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    // TODO: use `Offset.zero & size` instead of Rect.largest
-    // we need to pass the size to the custom paint widget
     final backgroundPath = Path()..addRect(Rect.largest);
     final cutoutPath = Path()..addRect(scanWindow);
 
@@ -190,9 +183,7 @@ class BarcodeOverlay extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    if (barcodeCorners.isEmpty ||
-        barcodeSize.isEmpty ||
-        cameraPreviewSize.isEmpty) {
+    if (barcodeCorners.isEmpty || barcodeSize.isEmpty || cameraPreviewSize.isEmpty) {
       return;
     }
 
@@ -212,16 +203,8 @@ class BarcodeOverlay extends CustomPainter {
       horizontalPadding = 0;
     }
 
-    final double ratioWidth;
-    final double ratioHeight;
-
-    if (!kIsWeb && defaultTargetPlatform == TargetPlatform.iOS) {
-      ratioWidth = barcodeSize.width / adjustedSize.destination.width;
-      ratioHeight = barcodeSize.height / adjustedSize.destination.height;
-    } else {
-      ratioWidth = cameraPreviewSize.width / adjustedSize.destination.width;
-      ratioHeight = cameraPreviewSize.height / adjustedSize.destination.height;
-    }
+    final ratioWidth = cameraPreviewSize.width / adjustedSize.destination.width;
+    final ratioHeight = cameraPreviewSize.height / adjustedSize.destination.height;
 
     final List<Offset> adjustedOffset = [
       for (final offset in barcodeCorners)
@@ -243,6 +226,6 @@ class BarcodeOverlay extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) {
-    return false;
+    return true;
   }
 }

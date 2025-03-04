@@ -29,23 +29,21 @@ class _ScanVPState extends State<ScanVP> {
       controller.start();
       controller.barcodes.listen((barcodeCapture) {
         if ((barcodeCapture.barcodes.first.displayValue ?? '').isEmpty) return;
-        if (previousBarcode == barcodeCapture.barcodes.first.displayValue)
-          return;
+        if (previousBarcode == barcodeCapture.barcodes.first.displayValue) return;
         previousBarcode = barcodeCapture.barcodes.first.displayValue ?? '';
         if (!context.read<AppDataBloc>().state.bacDiploma.isEmpty()) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text('You already have a diploma in your wallet'),
+              content: Text('You already have a document in your wallet'),
               backgroundColor: Colors.red,
             ),
           );
           return;
         }
-        context.read<AppDataBloc>().setBacDiplomaFromQRCode(
-            barcodeCapture.barcodes.first.displayValue ?? '');
+        context.read<AppDataBloc>().setBacDiplomaFromQRCode(barcodeCapture.barcodes.first.displayValue ?? '');
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Diploma added to your wallet'),
+            content: Text('Document added to your wallet'),
             backgroundColor: Colors.green,
           ),
         );
@@ -75,9 +73,7 @@ class _ScanVPState extends State<ScanVP> {
             final scannedBarcode = barcodeCapture.barcodes.first;
 
             // No barcode corners, or size, or no camera preview size.
-            if (scannedBarcode.corners.isEmpty ||
-                value.size.isEmpty ||
-                barcodeCapture.size.isEmpty) {
+            if (scannedBarcode.corners.isEmpty || value.size.isEmpty || barcodeCapture.size.isEmpty) {
               return const SizedBox();
             }
 
@@ -100,10 +96,7 @@ class _ScanVPState extends State<ScanVP> {
       valueListenable: controller,
       builder: (context, value, child) {
         // Not ready.
-        if (!value.isInitialized ||
-            !value.isRunning ||
-            value.error != null ||
-            value.size.isEmpty) {
+        if (!value.isInitialized || !value.isRunning || value.error != null || value.size.isEmpty) {
           return const SizedBox();
         }
 
@@ -207,9 +200,7 @@ class BarcodeOverlay extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    if (barcodeCorners.isEmpty ||
-        barcodeSize.isEmpty ||
-        cameraPreviewSize.isEmpty) {
+    if (barcodeCorners.isEmpty || barcodeSize.isEmpty || cameraPreviewSize.isEmpty) {
       return;
     }
 

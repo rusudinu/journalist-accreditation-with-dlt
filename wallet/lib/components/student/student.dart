@@ -1,8 +1,8 @@
 import 'package:bac_web3/common/app_data_bloc.dart';
 import 'package:bac_web3/components/common/profile.dart';
 import 'package:bac_web3/components/diploma/model/uploaded_diploma.dart';
-import 'package:bac_web3/components/student/add_diploma_to_wallet.dart';
-import 'package:bac_web3/components/student/present_diploma_by_scanning.dart';
+import 'package:bac_web3/components/student/add_credential.dart';
+import 'package:bac_web3/components/student/present_credential.dart';
 import 'package:bac_web3/components/student/present_diploma_qr.dart';
 import 'package:bac_web3/components/verifier/scan_vp.dart';
 import 'package:flutter/material.dart';

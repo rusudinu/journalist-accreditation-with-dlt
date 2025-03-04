@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:bac_web3/components/auth/auth_service.dart';
 import 'package:bac_web3/components/diploma/model/uploaded_diploma.dart';
+import 'package:bac_web3/components/verifier/model/verifiable_credential.dart';
 import 'package:bac_web3/components/verifier/verifier_service.dart';
 import 'package:bip39/bip39.dart' as bip39;
 import 'package:http/http.dart' as http;
@@ -23,29 +24,42 @@ class AppDataState extends Equatable {
   final Diploma bacDiploma;
   final List<UploadedDiploma> uploadedDiplomaList;
   final bool appliedToFaculty;
+  final List<VerifiableCredential> verifiableCredentials;
 
-  const AppDataState(this.keyPair, this.bacDiploma, this.appliedToFaculty,
-      this.uploadedDiplomaList);
+  const AppDataState(
+    this.keyPair,
+    this.bacDiploma,
+    this.appliedToFaculty,
+    this.uploadedDiplomaList,
+    this.verifiableCredentials,
+  );
 
   @override
-  List<Object> get props =>
-      [keyPair, bacDiploma, appliedToFaculty, uploadedDiplomaList];
+  List<Object> get props => [
+        keyPair,
+        bacDiploma,
+        appliedToFaculty,
+        uploadedDiplomaList,
+        verifiableCredentials,
+      ];
 
-  AppDataState copyWith(
-      {KeyPair? keyPair,
-      Diploma? bacDiploma,
-      bool? appliedToFaculty,
-      List<UploadedDiploma>? uploadedDiplomaList}) {
+  AppDataState copyWith({
+    KeyPair? keyPair,
+    Diploma? bacDiploma,
+    bool? appliedToFaculty,
+    List<UploadedDiploma>? uploadedDiplomaList,
+    List<VerifiableCredential>? verifiableCredentials,
+  }) {
     return AppDataState(
       keyPair ?? this.keyPair,
       bacDiploma ?? this.bacDiploma,
       appliedToFaculty ?? this.appliedToFaculty,
       uploadedDiplomaList ?? this.uploadedDiplomaList,
+      verifiableCredentials ?? this.verifiableCredentials,
     );
   }
 
-  get hasValidKeys =>
-      keyPair.publicKey.isNotEmpty && keyPair.privateKey.isNotEmpty;
+  get hasValidKeys => keyPair.publicKey.isNotEmpty && keyPair.privateKey.isNotEmpty;
 
   get publicKey => keyPair.publicKey;
 
@@ -53,7 +67,7 @@ class AppDataState extends Equatable {
 }
 
 class AppDataInitial extends AppDataState {
-  AppDataInitial() : super(KeyPair('', ''), Diploma.empty(), false, []);
+  AppDataInitial() : super(KeyPair('', ''), Diploma.empty(), false, [], []);
 }
 
 class AppDataBloc extends Cubit<AppDataState> {
@@ -65,6 +79,7 @@ class AppDataBloc extends Cubit<AppDataState> {
   // hold the public and private keys for signing
   static const String _publicKeyKey = 'publicKey';
   static const String _privateKeyKey = 'privateKey';
+  static const String _credentialsKey = 'verifiable_credentials';
 
   AppDataBloc() : super(AppDataInitial()) {
     _init();
@@ -86,7 +101,9 @@ class AppDataBloc extends Cubit<AppDataState> {
       await _saveKeys(keyPair);
       emit(state.copyWith(keyPair: keyPair));
     }
-    getUploadedDocuments();
+
+    // Load stored credentials
+    await loadVerifiableCredentials();
   }
 
   Future<void> _saveKeys(KeyPair keyPair) async {
@@ -144,8 +161,7 @@ class AppDataBloc extends Cubit<AppDataState> {
 
   Future<String> getPrivateKey(String mnemonic) async {
     final seed = bip39.mnemonicToSeedHex(mnemonic);
-    final master = await ED25519_HD_KEY.getMasterKeyFromSeed(hex.decode(seed),
-        masterSecret: 'Bitcoin seed');
+    final master = await ED25519_HD_KEY.getMasterKeyFromSeed(hex.decode(seed), masterSecret: 'Bitcoin seed');
     final privateKey = HEX.encode(master.key);
 
     print('private: $privateKey');
@@ -261,11 +277,7 @@ class AppDataBloc extends Cubit<AppDataState> {
   }
 
   List<String> _mnemonicWords(String mnemonic) {
-    return mnemonic
-        .split(' ')
-        .where((item) => item.trim().isNotEmpty)
-        .map((item) => item.trim())
-        .toList();
+    return mnemonic.split(' ').where((item) => item.trim().isNotEmpty).map((item) => item.trim()).toList();
   }
 
   bool _validateMnemonic(String mnemonic) {
@@ -273,31 +285,23 @@ class AppDataBloc extends Cubit<AppDataState> {
   }
 
   void uploadFile() {
-    final url = Uri.https(
-        BACKEND_URL, '$BACKEND_API_PREFIX/documents/upload-document/');
+    final url = Uri.https(BACKEND_URL, '$BACKEND_API_PREFIX/documents/upload-document/');
     http.post(url, body: {'name': 'doodle', 'file': 'file'});
   }
 
   void signBacDiploma(UploadedDiploma uploadedDiploma) {
-    log.info(
-        'Signing document ${uploadedDiploma.id} and user ${AuthService.instance.authIdToken?.sub}');
-    final url = Uri.https(
-        BACKEND_URL, '$BACKEND_API_PREFIX/credential-manager/sign-document/');
+    log.info('Signing document ${uploadedDiploma.id} and user ${AuthService.instance.authIdToken?.sub}');
+    final url = Uri.https(BACKEND_URL, '$BACKEND_API_PREFIX/credential-manager/sign-document/');
     http
         .post(url,
-            headers: {
-              'Authorization': 'Bearer ${AuthService.instance.accessToken}',
-              'Content-Type': 'application/json'
-            },
+            headers: {'Authorization': 'Bearer ${AuthService.instance.accessToken}', 'Content-Type': 'application/json'},
             body: jsonEncode({
               'document_id': uploadedDiploma.id.toString(),
-              'recipient_public_address':
-                  AuthService.instance.authIdToken?.sub ?? '',
+              'recipient_public_address': AuthService.instance.authIdToken?.sub ?? '',
             }))
         .then((response) {
       if (response.statusCode == 200) {
         log.info('Document signed successfully');
-        getUploadedDocuments();
       } else {
         log.warning('Failed to sign document: ${response.statusCode}');
       }
@@ -306,34 +310,66 @@ class AppDataBloc extends Cubit<AppDataState> {
     });
   }
 
-  void uploadSignedDocument(String destinationUrl) {
-    // TODO WILL UPLOAD THE SIGNED DIPLOMA
+  Future<void> addVerifiableCredential(VerifiableCredential credential) async {
+    final currentCredentials = List<VerifiableCredential>.from(state.verifiableCredentials);
+
+    // Check if credential already exists
+    if (!currentCredentials.any((c) => c.id == credential.id)) {
+      currentCredentials.add(credential);
+
+      // Save to secure storage
+      final credentialsJson = jsonEncode(
+        currentCredentials.map((c) => c.toJson()).toList(),
+      );
+      await _secureStorage.write(key: _credentialsKey, value: credentialsJson);
+
+      // Update state
+      emit(state.copyWith(verifiableCredentials: currentCredentials));
+    }
   }
 
-  void getUploadedDocuments() {
-    if ((AuthService.instance.authIdToken?.sub ?? '') == '') {
-      log.warning('No user ID found, retrying in 500ms');
-      Future.delayed(
-          const Duration(milliseconds: 500), () => getUploadedDocuments());
-      return;
+  Future<void> loadVerifiableCredentials() async {
+    final credentialsJson = await _secureStorage.read(key: _credentialsKey);
+    if (credentialsJson != null) {
+      final List<dynamic> jsonList = jsonDecode(credentialsJson);
+      final credentials = jsonList.map((json) => VerifiableCredential.fromJson(json)).toList();
+      emit(state.copyWith(verifiableCredentials: credentials));
     }
-    final url = Uri.parse(
-        '$BACKEND_URL$BACKEND_API_PREFIX/documents/my/?user_public_key=${AuthService.instance.authIdToken?.sub}');
+  }
 
-    http.get(url).then((response) {
-      if (response.statusCode == 200) {
-        var documents = jsonDecode(response.body);
-        final List<UploadedDiploma> uploadedDiplomas = documents['documents']
-            .map<UploadedDiploma>(
-                (document) => UploadedDiploma.fromJson(document))
-            .toList();
-        emit(state.copyWith(uploadedDiplomaList: uploadedDiplomas));
-        log.info('Got ${uploadedDiplomas.length} uploaded documents.');
-      } else {
-        log.warning('Failed to get uploaded documents: ${response.statusCode}');
-      }
-    }).catchError((error) {
-      log.warning('Error getting uploaded documents: $error');
-    });
+  Future<void> removeVerifiableCredential(String credentialId) async {
+    final currentCredentials = List<VerifiableCredential>.from(state.verifiableCredentials);
+    currentCredentials.removeWhere((c) => c.id == credentialId);
+
+    // Save to secure storage
+    final credentialsJson = jsonEncode(
+      currentCredentials.map((c) => c.toJson()).toList(),
+    );
+    await _secureStorage.write(key: _credentialsKey, value: credentialsJson);
+
+    // Update state
+    emit(state.copyWith(verifiableCredentials: currentCredentials));
+  }
+
+  void addVerifiableCredentialFromQRCode(String qrCodeContents) {
+    try {
+      final Map<String, dynamic> json = jsonDecode(qrCodeContents);
+      final credential = VerifiableCredential.fromJson(json);
+      addVerifiableCredential(credential);
+    } catch (e) {
+      log.warning('Failed to parse QR code contents: $e');
+      rethrow;
+    }
+  }
+
+  void addVerifiableCredentialFromJson(String jsonString) {
+    try {
+      final Map<String, dynamic> json = jsonDecode(jsonString);
+      final credential = VerifiableCredential.fromJson(json);
+      addVerifiableCredential(credential);
+    } catch (e) {
+      log.warning('Failed to parse JSON string: $e');
+      rethrow;
+    }
   }
 }

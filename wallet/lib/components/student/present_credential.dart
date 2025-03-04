@@ -1,18 +1,20 @@
+import 'dart:async';
 import 'package:bac_web3/common/app_data_bloc.dart';
 import 'package:bac_web3/components/verifier/scanner_error_widget.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 
-class ScanAdmission extends StatefulWidget {
-  const ScanAdmission({super.key});
+import 'package:flutter/material.dart';
+
+class PresentDiplomaByScanning extends StatefulWidget {
+  const PresentDiplomaByScanning({super.key});
 
   @override
-  State<ScanAdmission> createState() => _ScanAdmissionState();
+  State<PresentDiplomaByScanning> createState() => _PresentDiplomaByScanningState();
 }
 
-class _ScanAdmissionState extends State<ScanAdmission> {
+class _PresentDiplomaByScanningState extends State<PresentDiplomaByScanning> {
   final MobileScannerController controller = MobileScannerController();
   String previousBarcode = '';
   bool loadingCamera = true;
@@ -26,25 +28,18 @@ class _ScanAdmissionState extends State<ScanAdmission> {
       });
       controller.start();
       controller.barcodes.listen((barcodeCapture) {
+        print("barcode scanned");
         if ((barcodeCapture.barcodes.first.displayValue ?? '').isEmpty) return;
         if (previousBarcode == barcodeCapture.barcodes.first.displayValue) return;
         previousBarcode = barcodeCapture.barcodes.first.displayValue ?? '';
-        if (context.read<AppDataBloc>().state.appliedToFaculty) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('You have already submitted your verification request.'),
-              backgroundColor: Colors.red,
-            ),
-          );
-          return;
-        }
-        context.read<AppDataBloc>().setAppliedToFaculty(true);
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('You have successfully applied to the Faculty of Engineering in Foreign Languages'),
+            content: Text('Successfully registered for verification!'),
             backgroundColor: Colors.green,
           ),
         );
+        controller.stop();
+        Navigator.pop(context);
       });
     });
   }
@@ -130,16 +125,6 @@ class _ScanAdmissionState extends State<ScanAdmission> {
             ),
           if (!loadingCamera) _buildBarcodeOverlay(),
           if (!loadingCamera) _buildScanWindow(scanWindow),
-          // Align(
-          //   alignment: Alignment.bottomCenter,
-          //   child: Container(
-          //     alignment: Alignment.center,
-          //     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          //     height: 100,
-          //     color: Colors.black.withOpacity(0.4),
-          //     child: ScannedBarcodeLabel(barcodes: controller.barcodes),
-          //   ),
-          // ),
         ],
       ),
     );
