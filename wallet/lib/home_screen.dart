@@ -1,7 +1,8 @@
 import 'package:bac_web3/common/app_data_bloc.dart';
-import 'package:bac_web3/components/student/student.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+
+import 'components/student/dashboard.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});

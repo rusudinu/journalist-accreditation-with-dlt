@@ -1,5 +1,7 @@
 import 'package:bac_web3/components/verifier/scan_vp.dart';
+import 'package:bac_web3/common/app_data_bloc.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 enum AddDiplomaMethod { qrScanner, addManually, notSelected }
 
@@ -26,16 +28,27 @@ class _AddDiplomaToWalletState extends State<AddDiplomaToWallet> {
 
   void addDiplomaManually() {
     if (_selectedMethod == AddDiplomaMethod.addManually) {
-      // TODO later actually add diploma
-      // show a success message
-      _textController.clear();
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text('Document added successfully'),
-        backgroundColor: Colors.green,
-      ));
-      setState(() {
-        _selectedMethod = AddDiplomaMethod.notSelected;
-      });
+      try {
+        // Try to parse and save the credential
+        context.read<AppDataBloc>().addVerifiableCredentialFromJson(_textController.text);
+
+        // Clear the text field and show success message
+        _textController.clear();
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text('Document added successfully'),
+          backgroundColor: Colors.green,
+        ));
+        setState(() {
+          _selectedMethod = AddDiplomaMethod.notSelected;
+        });
+      } catch (e, stackTrace) {
+        print(stackTrace);
+        // Show error message if the credential is invalid
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text('Failed to add credential: $e'),
+          backgroundColor: Colors.red,
+        ));
+      }
       return;
     }
     setState(() {
@@ -71,7 +84,7 @@ class _AddDiplomaToWalletState extends State<AddDiplomaToWallet> {
               _selectedMethod == AddDiplomaMethod.addManually
                   ? TextField(
                       decoration: const InputDecoration(
-                        hintText: 'Introdu codul diplomei',
+                        hintText: 'Add credential',
                       ),
                       controller: _textController,
                       keyboardType: TextInputType.multiline,

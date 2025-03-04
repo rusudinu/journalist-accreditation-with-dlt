@@ -31,22 +31,24 @@ class _ScanVPState extends State<ScanVP> {
         if ((barcodeCapture.barcodes.first.displayValue ?? '').isEmpty) return;
         if (previousBarcode == barcodeCapture.barcodes.first.displayValue) return;
         previousBarcode = barcodeCapture.barcodes.first.displayValue ?? '';
-        if (!context.read<AppDataBloc>().state.bacDiploma.isEmpty()) {
+
+        try {
+          context.read<AppDataBloc>().addVerifiableCredentialFromQRCode(barcodeCapture.barcodes.first.displayValue ?? '');
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text('You already have a document in your wallet'),
+              content: Text('Credential added successfully'),
+              backgroundColor: Colors.green,
+            ),
+          );
+          Navigator.pop(context); // Return to previous screen after successful scan
+        } catch (e) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Failed to add credential: $e'),
               backgroundColor: Colors.red,
             ),
           );
-          return;
         }
-        context.read<AppDataBloc>().setBacDiplomaFromQRCode(barcodeCapture.barcodes.first.displayValue ?? '');
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Document added to your wallet'),
-            backgroundColor: Colors.green,
-          ),
-        );
       });
     });
   }

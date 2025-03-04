@@ -1,11 +1,9 @@
 import 'dart:convert';
 
-import 'package:bac_web3/components/auth/auth_service.dart';
 import 'package:bac_web3/components/diploma/model/uploaded_diploma.dart';
 import 'package:bac_web3/components/verifier/model/verifiable_credential.dart';
 import 'package:bac_web3/components/verifier/verifier_service.dart';
 import 'package:bip39/bip39.dart' as bip39;
-import 'package:http/http.dart' as http;
 import 'package:bac_web3/common/diploma.dart';
 import 'package:convert/convert.dart';
 import 'package:ed25519_hd_key/ed25519_hd_key.dart';
@@ -13,7 +11,6 @@ import 'package:equatable/equatable.dart';
 import 'package:fast_rsa/fast_rsa.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:bac_web3/common/constants.dart';
 import 'package:hex/hex.dart';
 import 'package:logging/logging.dart';
 import 'package:web3dart/credentials.dart';
@@ -75,10 +72,6 @@ class AppDataBloc extends Cubit<AppDataState> {
   final log = Logger('AppDataBloc');
   final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
 
-  // the keys for secure shared preferences which will
-  // hold the public and private keys for signing
-  static const String _publicKeyKey = 'publicKey';
-  static const String _privateKeyKey = 'privateKey';
   static const String _credentialsKey = 'verifiable_credentials';
 
   AppDataBloc() : super(AppDataInitial()) {
@@ -86,34 +79,7 @@ class AppDataBloc extends Cubit<AppDataState> {
   }
 
   Future<void> _init() async {
-    String? publicKey = await _secureStorage.read(key: _publicKeyKey);
-    String? privateKey = await _secureStorage.read(key: _privateKeyKey);
-
-    if (publicKey != null && privateKey != null) {
-      log.info('Keys found in secure storage');
-      emit(state.copyWith(
-        keyPair: KeyPair(publicKey, privateKey),
-      ));
-      print('Public key: ${convertStringToHex(state.keyPair.publicKey)}');
-    } else {
-      log.info('Keys not found in secure storage, generating new keys');
-      KeyPair keyPair = await RSA.generate(RSA_KEY_LENGTH);
-      await _saveKeys(keyPair);
-      emit(state.copyWith(keyPair: keyPair));
-    }
-
-    // Load stored credentials
     await loadVerifiableCredentials();
-  }
-
-  Future<void> _saveKeys(KeyPair keyPair) async {
-    // convert to hexadecimal the keyPair.publicKey
-
-    print('Public key: ${convertStringToHex(keyPair.publicKey)}');
-
-    log.info('Saving keys to secure storage');
-    await _secureStorage.write(key: _publicKeyKey, value: keyPair.publicKey);
-    await _secureStorage.write(key: _privateKeyKey, value: keyPair.privateKey);
   }
 
   void setBacDiplomaFromQRCode(String qrCodeContents) {
@@ -201,144 +167,52 @@ class AppDataBloc extends Cubit<AppDataState> {
     return checksumAddress;
   }
 
-  Future<EthereumAddress> getPublicAddress(String privateKey) async {
-    final private = EthPrivateKey.fromHex(privateKey);
-
-    print('address: ${private.address}');
-
-    return private.address;
-  }
-
-  Future<bool> setupFromMnemonic(String mnemonic) async {
-    final cryptMnemonic = bip39.mnemonicToEntropy(mnemonic);
-    final privateKey = await getPrivateKey(mnemonic);
-
-    // await _configService.setMnemonic(cryptMnemonic);
-    // await _configService.setPrivateKey(privateKey);
-    return true;
-  }
-
-  Future<bool> setupFromPrivateKey(String privateKey) async {
-    // await _configService.setMnemonic(null);
-    // await _configService.setPrivateKey(privateKey);
-    return true;
-  }
-
-  // Future<bool> confirmMnemonic(String mnemonic) async {
-  //   if (state.mnemonic != mnemonic) {
-  //     _store
-  //         .dispatch(WalletSetupAddError('Invalid mnemonic, please try again.'));
-  //     return false;
-  //   }
-  //   _store.dispatch(WalletSetupStarted());
-  //
-  //   await _addressService.setupFromMnemonic(mnemonic);
-  //
-  //   return true;
-  // }
-  //
-  // Future<bool> importFromMnemonic(String mnemonic) async {
-  //   try {
-  //     _store.dispatch(WalletSetupStarted());
-  //
-  //     if (_validateMnemonic(mnemonic)) {
-  //       final normalisedMnemonic = _mnemonicNormalise(mnemonic);
-  //       await _addressService.setupFromMnemonic(normalisedMnemonic);
-  //       return true;
-  //     }
-  //   } catch (e) {
-  //     _store.dispatch(WalletSetupAddError(e.toString()));
-  //   }
-  //
-  //   _store.dispatch(
-  //       WalletSetupAddError('Invalid mnemonic, it requires 12 words.'));
-  //
-  //   return false;
-  // }
-  //
-  // Future<bool> importFromPrivateKey(String privateKey) async {
-  //   try {
-  //     _store.dispatch(WalletSetupStarted());
-  //
-  //     await _addressService.setupFromPrivateKey(privateKey);
-  //     return true;
-  //   } catch (e) {
-  //     _store.dispatch(WalletSetupAddError(e.toString()));
-  //   }
-  //
-  //   _store.dispatch(
-  //       WalletSetupAddError('Invalid private key, please try again.'));
-  //
-  //   return false;
-  // }
-
-  String _mnemonicNormalise(String mnemonic) {
-    return _mnemonicWords(mnemonic).join(' ');
-  }
-
-  List<String> _mnemonicWords(String mnemonic) {
-    return mnemonic.split(' ').where((item) => item.trim().isNotEmpty).map((item) => item.trim()).toList();
-  }
-
-  bool _validateMnemonic(String mnemonic) {
-    return _mnemonicWords(mnemonic).length == 12;
-  }
-
-  void uploadFile() {
-    final url = Uri.https(BACKEND_URL, '$BACKEND_API_PREFIX/documents/upload-document/');
-    http.post(url, body: {'name': 'doodle', 'file': 'file'});
-  }
-
-  void signBacDiploma(UploadedDiploma uploadedDiploma) {
-    log.info('Signing document ${uploadedDiploma.id} and user ${AuthService.instance.authIdToken?.sub}');
-    final url = Uri.https(BACKEND_URL, '$BACKEND_API_PREFIX/credential-manager/sign-document/');
-    http
-        .post(url,
-            headers: {'Authorization': 'Bearer ${AuthService.instance.accessToken}', 'Content-Type': 'application/json'},
-            body: jsonEncode({
-              'document_id': uploadedDiploma.id.toString(),
-              'recipient_public_address': AuthService.instance.authIdToken?.sub ?? '',
-            }))
-        .then((response) {
-      if (response.statusCode == 200) {
-        log.info('Document signed successfully');
-      } else {
-        log.warning('Failed to sign document: ${response.statusCode}');
-      }
-    }).catchError((error) {
-      log.warning('Error signing document: $error');
-    });
-  }
-
   Future<void> addVerifiableCredential(VerifiableCredential credential) async {
     final currentCredentials = List<VerifiableCredential>.from(state.verifiableCredentials);
+    log.info('Current credentials count: ${currentCredentials.length}');
 
     // Check if credential already exists
     if (!currentCredentials.any((c) => c.id == credential.id)) {
       currentCredentials.add(credential);
+      log.info('Adding new credential with ID: ${credential.id}');
 
       // Save to secure storage
       final credentialsJson = jsonEncode(
         currentCredentials.map((c) => c.toJson()).toList(),
       );
       await _secureStorage.write(key: _credentialsKey, value: credentialsJson);
+      log.info('Saved credentials to secure storage');
 
       // Update state
       emit(state.copyWith(verifiableCredentials: currentCredentials));
+      log.info('Updated state with new credentials count: ${currentCredentials.length}');
+    } else {
+      log.info('Credential with ID: ${credential.id} already exists');
     }
   }
 
   Future<void> loadVerifiableCredentials() async {
+    log.info('Loading verifiable credentials from secure storage');
     final credentialsJson = await _secureStorage.read(key: _credentialsKey);
     if (credentialsJson != null) {
-      final List<dynamic> jsonList = jsonDecode(credentialsJson);
-      final credentials = jsonList.map((json) => VerifiableCredential.fromJson(json)).toList();
-      emit(state.copyWith(verifiableCredentials: credentials));
+      log.info('Found credentials in secure storage');
+      try {
+        final List<dynamic> jsonList = jsonDecode(credentialsJson);
+        final credentials = jsonList.map((json) => VerifiableCredential.fromJson(json)).toList();
+        log.info('Loaded ${credentials.length} credentials');
+        emit(state.copyWith(verifiableCredentials: credentials));
+      } catch (e, stackTrace) {
+        log.severe('Error loading credentials: $e');
+        log.severe('Stack trace: $stackTrace');
+      }
+    } else {
+      log.info('No credentials found in secure storage');
     }
   }
 
   Future<void> removeVerifiableCredential(String credentialId) async {
     final currentCredentials = List<VerifiableCredential>.from(state.verifiableCredentials);
+    log.info('Removing credential with ID: $credentialId');
     currentCredentials.removeWhere((c) => c.id == credentialId);
 
     // Save to secure storage
@@ -346,29 +220,39 @@ class AppDataBloc extends Cubit<AppDataState> {
       currentCredentials.map((c) => c.toJson()).toList(),
     );
     await _secureStorage.write(key: _credentialsKey, value: credentialsJson);
+    log.info('Saved updated credentials to secure storage');
 
     // Update state
     emit(state.copyWith(verifiableCredentials: currentCredentials));
+    log.info('Updated state with new credentials count: ${currentCredentials.length}');
   }
 
   void addVerifiableCredentialFromQRCode(String qrCodeContents) {
+    log.info('Attempting to add credential from QR code');
     try {
       final Map<String, dynamic> json = jsonDecode(qrCodeContents);
+      log.info('Successfully parsed QR code contents');
       final credential = VerifiableCredential.fromJson(json);
+      log.info('Created credential object with ID: ${credential.id}');
       addVerifiableCredential(credential);
-    } catch (e) {
-      log.warning('Failed to parse QR code contents: $e');
+    } catch (e, stackTrace) {
+      log.severe('Error adding credential from QR code: $e');
+      log.severe('Stack trace: $stackTrace');
       rethrow;
     }
   }
 
   void addVerifiableCredentialFromJson(String jsonString) {
+    log.info('Attempting to add credential from JSON');
     try {
       final Map<String, dynamic> json = jsonDecode(jsonString);
+      log.info('Successfully parsed JSON');
       final credential = VerifiableCredential.fromJson(json);
+      log.info('Created credential object with ID: ${credential.id}');
       addVerifiableCredential(credential);
-    } catch (e) {
-      log.warning('Failed to parse JSON string: $e');
+    } catch (e, stackTrace) {
+      log.severe('Error adding credential from JSON: $e');
+      log.severe('Stack trace: $stackTrace');
       rethrow;
     }
   }

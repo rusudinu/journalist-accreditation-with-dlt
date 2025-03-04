@@ -1,3 +1,26 @@
+/*
+{
+    "context": "http://beard.biz/",
+    "id": "6d4ae207-345d-4d8d-b369-4acbffe9da63",
+    "type": "Credential",
+    "issuer": "Obrien, Haney and Jimenez",
+    "issuanceDate": "1998-03-23T20:30:06",
+    "credentialSubject": {
+        "id": "b1f42322-9989-4bdb-8618-0a1eafe291a7",
+        "fileHash": "322ba6bd6bc4a8fd92cafcf78a3c4a8e291d36d1882a3eb15d8c78466ebed32f",
+        "status": "active"
+    },
+    "proof": {
+        "type": "Ed25519Signature2018",
+        "created": "1971-02-23T12:54:51",
+        "proofPurpose": "assertionMethod",
+        "verificationMethod": "http://jones.com/",
+        "jws": "4e2cbb71c0a0835160169add8dafa0d8f02b1c55e7226a7e336dc731bac93647"
+    }
+}
+
+ */
+
 class VerifiableCredential {
   final String context;
   final String id;
