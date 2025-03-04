@@ -100,7 +100,7 @@ class _AddDiplomaToWalletState extends State<AddDiplomaToWallet> {
                                     size: 40,
                                   ),
                                   Text(
-                                    'Scanează qr cu diploma de la minister',
+                                    'Scan the credential QR code',
                                     style: TextStyle(color: Colors.white),
                                   ),
                                 ],
@@ -135,7 +135,7 @@ class _AddDiplomaToWalletState extends State<AddDiplomaToWallet> {
                                     size: 40,
                                   ),
                             Text(
-                              _selectedMethod == AddDiplomaMethod.addManually ? 'Adaugă diploma' : 'Adaugă diploma manual',
+                              _selectedMethod == AddDiplomaMethod.addManually ? 'Add credential' : 'Add credential manually',
                               style: const TextStyle(color: Colors.white),
                             ),
                           ],

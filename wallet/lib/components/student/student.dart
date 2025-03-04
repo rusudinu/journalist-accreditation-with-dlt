@@ -24,11 +24,6 @@ class _StudentPageState extends State<StudentPage> {
   }
 
   void presentDiploma(UploadedDiploma uploadedDiploma) {
-    // Navigator.push(
-    //   context,
-    //   MaterialPageRoute(
-    //       builder: (context) => PresentDiplomaPage(diploma: uploadedDiploma)),
-    // );
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => const PresentDiplomaByScanning()),
