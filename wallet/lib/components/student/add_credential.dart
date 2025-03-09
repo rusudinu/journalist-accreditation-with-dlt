@@ -78,87 +78,89 @@ class _AddDiplomaToWalletState extends State<AddDiplomaToWallet> {
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              _selectedMethod == AddDiplomaMethod.addManually
-                  ? TextField(
-                      decoration: const InputDecoration(
-                        hintText: 'Add credential',
-                      ),
-                      controller: _textController,
-                      keyboardType: TextInputType.multiline,
-                      maxLines: null,
-                    )
-                  : GestureDetector(
-                      onTap: qrScanner,
-                      child: Card(
-                        child: Container(
-                          decoration: const BoxDecoration(
-                            gradient: LinearGradient(
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                              colors: [Colors.green, Colors.lightGreen],
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                _selectedMethod == AddDiplomaMethod.addManually
+                    ? TextField(
+                        decoration: const InputDecoration(
+                          hintText: 'Add credential',
+                        ),
+                        controller: _textController,
+                        keyboardType: TextInputType.multiline,
+                        maxLines: null,
+                      )
+                    : GestureDetector(
+                        onTap: qrScanner,
+                        child: Card(
+                          child: Container(
+                            decoration: const BoxDecoration(
+                              gradient: LinearGradient(
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                                colors: [Colors.green, Colors.lightGreen],
+                              ),
+                              borderRadius: BorderRadius.all(Radius.circular(12.0)),
                             ),
-                            borderRadius: BorderRadius.all(Radius.circular(12.0)),
-                          ),
-                          child: const Center(
-                            child: Padding(
-                              padding: EdgeInsets.all(8.0),
-                              child: Column(
-                                children: [
-                                  Icon(
-                                    Icons.qr_code_scanner_sharp,
-                                    color: Colors.white,
-                                    size: 40,
-                                  ),
-                                  Text(
-                                    'Scan the credential QR code',
-                                    style: TextStyle(color: Colors.white),
-                                  ),
-                                ],
+                            child: const Center(
+                              child: Padding(
+                                padding: EdgeInsets.all(8.0),
+                                child: Column(
+                                  children: [
+                                    Icon(
+                                      Icons.qr_code_scanner_sharp,
+                                      color: Colors.white,
+                                      size: 40,
+                                    ),
+                                    Text(
+                                      'Scan the credential QR code',
+                                      style: TextStyle(color: Colors.white),
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
                           ),
                         ),
                       ),
-                    ),
-              GestureDetector(
-                onTap: addDiplomaManually,
-                child: Card(
-                  child: Container(
-                    decoration: const BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [Colors.green, Colors.lightGreen],
+                GestureDetector(
+                  onTap: addDiplomaManually,
+                  child: Card(
+                    child: Container(
+                      decoration: const BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [Colors.green, Colors.lightGreen],
+                        ),
+                        borderRadius: BorderRadius.all(Radius.circular(12.0)),
                       ),
-                      borderRadius: BorderRadius.all(Radius.circular(12.0)),
-                    ),
-                    child: Center(
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Column(
-                          children: [
-                            _selectedMethod == AddDiplomaMethod.addManually
-                                ? const SizedBox()
-                                : const Icon(
-                                    Icons.text_fields,
-                                    color: Colors.white,
-                                    size: 40,
-                                  ),
-                            Text(
-                              _selectedMethod == AddDiplomaMethod.addManually ? 'Add credential' : 'Add credential manually',
-                              style: const TextStyle(color: Colors.white),
-                            ),
-                          ],
+                      child: Center(
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Column(
+                            children: [
+                              _selectedMethod == AddDiplomaMethod.addManually
+                                  ? const SizedBox()
+                                  : const Icon(
+                                      Icons.text_fields,
+                                      color: Colors.white,
+                                      size: 40,
+                                    ),
+                              Text(
+                                _selectedMethod == AddDiplomaMethod.addManually ? 'Add credential' : 'Add credential manually',
+                                style: const TextStyle(color: Colors.white),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

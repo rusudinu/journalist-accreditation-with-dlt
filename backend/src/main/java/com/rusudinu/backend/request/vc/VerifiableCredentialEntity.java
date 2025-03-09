@@ -29,7 +29,7 @@ public class VerifiableCredentialEntity {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     private ZonedDateTime createdDate;
     
-    @Column(name = "request_id", nullable = false, columnDefinition = "TEXT")
+    @Column(name = "request_id", nullable = false)
     private Long requestId;
 
     @Column(nullable = false, columnDefinition = "TEXT")
