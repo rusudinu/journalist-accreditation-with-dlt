@@ -39,7 +39,7 @@ public class ApprovalReviewController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<Void> deleteReview(@PathVariable Long id) {
         approvalReviewService.deleteReview(id);
         return ResponseEntity.noContent().build();

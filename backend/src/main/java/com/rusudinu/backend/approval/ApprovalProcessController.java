@@ -14,25 +14,25 @@ public class ApprovalProcessController {
     private final ApprovalProcessService approvalProcessService;
 
     @GetMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<List<ApprovalProcess>> getAllApprovalProcesses() {
         return ResponseEntity.ok(approvalProcessService.getAllApprovalProcesses());
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<ApprovalProcess> getApprovalProcessById(@PathVariable Long id) {
         return ResponseEntity.ok(approvalProcessService.getApprovalProcessById(id));
     }
 
     @PostMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<ApprovalProcess> createApprovalProcess(@RequestBody ApprovalProcess approvalProcess) {
         return ResponseEntity.ok(approvalProcessService.createApprovalProcess(approvalProcess));
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<ApprovalProcess> updateApprovalProcess(
             @PathVariable Long id,
             @RequestBody ApprovalProcess approvalProcess) {
@@ -40,14 +40,14 @@ public class ApprovalProcessController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<Void> deleteApprovalProcess(@PathVariable Long id) {
         approvalProcessService.deleteApprovalProcess(id);
         return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/{approvalProcessId}/assign-to-request/{requestId}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<Void> assignApprovalProcessToRequest(
             @PathVariable Long approvalProcessId,
             @PathVariable Long requestId) {

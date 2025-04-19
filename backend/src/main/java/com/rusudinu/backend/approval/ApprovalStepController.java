@@ -15,19 +15,19 @@ public class ApprovalStepController {
     private final ApprovalStepService approvalStepService;
 
     @GetMapping("/process/{approvalProcessId}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<List<ApprovalStep>> getStepsByApprovalProcessId(@PathVariable Long approvalProcessId) {
         return ResponseEntity.ok(approvalStepService.getStepsByApprovalProcessId(approvalProcessId));
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<ApprovalStep> getStepById(@PathVariable Long id) {
         return ResponseEntity.ok(approvalStepService.getStepById(id));
     }
 
     @PostMapping("/process/{approvalProcessId}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<ApprovalStep> createStep(
             @PathVariable Long approvalProcessId,
             @RequestBody ApprovalStep step) {
@@ -35,7 +35,7 @@ public class ApprovalStepController {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<ApprovalStep> updateStep(
             @PathVariable Long id,
             @RequestBody ApprovalStep step) {
@@ -43,14 +43,14 @@ public class ApprovalStepController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<Void> deleteStep(@PathVariable Long id) {
         approvalStepService.deleteStep(id);
         return ResponseEntity.noContent().build();
     }
 
     @PutMapping("/{id}/status")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<Void> updateStepStatus(
             @PathVariable Long id,
             @RequestBody ApprovalStepStatus status) {
@@ -59,7 +59,7 @@ public class ApprovalStepController {
     }
 
     @GetMapping("/random-reviewers")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<List<User>> getRandomReviewers(@RequestParam int count) {
         return ResponseEntity.ok(approvalStepService.getRandomReviewers(count));
     }
