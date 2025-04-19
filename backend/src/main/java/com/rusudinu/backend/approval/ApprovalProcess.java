@@ -1,13 +1,13 @@
-package com.rusudinu.backend.user;
+package com.rusudinu.backend.approval;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.rusudinu.backend.approval.ApprovalReview;
 import com.rusudinu.backend.request.Request;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
-import lombok.ToString;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.ZonedDateTime;
@@ -15,27 +15,28 @@ import java.util.List;
 
 @Data
 @Entity
+@Builder
+@AllArgsConstructor
 @RequiredArgsConstructor
-@Table(name = "app_users")
-@ToString(exclude = "requests")
-public class User {
+@Table(name = "approval_processes")
+public class ApprovalProcess {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    private String keycloakId;
 
     @CreationTimestamp
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     private ZonedDateTime createdDate;
 
-    private boolean isDeleted = false;
+    private String name;
 
-    @JsonIgnoreProperties("user")
-    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "user")
+    private String description;
+
+    @JsonIgnoreProperties("approvalProcess")
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "approvalProcess")
+    private List<ApprovalStep> steps;
+
+    @JsonIgnoreProperties("approvalProcess")
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "approvalProcess")
     private List<Request> requests;
-
-    @JsonIgnoreProperties("reviewer")
-    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "reviewer")
-    private List<ApprovalReview> approvalReviews;
 }

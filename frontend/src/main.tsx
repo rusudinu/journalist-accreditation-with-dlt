@@ -11,6 +11,8 @@ import RequestPage from "@/pages/RequestPage.tsx";
 import Users from "@/pages/Users.tsx";
 import Home from "@/pages/Home.tsx";
 import VerifyCredentialPage from '@/pages/VerifyCredentialPage';
+import RequestsWithoutApprovalProcess from '@/pages/admin/RequestsWithoutApprovalProcess';
+import RequestsWithApprovalProcess from '@/pages/admin/RequestsWithApprovalProcess';
 
 const router = createBrowserRouter([
     {
@@ -36,6 +38,14 @@ const router = createBrowserRouter([
             {
                 path: '/verify/:credentialId',
                 element: <VerifyCredentialPage/>,
+            },
+            {
+                path: '/admin/requests-without-approval-process',
+                element: <RequestsWithoutApprovalProcess/>,
+            },
+            {
+                path: '/admin/requests-with-approval-process',
+                element: <RequestsWithApprovalProcess/>,
             },
         ],
     },

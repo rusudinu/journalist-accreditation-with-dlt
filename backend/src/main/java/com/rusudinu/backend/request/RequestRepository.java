@@ -8,4 +8,8 @@ public interface RequestRepository extends JpaRepository<Request, Long> {
     List<Request> findAllByUserIdAndStatusIn(Long userId, List<RequestStatus> statusFilter);
 
     List<Request> findAllByStatusIn(List<RequestStatus> statusFilter);
+
+    List<Request> findByApprovalProcessIsNull();
+
+    List<Request> findByApprovalProcessIsNotNull();
 }

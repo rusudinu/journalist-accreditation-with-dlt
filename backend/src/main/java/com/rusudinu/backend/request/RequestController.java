@@ -1,11 +1,14 @@
 package com.rusudinu.backend.request;
 
 import com.nimbusds.jose.shaded.gson.internal.LinkedTreeMap;
+import com.rusudinu.backend.request.dto.RequestWithApprovalStatusDTO;
 import com.rusudinu.backend.request.snapshot.RequestSnapshot;
 import com.rusudinu.backend.request.snapshot.SnapshotService;
 import com.rusudinu.backend.user.User;
 import com.rusudinu.backend.user.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
@@ -52,5 +55,25 @@ public class RequestController {
     public boolean verifyRequestById(@PathVariable Long id) {
         Request request = requestService.getRequestById(id);
         return snapshotService.verifyRequest(request);
+    }
+
+    @GetMapping("/without-approval-process")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<List<Request>> getRequestsWithoutApprovalProcess() {
+        return ResponseEntity.ok(requestService.getRequestsWithoutApprovalProcess());
+    }
+
+    @PostMapping("/{requestId}/assign-approval-process/{approvalProcessId}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Request> assignApprovalProcess(
+            @PathVariable Long requestId,
+            @PathVariable Long approvalProcessId) {
+        return ResponseEntity.ok(requestService.assignApprovalProcess(requestId, approvalProcessId));
+    }
+
+    @GetMapping("/with-approval-process")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<List<RequestWithApprovalStatusDTO>> getRequestsWithApprovalProcess() {
+        return ResponseEntity.ok(requestService.getRequestsWithApprovalProcess());
     }
 }

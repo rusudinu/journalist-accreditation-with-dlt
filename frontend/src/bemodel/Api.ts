@@ -26,6 +26,7 @@ export interface IRequest {
   status?: "CREATED" | "VALIDATED" | "APPROVED" | "REJECTED";
   user?: IUser;
   documents?: IDocument[];
+  approvalProcess?: any; // Using any for now, will be replaced with IApprovalProcess when needed
 }
 
 export interface IUser {

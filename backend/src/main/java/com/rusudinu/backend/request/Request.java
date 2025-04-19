@@ -2,6 +2,7 @@ package com.rusudinu.backend.request;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.rusudinu.backend.approval.ApprovalProcess;
 import com.rusudinu.backend.document.Document;
 import com.rusudinu.backend.request.vc.VerifiableCredentialEntity;
 import com.rusudinu.backend.user.User;
@@ -43,4 +44,8 @@ public class Request {
     @JsonIgnoreProperties("request")
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "request")
     private List<Document> documents;
+
+    @ManyToOne
+    @JsonIgnoreProperties("requests")
+    private ApprovalProcess approvalProcess;
 }

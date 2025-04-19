@@ -36,7 +36,11 @@ https://github.com/web3labs/chainlens-free/blob/master/docker-compose/README.md
 NODE_ENDPOINT=http://host.docker.internal:8545 docker compose up
 
 ## System description
-Something has to be approved (document, text, etc)
-The approval must pass multiple steps. Each step requires a minimum number of reviewers and can be a step that requires approval or can be a step in which only comments are left. These reviewers are assigned to each step by the system.
+Documents (bills) have to be approved. An approval process is defined by an admin. The approval must pass multiple steps. Each step requires a minimum number of reviewers and can be a step that requires approval or can be a step in which only comments are left. These reviewers are assigned to each step by the system.
+
+
+We need to extend the project to also handle bills. New bills can be created by anyone. After creation, a bill (document) must be put on an approval process that is created by an admin.
+
+Admins can see the bills that need to be assigned to an approval process.
 
 The admin can configure the phases of the approval process. For each phase he will be presented with a randomly chosen set of reviewers. He can choose the reviewers he wants to assign to that phase if he is not satisfied with that list.

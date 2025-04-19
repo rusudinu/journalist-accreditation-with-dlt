@@ -19,14 +19,25 @@ const generalComponents = [
     },
 ]
 
-const adminComponents: { title: string, href: string, description: string }[] = [];
+const adminComponents: { title: string, href: string, description: string }[] = [
+    {
+        title: 'Requests Without Approval Process',
+        href: '/admin/requests-without-approval-process',
+        description: 'View and assign approval processes to requests',
+    },
+    {
+        title: 'Requests With Approval Process',
+        href: '/admin/requests-with-approval-process',
+        description: 'View requests with approval processes and their status',
+    },
+];
 
 const pathsWhereMenuIsHidden: string[] = [];
 
 const MenuComponent = () => {
     const keycloak = useContext(AuthContext);
     const location = useLocation();
-    const hasAdminRole = useUserHasRole('admin');
+    const hasAdminRole = useUserHasRole('ADMIN');
     const userIsAuthenticated = useUserIsAuthenticated();
     const [showMenu, setShowMenu] = React.useState(true);
     const [showLogout, setShowLogout] = React.useState(false);
