@@ -20,6 +20,7 @@ import {Separator} from "@/components/ui/separator.tsx";
 import {IoIosWarning} from "react-icons/io";
 import {Alert, AlertDescription, AlertTitle} from "@/components/ui/alert.tsx";
 import {CredentialQRCode} from "@/components/extension/CredentialQRCode";
+import DocumentComments from "@/components/comments/DocumentComments";
 
 const FileSvgDraw = () => {
     return (
@@ -56,6 +57,7 @@ function RequestPage() {
     const [request, setRequest] = useState<IRequest | null>(null);
     const [selectedStatus, setSelectedStatus] = useState<Status | null>(null);
     const [verifiedRequest, setVerifiedRequest] = useState<boolean | null>(null);
+    const [selectedDocumentId, setSelectedDocumentId] = useState<number | null>(null);
     const isJournalist = useUserHasRole('JOURNALIST');
     const isJuridic = useUserHasRole('JURIDIC');
     const isDirector = useUserHasRole('DIRECTOR');
@@ -110,6 +112,11 @@ function RequestPage() {
             })
                 .then((response) => {
                     setRequest(response.data);
+                    // Set the selected document ID to the most recent document's ID if available
+                    if (response.data.documents && response.data.documents.length > 0) {
+                        const mostRecentDocument = response.data.documents[response.data.documents.length - 1];
+                        setSelectedDocumentId(mostRecentDocument.id);
+                    }
                     checkIfRequestIsValid();
                 })
                 .catch((error: unknown) => {
@@ -217,7 +224,7 @@ function RequestPage() {
                 </Table>
             }
             <Separator className="my-4"/>
-            
+
             {/* Add the QR Code component if request exists */}
             {request && (
                 <>
@@ -228,9 +235,34 @@ function RequestPage() {
                     <Separator className="my-4"/>
                 </>
             )}
-            
-            {request && <div className="pb-12"><RequestsDocumentTable request={request}/></div>}
-            
+
+            {request && <div className="pb-6"><RequestsDocumentTable request={request}/></div>}
+
+            {/* Comments section for the selected document */}
+            {selectedDocumentId && request?.documents && request.documents.length > 0 && (
+                <div className="mb-6">
+                    <div className="flex justify-between items-center mb-4">
+                        <h2 className="text-xl font-bold">Document Comments</h2>
+                        <div className="flex items-center">
+                            <span className="mr-2">Select Document:</span>
+                            <select 
+                                className="p-2 border rounded-md"
+                                value={selectedDocumentId}
+                                onChange={(e) => setSelectedDocumentId(Number(e.target.value))}
+                            >
+                                {request.documents.map((doc) => (
+                                    <option key={doc.id} value={doc.id}>
+                                        Document {doc.id} ({new Date(doc.createdDate || '').toLocaleDateString()})
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                    </div>
+                    <DocumentComments documentId={selectedDocumentId} />
+                    <Separator className="my-4"/>
+                </div>
+            )}
+
             {
                 (request?.status === "APPROVED" || request?.status === "REJECTED") &&
                 <Alert className="mb-2">

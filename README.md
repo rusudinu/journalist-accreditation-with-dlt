@@ -26,3 +26,7 @@ When running the core backend set either ethereum or hyperledger as profile.
 
 https://github.com/web3labs/chainlens-free/blob/master/docker-compose/README.md
 NODE_ENDPOINT=http://host.docker.internal:8545 docker compose up
+
+## System description
+Something has to be approved (document, text, etc)
+The approval must pass multiple steps. Each step requires a minimum number of reviewers and can be a step that requires approval or can be a step in which only comments are left. These reviewers are assigned to each step by the system.
