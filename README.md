@@ -12,6 +12,14 @@ juridic: juridic, juridic
 
 director: director, director
 
+deputy1: deputy1, deputy1
+
+deputy2: deputy2, deputy2
+
+deputy3: deputy3, deputy3
+
+admin: admin, admin
+
 ## Auth in swagger
 
 Click on Authorize, then in client_id add journalist-accreditation then press on Authorize.
@@ -30,3 +38,5 @@ NODE_ENDPOINT=http://host.docker.internal:8545 docker compose up
 ## System description
 Something has to be approved (document, text, etc)
 The approval must pass multiple steps. Each step requires a minimum number of reviewers and can be a step that requires approval or can be a step in which only comments are left. These reviewers are assigned to each step by the system.
+
+The admin can configure the phases of the approval process. For each phase he will be presented with a randomly chosen set of reviewers. He can choose the reviewers he wants to assign to that phase if he is not satisfied with that list.
