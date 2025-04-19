@@ -14,6 +14,7 @@ import VerifyCredentialPage from '@/pages/VerifyCredentialPage';
 import RequestsWithoutApprovalProcess from '@/pages/admin/RequestsWithoutApprovalProcess';
 import RequestsWithApprovalProcess from '@/pages/admin/RequestsWithApprovalProcess';
 import CreateApprovalProcess from '@/pages/admin/CreateApprovalProcess';
+import RequestApprovalDetails from '@/pages/admin/RequestApprovalDetails';
 
 const router = createBrowserRouter([
     {
@@ -51,6 +52,10 @@ const router = createBrowserRouter([
             {
                 path: '/admin/create-approval-process',
                 element: <CreateApprovalProcess/>,
+            },
+            {
+                path: '/admin/request-approval-details/:requestId',
+                element: <RequestApprovalDetails/>,
             },
         ],
     },

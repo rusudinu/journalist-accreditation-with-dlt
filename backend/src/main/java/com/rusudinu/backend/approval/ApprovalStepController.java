@@ -63,4 +63,12 @@ public class ApprovalStepController {
     public ResponseEntity<List<User>> getRandomReviewers(@RequestParam int count) {
         return ResponseEntity.ok(approvalStepService.getRandomReviewers(count));
     }
+
+    @GetMapping("/{stepId}/suggest-reviewers")
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public ResponseEntity<List<User>> suggestReviewersForStep(@PathVariable Long stepId) {
+        ApprovalStep step = approvalStepService.getStepById(stepId);
+        int requiredReviewers = step.getMinReviewers();
+        return ResponseEntity.ok(approvalStepService.getRandomReviewers(requiredReviewers));
+    }
 }

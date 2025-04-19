@@ -38,10 +38,15 @@ public class RequestWithApprovalStatusDTO {
         dto.setId(request.getId());
         dto.setCreatedDate(request.getCreatedDate());
         dto.setStatus(request.getStatus());
-        
+
         if (request.getUser() != null) {
             dto.setUserId(request.getUser().getId());
-            dto.setUserName(request.getUser().getKeycloakId()); // Using keycloakId as name for now
+            // Use name if available, otherwise use keycloakId
+            String userName = request.getUser().getName();
+            if (userName == null || userName.isEmpty()) {
+                userName = request.getUser().getKeycloakId();
+            }
+            dto.setUserName(userName);
         }
 
         ApprovalProcess approvalProcess = request.getApprovalProcess();

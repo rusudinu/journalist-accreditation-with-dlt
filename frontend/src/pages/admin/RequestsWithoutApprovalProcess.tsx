@@ -53,10 +53,13 @@ function RequestsWithoutApprovalProcess() {
     }
 
     const handleApprovalProcessChange = (requestId: number, approvalProcessId: string) => {
-        setSelectedApprovalProcesses({
-            ...selectedApprovalProcesses,
-            [requestId]: parseInt(approvalProcessId)
-        });
+        // Only set the approval process if it's a valid numeric ID (not a placeholder)
+        if (approvalProcessId !== 'placeholder') {
+            setSelectedApprovalProcesses({
+                ...selectedApprovalProcesses,
+                [requestId]: parseInt(approvalProcessId)
+            });
+        }
     }
 
     const assignApprovalProcess = (requestId: number) => {
@@ -106,7 +109,7 @@ function RequestsWithoutApprovalProcess() {
                                 <TableCell className="font-medium">{request.id}</TableCell>
                                 <TableCell><Badge variant={request.status}>{request.status}</Badge></TableCell>
                                 <TableCell>{new Date(request.createdDate || '').toLocaleString()}</TableCell>
-                                <TableCell>{request.user?.keycloakId}</TableCell>
+                                <TableCell>{request.user?.name || request.user?.keycloakId}</TableCell>
                                 <TableCell>
                                     <Select 
                                         onValueChange={(value) => handleApprovalProcessChange(request.id!, value)}
@@ -117,8 +120,8 @@ function RequestsWithoutApprovalProcess() {
                                         </SelectTrigger>
                                         <SelectContent>
                                             {approvalProcesses.map((process) => (
-                                                <SelectItem key={process.id} value={process.id!.toString()}>
-                                                    {process.name}
+                                                <SelectItem key={process.id || 'unknown'} value={(process.id || 'placeholder').toString()}>
+                                                    {process.name || 'Unnamed Process'}
                                                 </SelectItem>
                                             ))}
                                         </SelectContent>

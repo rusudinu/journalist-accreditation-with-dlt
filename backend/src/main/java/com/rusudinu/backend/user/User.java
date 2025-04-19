@@ -25,6 +25,8 @@ public class User {
 
     private String keycloakId;
 
+    private String name;
+
     @CreationTimestamp
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     private ZonedDateTime createdDate;

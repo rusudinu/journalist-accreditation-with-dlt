@@ -33,6 +33,7 @@ export interface IUser {
   /** @format int64 */
   id?: number;
   keycloakId?: string;
+  name?: string;
   /** @format date-time */
   createdDate?: string;
   deleted?: boolean;

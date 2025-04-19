@@ -5,8 +5,11 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge.tsx";
 import { toast } from "sonner";
 import { Progress } from "@/components/ui/progress";
+import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
 
 function RequestsWithApprovalProcess() {
+    const navigate = useNavigate();
     const [requests, setRequests] = useState<IRequestWithApprovalStatus[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
 
@@ -35,11 +38,15 @@ function RequestsWithApprovalProcess() {
     // Calculate progress percentage for the progress bar
     const calculateProgressPercentage = (progressDisplay: string | undefined) => {
         if (!progressDisplay) return 0;
-        
+
         const [completed, total] = progressDisplay.split('/').map(Number);
         if (isNaN(completed) || isNaN(total) || total === 0) return 0;
-        
+
         return (completed / total) * 100;
+    };
+
+    const handleViewDetails = (requestId: number) => {
+        navigate(`/admin/request-approval-details/${requestId}`);
     };
 
     return (
@@ -60,6 +67,7 @@ function RequestsWithApprovalProcess() {
                             <TableHead>Approval Process</TableHead>
                             <TableHead>Current Step</TableHead>
                             <TableHead>Progress</TableHead>
+                            <TableHead>Actions</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -76,6 +84,15 @@ function RequestsWithApprovalProcess() {
                                         <div className="text-sm">{request.progressDisplay}</div>
                                         <Progress value={calculateProgressPercentage(request.progressDisplay)} />
                                     </div>
+                                </TableCell>
+                                <TableCell>
+                                    <Button 
+                                        onClick={() => handleViewDetails(request.id!)}
+                                        variant="outline"
+                                        size="sm"
+                                    >
+                                        View Details
+                                    </Button>
                                 </TableCell>
                             </TableRow>
                         ))}
