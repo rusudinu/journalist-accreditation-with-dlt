@@ -1,5 +1,9 @@
 package com.rusudinu.backend.document;
 
+import com.rusudinu.backend.comment.Comment;
+import com.rusudinu.backend.comment.CommentDTO;
+import com.rusudinu.backend.comment.CommentMapper;
+import com.rusudinu.backend.comment.CommentRepository;
 import com.rusudinu.backend.request.Request;
 import com.rusudinu.backend.request.RequestService;
 import com.rusudinu.backend.request.RequestStatus;
@@ -12,7 +16,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -21,6 +27,9 @@ public class DocumentService {
 
     private final DocumentRepository documentRepository;
     private final RequestService requestService;
+    private final CommentRepository commentRepository;
+    private final CommentMapper commentMapper;
+    private final DocumentMapper documentMapper;
 
     public Document uploadDocument(MultipartFile file, RequestStatus status, Long requestId) {
         File directory = new File(UPLOAD_DIR);
@@ -62,4 +71,43 @@ public class DocumentService {
         }
     }
 
+    public DocumentDTO getDocumentWithComments(Long documentId) {
+        Document document = documentRepository.findById(documentId)
+                .orElseThrow(() -> new RuntimeException("Document not found with id: " + documentId));
+
+        DocumentDTO documentDTO = documentMapper.toDocumentDTO(document);
+
+        // Get comments for the document
+        List<Comment> comments = commentRepository.findByDocumentId(documentId);
+        List<CommentDTO> commentDTOs = comments.stream()
+                .map(commentMapper::toCommentDTO)
+                .collect(Collectors.toList());
+
+        documentDTO.setComments(commentDTOs);
+
+        return documentDTO;
+    }
+
+    public CommentDTO addCommentToDocument(Long documentId, CommentDTO commentDTO) {
+        Document document = documentRepository.findById(documentId)
+                .orElseThrow(() -> new RuntimeException("Document not found with id: " + documentId));
+
+        Comment comment = commentMapper.toComment(commentDTO);
+        comment.setDocument(document);
+
+        Comment savedComment = commentRepository.save(comment);
+        return commentMapper.toCommentDTO(savedComment);
+    }
+
+    public List<CommentDTO> getCommentsForDocument(Long documentId) {
+        List<Comment> comments = commentRepository.findByDocumentId(documentId);
+        return comments.stream()
+                .map(commentMapper::toCommentDTO)
+                .collect(Collectors.toList());
+    }
+
+    public Document getDocumentById(Long documentId) {
+        return documentRepository.findById(documentId)
+                .orElseThrow(() -> new RuntimeException("Document not found with id: " + documentId));
+    }
 }

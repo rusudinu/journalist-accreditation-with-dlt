@@ -1,5 +1,9 @@
 package com.rusudinu.backend.hash;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.rusudinu.backend.comment.Comment;
+import com.rusudinu.backend.document.Document;
+import com.rusudinu.backend.document.DocumentRepository;
 import com.rusudinu.backend.document.DocumentService;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
@@ -13,6 +17,9 @@ import org.springframework.stereotype.Service;
 import javax.crypto.Cipher;
 import java.security.*;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -21,6 +28,8 @@ public class HashService {
     private final PrivateKey ministryPrivateKey;
     private final MessageDigest messageDigest;
     private final DocumentService documentService;
+    private final DocumentRepository documentRepository;
+    private final ObjectMapper objectMapper;
 
     @SneakyThrows
     public byte[] hashString(String data) {
@@ -34,12 +43,54 @@ public class HashService {
 
     @SneakyThrows
     public byte[] hashDocument(String documentName) {
-        return encryptWithRSA(createDigestInfo(documentService.getDocument(documentName)));
+        // Get the document content
+        byte[] documentContent = documentService.getDocument(documentName);
+
+        // Find the document entity by stored name to get comments
+        Document document = documentRepository.findAll().stream()
+                .filter(doc -> doc.getStoredDocumentName().equals(documentName))
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("Document not found with name: " + documentName));
+
+        // Create a map with document content and comments
+        Map<String, Object> documentData = new HashMap<>();
+        documentData.put("content", documentContent);
+
+        // Add comments to the map
+        List<Comment> comments = document.getComments();
+        if (comments != null && !comments.isEmpty()) {
+            documentData.put("comments", comments);
+        }
+
+        // Convert the map to JSON and hash it
+        String jsonData = objectMapper.writeValueAsString(documentData);
+        return encryptWithRSA(createDigestInfo(jsonData.getBytes()));
     }
 
     @SneakyThrows
     public boolean verifyDocument(byte[] encryptedMessageHash, String documentName) {
-        return Arrays.equals(decryptWithRSA(encryptedMessageHash), createDigestInfo(documentService.getDocument(documentName)));
+        // Get the document content
+        byte[] documentContent = documentService.getDocument(documentName);
+
+        // Find the document entity by stored name to get comments
+        Document document = documentRepository.findAll().stream()
+                .filter(doc -> doc.getStoredDocumentName().equals(documentName))
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("Document not found with name: " + documentName));
+
+        // Create a map with document content and comments
+        Map<String, Object> documentData = new HashMap<>();
+        documentData.put("content", documentContent);
+
+        // Add comments to the map
+        List<Comment> comments = document.getComments();
+        if (comments != null && !comments.isEmpty()) {
+            documentData.put("comments", comments);
+        }
+
+        // Convert the map to JSON and verify the hash
+        String jsonData = objectMapper.writeValueAsString(documentData);
+        return Arrays.equals(decryptWithRSA(encryptedMessageHash), createDigestInfo(jsonData.getBytes()));
     }
 
     @SneakyThrows

@@ -1,5 +1,6 @@
 package com.rusudinu.backend.document;
 
+import com.rusudinu.backend.comment.CommentDTO;
 import com.rusudinu.backend.request.RequestStatus;
 import com.rusudinu.backend.request.snapshot.SnapshotService;
 import lombok.RequiredArgsConstructor;
@@ -7,6 +8,8 @@ import org.springframework.http.*;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/documents")
@@ -51,5 +54,34 @@ public class DocumentController {
     @PreAuthorize("hasAnyAuthority('MINISTRY', 'JOURNALIST')")
     public String testJournalistAndMinistry() {
         return "hello journalist and ministry";
+    }
+
+    @GetMapping("/{documentId}/with-comments")
+    @PreAuthorize("hasAnyAuthority('MINISTRY', 'JOURNALIST')")
+    public ResponseEntity<DocumentDTO> getDocumentWithComments(@PathVariable Long documentId) {
+        return ResponseEntity.ok(documentService.getDocumentWithComments(documentId));
+    }
+
+    @PostMapping("/{documentId}/comments")
+    @PreAuthorize("hasAnyAuthority('MINISTRY', 'JOURNALIST')")
+    public ResponseEntity<CommentDTO> addCommentToDocument(
+            @PathVariable Long documentId,
+            @RequestBody CommentDTO commentDTO) {
+        CommentDTO savedComment = documentService.addCommentToDocument(documentId, commentDTO);
+
+        // After adding a comment, create a new snapshot to update the hash in the blockchain
+        Document document = documentService.getDocumentById(documentId);
+        snapshotService.createAndPersistRequestSnapshot(
+                document.getRequest().getStatus(),
+                document.getRequest().getId(),
+                document.getStoredDocumentName());
+
+        return ResponseEntity.ok(savedComment);
+    }
+
+    @GetMapping("/{documentId}/comments")
+    @PreAuthorize("hasAnyAuthority('MINISTRY', 'JOURNALIST')")
+    public ResponseEntity<List<CommentDTO>> getCommentsForDocument(@PathVariable Long documentId) {
+        return ResponseEntity.ok(documentService.getCommentsForDocument(documentId));
     }
 }
