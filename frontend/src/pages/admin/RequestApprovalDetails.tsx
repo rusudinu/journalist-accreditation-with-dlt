@@ -281,7 +281,9 @@ function RequestApprovalDetails() {
                                         </SelectTrigger>
                                         <SelectContent>
                                             {availableUsers.map((user) => (
-                                                <SelectItem key={user.id || 'unknown'} value={(user.id || 'placeholder').toString()}>
+                                                <SelectItem 
+                                                    key={`${(user.name ? user.name.toLowerCase().replace(/\s+/g, '') : '')}${user.keycloakId || 'unknown'}`} 
+                                                    value={(user.id || 'placeholder').toString()}>
                                                     {user.name || user.keycloakId || 'Unknown User'}
                                                 </SelectItem>
                                             ))}
