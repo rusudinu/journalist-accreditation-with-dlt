@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge.tsx";
 import { toast } from "sonner";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, X } from "lucide-react";
 
 function RequestApprovalDetails() {
     const { requestId } = useParams<{ requestId: string }>();
@@ -103,8 +103,8 @@ function RequestApprovalDetails() {
             setAvailableUsers(response.data);
 
             // If there are suggested reviewers, select the first one
-            if (response.data.length > 0) {
-                handleReviewerChange(stepId, response.data[0].id!.toString());
+            if (response.data.length > 0 && response.data[0].id !== null && response.data[0].id !== undefined) {
+                handleReviewerChange(stepId, response.data[0].id.toString());
             }
 
             toast.success(`Suggested ${response.data.length} reviewers for this step`);
@@ -242,62 +242,67 @@ function RequestApprovalDetails() {
                                 <h5 className="text-sm font-medium mb-2">Assigned Reviewers</h5>
 
                                 {step.reviews && step.reviews.length > 0 ? (
-                                    <div className="space-y-2">
-                                        {step.reviews.map((review: IApprovalReview) => (
-                                            <div key={review.id || `review-${Math.random()}`} className="flex justify-between items-center p-2 bg-gray-50 rounded">
-                                                <div>
-                                                    <p className="font-medium">
-                                                        {(() => {
-                                                            const reviewer = availableUsers.find(u => u.id === review.reviewerId);
-                                                            return reviewer?.name || reviewer?.keycloakId || 
-                                                                (review.reviewerId ? `User ID: ${review.reviewerId}` : 'Unknown User');
-                                                        })()}
-                                                    </p>
-                                                    <p className="text-xs text-gray-500">
-                                                        {new Date(review.createdDate || '').toLocaleString()}
-                                                    </p>
-                                                </div>
-                                                <Button 
-                                                    variant="destructive" 
-                                                    size="sm"
-                                                    onClick={() => review.id && removeReviewer(review.id)}
+                                    <div className="flex flex-wrap gap-2 mb-2">
+                                        {step.reviews.map((review: IApprovalReview) => {
+                                            const reviewer = availableUsers.find(u => u.id === review.reviewerId);
+                                            const reviewerName = reviewer?.name || reviewer?.keycloakId || 
+                                                (review.reviewerId ? `User ID: ${review.reviewerId}` : 'Unknown User');
+
+                                            return (
+                                                <Badge 
+                                                    key={review.id || `review-${Math.random()}`}
+                                                    className="flex items-center gap-1 px-3 py-1"
+                                                    variant="secondary"
                                                 >
-                                                    Remove
-                                                </Button>
-                                            </div>
-                                        ))}
+                                                    <span>{reviewerName}</span>
+                                                    <button 
+                                                        className="ml-1 rounded-full hover:bg-gray-200 p-1"
+                                                        onClick={() => review.id && removeReviewer(review.id)}
+                                                        title="Remove reviewer"
+                                                    >
+                                                        <X className="h-3 w-3" />
+                                                    </button>
+                                                </Badge>
+                                            );
+                                        })}
                                     </div>
                                 ) : (
                                     <p className="text-sm text-gray-500">No reviewers assigned yet.</p>
                                 )}
 
-                                <div className="mt-4 flex items-center gap-2">
-                                    <Select 
-                                        onValueChange={(value) => step.id && handleReviewerChange(step.id, value)}
-                                        value={(step.id && selectedReviewers[step.id]?.toString()) || ''}
-                                    >
-                                        <SelectTrigger className="w-[250px]">
-                                            <SelectValue placeholder="Select Reviewer" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            {availableUsers.map((user) => (
-                                                <SelectItem 
-                                                    key={`${(user.name ? user.name.toLowerCase().replace(/\s+/g, '') : '')}${user.keycloakId || 'unknown'}`} 
-                                                    value={(user.id || 'placeholder').toString()}>
-                                                    {user.name || user.keycloakId || 'Unknown User'}
-                                                </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-                                    <Button 
-                                        onClick={() => step.id && assignReviewer(step.id)}
-                                        disabled={!step.id || !selectedReviewers[step.id]}
-                                    >
-                                        Assign Reviewer
-                                    </Button>
+                                <div className="mt-4">
+                                    <h5 className="text-sm font-medium mb-2">Available Reviewers</h5>
+                                    <div className="flex flex-wrap gap-2 mb-4">
+                                        {availableUsers.map((user) => {
+                                            const userName = user.name || user.keycloakId || 'Unknown User';
+                                            // Skip users that are already assigned as reviewers for this step
+                                            const isAlreadyAssigned = step.reviews?.some(
+                                                (review: IApprovalReview) => review.reviewerId === user.id
+                                            );
+
+                                            if (isAlreadyAssigned) return null;
+
+                                            return (
+                                                <Badge 
+                                                    key={`${(user.name ? user.name.toLowerCase().replace(/\s+/g, '') : '')}${user.keycloakId || 'unknown'}`}
+                                                    className="flex items-center gap-1 px-3 py-1 cursor-pointer hover:bg-primary hover:text-primary-foreground"
+                                                    variant="outline"
+                                                    onClick={() => {
+                                                        if (step.id && user.id) {
+                                                            handleReviewerChange(step.id, user.id.toString());
+                                                            assignReviewer(step.id);
+                                                        }
+                                                    }}
+                                                >
+                                                    <span>{userName}</span>
+                                                </Badge>
+                                            );
+                                        })}
+                                    </div>
                                     <Button 
                                         variant="outline"
                                         onClick={() => step.id && suggestReviewers(step.id)}
+                                        className="mt-2"
                                     >
                                         Suggest Reviewers
                                     </Button>
