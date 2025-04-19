@@ -13,6 +13,7 @@ import Home from "@/pages/Home.tsx";
 import VerifyCredentialPage from '@/pages/VerifyCredentialPage';
 import RequestsWithoutApprovalProcess from '@/pages/admin/RequestsWithoutApprovalProcess';
 import RequestsWithApprovalProcess from '@/pages/admin/RequestsWithApprovalProcess';
+import CreateApprovalProcess from '@/pages/admin/CreateApprovalProcess';
 
 const router = createBrowserRouter([
     {
@@ -46,6 +47,10 @@ const router = createBrowserRouter([
             {
                 path: '/admin/requests-with-approval-process',
                 element: <RequestsWithApprovalProcess/>,
+            },
+            {
+                path: '/admin/create-approval-process',
+                element: <CreateApprovalProcess/>,
             },
         ],
     },

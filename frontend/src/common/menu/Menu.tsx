@@ -30,6 +30,11 @@ const adminComponents: { title: string, href: string, description: string }[] = 
         href: '/admin/requests-with-approval-process',
         description: 'View requests with approval processes and their status',
     },
+    {
+        title: 'Create Approval Process',
+        href: '/admin/create-approval-process',
+        description: 'Create a new approval process with multiple steps',
+    },
 ];
 
 const pathsWhereMenuIsHidden: string[] = [];
