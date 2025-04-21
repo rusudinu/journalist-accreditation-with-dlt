@@ -247,11 +247,10 @@ function RequestApprovalDetails() {
 
                                 {step.reviews && step.reviews.length > 0 ? (
                                     <div className="flex flex-wrap gap-2 mb-2">
-                                        {step.reviews.map((review: IApprovalReview) => {
-                                            const reviewer = availableUsers.find(u => u.id === review.reviewerId);
+                                        {step.reviews.map((review: any) => {
+                                            const reviewer = availableUsers.find(u => u.keycloakId === review.reviewer.keycloakId?.toString());
                                             const reviewerName = reviewer?.name || reviewer?.keycloakId || 
                                                 (review.reviewerId ? `User ID: ${review.reviewerId}` : 'Unknown User');
-
                                             return (
                                                 <Badge 
                                                     key={review.id || `review-${Math.random()}`}
@@ -283,7 +282,7 @@ function RequestApprovalDetails() {
                                                     const userName = user.name || user.keycloakId || 'Unknown User';
                                                     // Skip users that are already assigned as reviewers for this step
                                                     const isAlreadyAssigned = step.reviews?.some(
-                                                        (review: IApprovalReview) => review.reviewerId === user.keycloakId
+                                                        (review: IApprovalReview) => review.reviewerId?.toString() === user.keycloakId
                                                     );
 
                                                     if (isAlreadyAssigned) return null;
@@ -294,7 +293,6 @@ function RequestApprovalDetails() {
                                                             className="flex items-center gap-1 px-3 py-1 cursor-pointer hover:bg-primary hover:text-primary-foreground"
                                                             variant="outline"
                                                             onClick={() => {
-                                                                console.log(user.keycloakId)
                                                                 if (step.id && user.keycloakId) {
                                                                     handleReviewerChange(step.id, user.keycloakId);
                                                                     assignReviewer(step.id, user.keycloakId);
@@ -315,12 +313,12 @@ function RequestApprovalDetails() {
                                             const userName = user.name || user.keycloakId || 'Unknown User';
                                             // Skip users that are already assigned as reviewers for this step
                                             const isAlreadyAssigned = step.reviews?.some(
-                                                (review: IApprovalReview) => review.reviewerId === user.keycloakId
+                                                (review: IApprovalReview) => review.reviewerId?.toString() === user.keycloakId
                                             );
 
                                             // Also skip users that are in the suggested reviewers list for this step
                                             const isInSuggestedList = step.id && suggestedReviewers[step.id]?.some(
-                                                (suggestedUser) => suggestedUser.id === user.keycloakId
+                                                (suggestedUser) => suggestedUser.id?.toString() === user.keycloakId
                                             );
 
                                             if (isAlreadyAssigned || isInSuggestedList) return null;
