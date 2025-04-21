@@ -107,7 +107,8 @@ public class RequestService {
             statusFilter = adminStatusFilter;
             return requestRepository.findAllByStatusIn(statusFilter);
         } else {
-            throw new RuntimeException("User with id " + userId + " has no roles");
+            // for deputy, etc use director filter
+            return requestRepository.findAllByStatusIn(directorStatusFilter);
         }
     }
 
