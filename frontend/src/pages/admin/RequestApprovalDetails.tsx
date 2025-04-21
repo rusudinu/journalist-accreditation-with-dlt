@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button.tsx";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card.tsx";
 import { Badge } from "@/components/ui/badge.tsx";
 import { toast } from "sonner";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { ArrowLeft, X } from "lucide-react";
 
@@ -20,6 +19,7 @@ function RequestApprovalDetails() {
     const [approvalProcess, setApprovalProcess] = useState<IApprovalProcess | null>(null);
     const [steps, setSteps] = useState<IApprovalStep[]>([]);
     const [availableUsers, setAvailableUsers] = useState<IUser[]>([]);
+    const [suggestedReviewers, setSuggestedReviewers] = useState<Record<number, IUser[]>>({});
     const [selectedReviewers, setSelectedReviewers] = useState<Record<number, number>>({});
 
     useEffect(() => {
@@ -99,8 +99,11 @@ function RequestApprovalDetails() {
                 headers: { 'Content-Type': 'application/json' },
             });
 
-            // Update the available users with the suggested reviewers
-            setAvailableUsers(response.data);
+            // Update the suggested reviewers for this specific step
+            setSuggestedReviewers(prev => ({
+                ...prev,
+                [stepId]: response.data
+            }));
 
             // If there are suggested reviewers, select the first one
             if (response.data.length > 0 && response.data[0].id !== null && response.data[0].id !== undefined) {
@@ -271,6 +274,39 @@ function RequestApprovalDetails() {
                                 )}
 
                                 <div className="mt-4">
+                                    {step.id && suggestedReviewers[step.id] && suggestedReviewers[step.id].length > 0 && (
+                                        <>
+                                            <h5 className="text-sm font-medium mb-2">Suggested Reviewers</h5>
+                                            <div className="flex flex-wrap gap-2 mb-4">
+                                                {suggestedReviewers[step.id].map((user) => {
+                                                    const userName = user.name || user.keycloakId || 'Unknown User';
+                                                    // Skip users that are already assigned as reviewers for this step
+                                                    const isAlreadyAssigned = step.reviews?.some(
+                                                        (review: IApprovalReview) => review.reviewerId === user.id
+                                                    );
+
+                                                    if (isAlreadyAssigned) return null;
+
+                                                    return (
+                                                        <Badge 
+                                                            key={`suggested-${(user.name ? user.name.toLowerCase().replace(/\s+/g, '') : '')}${user.keycloakId || 'unknown'}`}
+                                                            className="flex items-center gap-1 px-3 py-1 cursor-pointer hover:bg-primary hover:text-primary-foreground"
+                                                            variant="outline"
+                                                            onClick={() => {
+                                                                if (step.id && user.id) {
+                                                                    handleReviewerChange(step.id, user.id.toString());
+                                                                    assignReviewer(step.id);
+                                                                }
+                                                            }}
+                                                        >
+                                                            <span>{userName}</span>
+                                                        </Badge>
+                                                    );
+                                                })}
+                                            </div>
+                                        </>
+                                    )}
+
                                     <h5 className="text-sm font-medium mb-2">Available Reviewers</h5>
                                     <div className="flex flex-wrap gap-2 mb-4">
                                         {availableUsers.map((user) => {
@@ -280,11 +316,16 @@ function RequestApprovalDetails() {
                                                 (review: IApprovalReview) => review.reviewerId === user.id
                                             );
 
-                                            if (isAlreadyAssigned) return null;
+                                            // Also skip users that are in the suggested reviewers list for this step
+                                            const isInSuggestedList = step.id && suggestedReviewers[step.id]?.some(
+                                                (suggestedUser) => suggestedUser.id === user.id
+                                            );
+
+                                            if (isAlreadyAssigned || isInSuggestedList) return null;
 
                                             return (
                                                 <Badge 
-                                                    key={`${(user.name ? user.name.toLowerCase().replace(/\s+/g, '') : '')}${user.keycloakId || 'unknown'}`}
+                                                    key={`available-${(user.name ? user.name.toLowerCase().replace(/\s+/g, '') : '')}${user.keycloakId || 'unknown'}`}
                                                     className="flex items-center gap-1 px-3 py-1 cursor-pointer hover:bg-primary hover:text-primary-foreground"
                                                     variant="outline"
                                                     onClick={() => {
