@@ -20,6 +20,6 @@ public interface ApprovalReviewRepository extends JpaRepository<ApprovalReview, 
 
     List<ApprovalReview> findByReviewer(User reviewer);
 
-    @Query("SELECT r FROM Request r JOIN r.approvalProcess ap JOIN ap.steps s JOIN s.reviews rev WHERE rev.reviewer = :reviewer")
+    @Query("SELECT r FROM Request r JOIN r.approvalProcess ap JOIN ap.steps s JOIN s.reviews rev WHERE rev.reviewer = :reviewer AND (rev.completed IS NULL OR rev.completed = false)")
     List<com.rusudinu.backend.request.Request> findRequestsByReviewer(@Param("reviewer") User reviewer);
 }
