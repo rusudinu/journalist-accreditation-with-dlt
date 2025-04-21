@@ -38,32 +38,14 @@ public class DocumentController {
         return new ResponseEntity<>(documentContent, headers, HttpStatus.OK);
     }
 
-    @GetMapping("/only-ministry")
-    @PreAuthorize("hasAuthority('MINISTRY')")
-    public String testMinistry() {
-        return "hello ministry";
-    }
-
-    @GetMapping("/only-journalist")
-    @PreAuthorize("hasAuthority('JOURNALIST')")
-    public String testJournalist() {
-        return "hello journalist";
-    }
-
-    @GetMapping("/journalist-and-ministry")
-    @PreAuthorize("hasAnyAuthority('MINISTRY', 'JOURNALIST')")
-    public String testJournalistAndMinistry() {
-        return "hello journalist and ministry";
-    }
-
     @GetMapping("/{documentId}/with-comments")
-    @PreAuthorize("hasAnyAuthority('MINISTRY', 'JOURNALIST')")
+    @PreAuthorize("hasAnyAuthority('MINISTRY', 'JOURNALIST', 'DEPUTY')")
     public ResponseEntity<DocumentDTO> getDocumentWithComments(@PathVariable Long documentId) {
         return ResponseEntity.ok(documentService.getDocumentWithComments(documentId));
     }
 
     @PostMapping("/{documentId}/comments")
-    @PreAuthorize("hasAnyAuthority('MINISTRY', 'JOURNALIST')")
+    @PreAuthorize("hasAnyAuthority('MINISTRY', 'JOURNALIST', 'DEPUTY')")
     public ResponseEntity<CommentDTO> addCommentToDocument(
             @PathVariable Long documentId,
             @RequestBody CommentDTO commentDTO) {
@@ -80,7 +62,7 @@ public class DocumentController {
     }
 
     @GetMapping("/{documentId}/comments")
-    @PreAuthorize("hasAnyAuthority('MINISTRY', 'JOURNALIST')")
+    @PreAuthorize("hasAnyAuthority('MINISTRY', 'JOURNALIST', 'DEPUTY')")
     public ResponseEntity<List<CommentDTO>> getCommentsForDocument(@PathVariable Long documentId) {
         return ResponseEntity.ok(documentService.getCommentsForDocument(documentId));
     }
