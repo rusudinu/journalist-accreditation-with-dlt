@@ -14,6 +14,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class UserService {
     private final KeycloakClient keycloakClient;
+    private final UserRepository userRepository;
 
     public User findOrCreateByKeycloakId(String keycloakId) {
         // Get user from Keycloak
@@ -24,7 +25,13 @@ public class UserService {
             throw new RuntimeException("User not found in Keycloak with id: " + keycloakId);
         }
 
-        return keycloakUser;
+		// If not found, save the user to the database
+
+		return userRepository.findByKeycloakId(keycloakId)
+				.orElseGet(() -> {
+					// If not found, save the user to the database
+					return userRepository.save(keycloakUser);
+				});
     }
 
     public List<User> getAllUsers() {
