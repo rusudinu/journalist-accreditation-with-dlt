@@ -23,12 +23,12 @@ public class ApprovalReviewController {
         return ResponseEntity.ok(approvalReviewService.getReviewById(id));
     }
 
-    @PostMapping("/step/{stepId}/reviewer/{reviewerId}")
+    @PostMapping("/step/{stepId}/reviewer/{reviewerKeycloakId}")
     public ResponseEntity<ApprovalReview> createReview(
             @PathVariable Long stepId,
-            @PathVariable Long reviewerId,
+            @PathVariable String reviewerKeycloakId,
             @RequestBody ApprovalReview review) {
-        return ResponseEntity.ok(approvalReviewService.createReview(stepId, reviewerId, review));
+        return ResponseEntity.ok(approvalReviewService.createReview(stepId, reviewerKeycloakId, review));
     }
 
     @PutMapping("/{id}")

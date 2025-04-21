@@ -28,17 +28,13 @@ public class ApprovalReviewService {
     }
 
     @Transactional
-    public ApprovalReview createReview(Long stepId, Long reviewerId, ApprovalReview review) {
+    public ApprovalReview createReview(Long stepId, String reviewerKeycloakId, ApprovalReview review) {
         ApprovalStep step = approvalStepRepository.findById(stepId)
                 .orElseThrow(() -> new RuntimeException("Approval step not found with id: " + stepId));
 
-        // We need to convert the numeric ID to a Keycloak ID
-        // This is a simplification - in a real implementation, you would need to maintain a mapping
-        // between your internal user IDs and Keycloak IDs
-        User reviewer = keycloakClient.getAllUsers().stream()
-                .filter(user -> user.getId() != null && user.getId().equals(reviewerId))
-                .findFirst()
-                .orElseThrow(() -> new RuntimeException("User not found with id: " + reviewerId));
+        // Find the user by their database ID
+        User reviewer = userRepository.findByKeycloakId(reviewerKeycloakId)
+                .orElseThrow(() -> new RuntimeException("User not found with id: " + reviewerKeycloakId));
 
         // Check if the reviewer has already submitted a review for this step
         List<ApprovalReview> existingReviews = approvalReviewRepository.findByApprovalStepIdAndReviewer(stepId, reviewer);
@@ -97,12 +93,8 @@ public class ApprovalReviewService {
     }
 
     public List<ApprovalReview> getReviewsByStepIdAndReviewer(Long stepId, Long reviewerId) {
-        // We need to convert the numeric ID to a Keycloak ID
-        // This is a simplification - in a real implementation, you would need to maintain a mapping
-        // between your internal user IDs and Keycloak IDs
-        User reviewer = keycloakClient.getAllUsers().stream()
-                .filter(user -> user.getId() != null && user.getId().equals(reviewerId))
-                .findFirst()
+        // Find the user by their database ID
+        User reviewer = userRepository.findById(reviewerId)
                 .orElseThrow(() -> new RuntimeException("User not found with id: " + reviewerId));
 
         return approvalReviewRepository.findByApprovalStepIdAndReviewer(stepId, reviewer);
