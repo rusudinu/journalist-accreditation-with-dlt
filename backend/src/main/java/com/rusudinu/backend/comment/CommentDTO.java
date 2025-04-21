@@ -15,4 +15,6 @@ public class CommentDTO {
     private String content;
     private String author;
     private Long documentId;
+    private String commentHash;
+    private Boolean isValid;
 }

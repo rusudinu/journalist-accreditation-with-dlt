@@ -4,6 +4,8 @@ export interface IComment {
   content: string;
   author?: string;
   documentId: number;
+  commentHash?: string;
+  isValid?: boolean;
 }
 
 export interface ICommentFormData {

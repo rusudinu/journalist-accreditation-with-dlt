@@ -9,5 +9,6 @@ public interface CommentMapper {
     CommentDTO toCommentDTO(Comment comment);
 
     @Mapping(target = "document.id", source = "documentId")
+    @Mapping(target = "isValid", ignore = true) // This will be set by the service
     Comment toComment(CommentDTO commentDTO);
 }

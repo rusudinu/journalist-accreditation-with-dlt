@@ -35,4 +35,10 @@ public class Comment {
     @JsonIgnoreProperties("comments")
     @ManyToOne(fetch = FetchType.LAZY)
     private Document document;
+
+    @Column(length = 1000)
+    private String commentHash;
+
+    @Transient
+    private Boolean isValid;
 }

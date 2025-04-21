@@ -22,6 +22,11 @@ public class CommentController {
         return ResponseEntity.ok(commentService.getCommentsByDocumentId(documentId));
     }
 
+    @GetMapping("/{commentId}/verify")
+    public ResponseEntity<CommentDTO> verifyComment(@PathVariable Long commentId) {
+        return ResponseEntity.ok(commentService.verifyComment(commentId));
+    }
+
     @PutMapping("/{commentId}")
     public ResponseEntity<CommentDTO> updateComment(@PathVariable Long commentId, @RequestBody CommentDTO commentDTO) {
         return ResponseEntity.ok(commentService.updateComment(commentId, commentDTO));
