@@ -127,16 +127,17 @@ function RequestApprovalDetails() {
         }
     };
 
-    const assignReviewer = async (stepId: number) => {
-        const reviewerId = selectedReviewers[stepId];
-        if (!reviewerId) {
+    const assignReviewer = async (stepId: number, reviewerId?: string) => {
+        // If reviewerId is not provided, use the one from state
+        const actualReviewerId = reviewerId || selectedReviewers[stepId];
+        if (!actualReviewerId) {
             toast.error('Please select a reviewer');
             return;
         }
 
         try {
             // Create a new review with the selected reviewer
-            await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/approval-reviews/step/${stepId}/reviewer/${reviewerId}`, {
+            await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/approval-reviews/step/${stepId}/reviewer/${actualReviewerId}`, {
                 comment: "Assigned by admin",
                 approved: null
             }, {
@@ -282,7 +283,7 @@ function RequestApprovalDetails() {
                                                     const userName = user.name || user.keycloakId || 'Unknown User';
                                                     // Skip users that are already assigned as reviewers for this step
                                                     const isAlreadyAssigned = step.reviews?.some(
-                                                        (review: IApprovalReview) => review.reviewerId === user.id
+                                                        (review: IApprovalReview) => review.reviewerId === user.keycloakId
                                                     );
 
                                                     if (isAlreadyAssigned) return null;
@@ -293,9 +294,10 @@ function RequestApprovalDetails() {
                                                             className="flex items-center gap-1 px-3 py-1 cursor-pointer hover:bg-primary hover:text-primary-foreground"
                                                             variant="outline"
                                                             onClick={() => {
-                                                                if (step.id && user.id) {
-                                                                    handleReviewerChange(step.id, user.id.toString());
-                                                                    assignReviewer(step.id);
+                                                                console.log(user.keycloakId)
+                                                                if (step.id && user.keycloakId) {
+                                                                    handleReviewerChange(step.id, user.keycloakId);
+                                                                    assignReviewer(step.id, user.keycloakId);
                                                                 }
                                                             }}
                                                         >
@@ -313,12 +315,12 @@ function RequestApprovalDetails() {
                                             const userName = user.name || user.keycloakId || 'Unknown User';
                                             // Skip users that are already assigned as reviewers for this step
                                             const isAlreadyAssigned = step.reviews?.some(
-                                                (review: IApprovalReview) => review.reviewerId === user.id
+                                                (review: IApprovalReview) => review.reviewerId === user.keycloakId
                                             );
 
                                             // Also skip users that are in the suggested reviewers list for this step
                                             const isInSuggestedList = step.id && suggestedReviewers[step.id]?.some(
-                                                (suggestedUser) => suggestedUser.id === user.id
+                                                (suggestedUser) => suggestedUser.id === user.keycloakId
                                             );
 
                                             if (isAlreadyAssigned || isInSuggestedList) return null;
@@ -329,9 +331,9 @@ function RequestApprovalDetails() {
                                                     className="flex items-center gap-1 px-3 py-1 cursor-pointer hover:bg-primary hover:text-primary-foreground"
                                                     variant="outline"
                                                     onClick={() => {
-                                                        if (step.id && user.id) {
-                                                            handleReviewerChange(step.id, user.id.toString());
-                                                            assignReviewer(step.id);
+                                                        if (step.id && user.keycloakId) {
+                                                            handleReviewerChange(step.id, user.keycloakId.toString());
+                                                            assignReviewer(step.id, user.keycloakId);
                                                         }
                                                     }}
                                                 >
