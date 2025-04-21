@@ -3,7 +3,6 @@ import { IComment } from '@/bemodel/CommentTypes';
 import { Card } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface CommentListProps {
   comments: IComment[];
@@ -29,26 +28,21 @@ const CommentList: React.FC<CommentListProps> = ({ comments }) => {
           <div className="flex justify-between items-start">
             <div className="font-medium">{comment.author || 'Anonymous'}</div>
             <div className="flex items-center gap-2">
-              {comment.isValid !== undefined && (
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger>
-                      <Badge variant={comment.isValid ? "success" : "destructive"}>
-                        {comment.isValid 
-                          ? "Comment signature checked and is valid" 
-                          : "Comment signature checked and is invalid"}
-                      </Badge>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>
-                        {comment.isValid 
-                          ? "This comment's signature has been verified against the blockchain and is valid." 
-                          : "This comment's signature does not match what's stored on the blockchain."}
-                      </p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              )}
+              <Badge 
+                variant={
+                  comment.isValid === undefined 
+                    ? "outline" 
+                    : comment.isValid 
+                      ? "secondary" 
+                      : "destructive"
+                }
+              >
+                {comment.isValid === undefined 
+                  ? "Comment signature not verified" 
+                  : comment.isValid 
+                    ? "Comment signature checked and is valid" 
+                    : "Comment signature checked and is invalid"}
+              </Badge>
               <div className="text-sm text-gray-500">
                 {new Date(comment.createdDate || '').toLocaleString()}
               </div>
