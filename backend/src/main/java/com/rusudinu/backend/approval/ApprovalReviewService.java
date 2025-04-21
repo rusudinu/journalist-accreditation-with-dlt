@@ -81,11 +81,8 @@ public class ApprovalReviewService {
             existingReview.setApproved(review.getApproved());
         }
 
-        // Update completed status if provided, but only if there's at least one comment
+        // Update completed status if provided
         if (review.getCompleted() != null && review.getCompleted()) {
-            if (existingReview.getComment() == null || existingReview.getComment().trim().isEmpty()) {
-                throw new RuntimeException("Cannot mark review as completed without adding at least one comment");
-            }
             existingReview.setCompleted(true);
         }
 
