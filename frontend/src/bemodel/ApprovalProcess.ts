@@ -23,6 +23,7 @@ export interface IApprovalReview {
   createdDate?: string;
   comment?: string;
   approved?: boolean;
+  completed?: boolean;
   reviewerId?: number;
 }
 

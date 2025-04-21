@@ -53,6 +53,7 @@ public class ApprovalReviewService {
         // Set the step and reviewer for the review
         review.setApprovalStep(step);
         review.setReviewer(reviewer);
+        review.setCompleted(false);
 
         // For comment-only steps, set approved to null
         if (!step.getRequiresApproval()) {
@@ -78,6 +79,14 @@ public class ApprovalReviewService {
         // Only update approved status if the step requires approval
         if (existingReview.getApprovalStep().getRequiresApproval()) {
             existingReview.setApproved(review.getApproved());
+        }
+
+        // Update completed status if provided, but only if there's at least one comment
+        if (review.getCompleted() != null && review.getCompleted()) {
+            if (existingReview.getComment() == null || existingReview.getComment().trim().isEmpty()) {
+                throw new RuntimeException("Cannot mark review as completed without adding at least one comment");
+            }
+            existingReview.setCompleted(true);
         }
 
         // Save the updated review

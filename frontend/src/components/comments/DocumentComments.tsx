@@ -7,6 +7,7 @@ import { toast } from 'sonner';
 import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
 import { RefreshCw } from 'lucide-react';
+import MarkReviewAsCompleted from '@/components/reviews/MarkReviewAsCompleted';
 
 interface DocumentCommentsProps {
   documentId: number;
@@ -73,6 +74,10 @@ const DocumentComments: React.FC<DocumentCommentsProps> = ({ documentId }) => {
       <Separator className="my-4" />
 
       <CommentForm documentId={documentId} onCommentAdded={handleCommentAdded} />
+
+      <Separator className="my-4" />
+
+      <MarkReviewAsCompleted documentId={documentId} />
     </div>
   );
 };

@@ -26,15 +26,17 @@ public class ApprovalReview {
     @CreationTimestamp
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     private ZonedDateTime createdDate;
-    
+
     private String comment;
-    
+
     private Boolean approved;
-    
+
+    private Boolean completed;
+
     @ManyToOne
     @JsonIgnoreProperties("reviews")
     private ApprovalStep approvalStep;
-    
+
     @ManyToOne
     @JsonIgnoreProperties("approvalReviews")
     private User reviewer;
