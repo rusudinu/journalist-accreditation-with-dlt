@@ -12,7 +12,12 @@ function RequestsTable() {
     const navigate = useNavigate();
     const [requests, setRequests] = useState<IRequest[]>([]);
     const [reviewRequests, setReviewRequests] = useState<IRequest[]>([]);
-    const [reviews, setReviews] = useState<{id: number, approved: boolean | null, approvalStep: {approvalProcess: {id: number}}}[]>([]);
+    const [reviews, setReviews] = useState<{
+        id: number,
+        approved: boolean | null,
+        completed: boolean | null,
+        approvalStep: { approvalProcess: { id: number } }
+    }[]>([]);
     const [, setActiveTab] = useState<string>("all");
     const userId = useAppSelector((state) => state.core.authenticatedUserId);
 
@@ -71,24 +76,6 @@ function RequestsTable() {
 
     const openRequestPage = (request: IRequest) => {
         navigate(`/request/${request.id}`);
-    }
-
-    // Check if a request has been reviewed by the current user
-    const hasUserReviewed = (requestId: number) => {
-        // Find all reviews for steps in this request
-        const requestReviews = reviews.filter(review => {
-            const stepApprovalProcess = review.approvalStep?.approvalProcess;
-            if (!stepApprovalProcess) return false;
-
-            // Check if this review's approval process is associated with the current request
-            return reviewRequests.some(req => 
-                req.id === requestId && 
-                req.approvalProcess?.id === stepApprovalProcess.id
-            );
-        });
-
-        // Check if any of these reviews have an approved status (not null)
-        return requestReviews.some(review => review.approved !== null);
     }
 
     // if the user is a journalist, show a button to start a new request and the list of previous requests
@@ -152,11 +139,7 @@ function RequestsTable() {
                                     <TableCell>{request.documents?.length}</TableCell>
                                     <TableCell><Badge variant={request.status}>{request.status}</Badge></TableCell>
                                     <TableCell>
-                                        {hasUserReviewed(request.id) ? (
-                                            <Badge variant="success">Reviewed</Badge>
-                                        ) : (
-                                            <Badge variant="destructive">Needs Review</Badge>
-                                        )}
+                                        <Badge variant="destructive">Needs Review</Badge>
                                     </TableCell>
                                     <TableCell>{request.createdDate}</TableCell>
                                     <TableCell>
