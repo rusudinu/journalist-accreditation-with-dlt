@@ -67,7 +67,11 @@ public class CommentService {
             String commentKey = requestId + "-comment-" + comment.getId();
             String blockchainHash = distributedStorageService.getRegistrySnapshotHashByRequestId(Long.valueOf(commentKey));
 
-            boolean isValid = comment.getCommentHash().equals(blockchainHash);
+            System.out.println("Blockchain Hash: " + blockchainHash);
+            System.out.println("Comment Hash: " + comment.getCommentHash());
+
+            // Check if blockchainHash is not null or empty before comparing
+            boolean isValid = blockchainHash != null && !blockchainHash.isEmpty() && comment.getCommentHash().equals(blockchainHash);
             commentDTO.setIsValid(isValid);
         } else {
             commentDTO.setIsValid(false);
