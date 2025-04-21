@@ -1,5 +1,6 @@
 package com.rusudinu.backend.approval;
 
+import com.rusudinu.backend.request.Request;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -50,5 +51,15 @@ public class ApprovalReviewController {
             @PathVariable Long stepId,
             @PathVariable Long reviewerId) {
         return ResponseEntity.ok(approvalReviewService.getReviewsByStepIdAndReviewer(stepId, reviewerId));
+    }
+
+    @GetMapping("/reviewer/{keycloakId}")
+    public ResponseEntity<List<ApprovalReview>> getReviewsByReviewer(@PathVariable String keycloakId) {
+        return ResponseEntity.ok(approvalReviewService.getReviewsByReviewer(keycloakId));
+    }
+
+    @GetMapping("/reviewer/{keycloakId}/requests")
+    public ResponseEntity<List<Request>> getRequestsByReviewer(@PathVariable String keycloakId) {
+        return ResponseEntity.ok(approvalReviewService.getRequestsByReviewer(keycloakId));
     }
 }

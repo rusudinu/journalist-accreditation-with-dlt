@@ -1,6 +1,7 @@
 package com.rusudinu.backend.approval;
 
 import com.rusudinu.backend.config.KeycloakClient;
+import com.rusudinu.backend.request.Request;
 import com.rusudinu.backend.user.User;
 import com.rusudinu.backend.user.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -105,5 +106,35 @@ public class ApprovalReviewService {
                 .orElseThrow(() -> new RuntimeException("User not found with id: " + reviewerId));
 
         return approvalReviewRepository.findByApprovalStepIdAndReviewer(stepId, reviewer);
+    }
+
+    public List<ApprovalReview> getReviewsByReviewer(String keycloakId) {
+        // Try to find the user in the database first
+        User reviewer = userRepository.findByKeycloakId(keycloakId)
+                .orElseGet(() -> {
+                    // If not found, try to get from Keycloak and save to database
+                    User keycloakUser = keycloakClient.getUserByKeycloakId(keycloakId);
+                    if (keycloakUser == null || keycloakUser.getKeycloakId() == null) {
+                        throw new RuntimeException("User not found with id: " + keycloakId);
+                    }
+                    return userRepository.save(keycloakUser);
+                });
+
+        return approvalReviewRepository.findByReviewer(reviewer);
+    }
+
+    public List<Request> getRequestsByReviewer(String keycloakId) {
+        // Try to find the user in the database first
+        User reviewer = userRepository.findByKeycloakId(keycloakId)
+                .orElseGet(() -> {
+                    // If not found, try to get from Keycloak and save to database
+                    User keycloakUser = keycloakClient.getUserByKeycloakId(keycloakId);
+                    if (keycloakUser == null || keycloakUser.getKeycloakId() == null) {
+                        throw new RuntimeException("User not found with id: " + keycloakId);
+                    }
+                    return userRepository.save(keycloakUser);
+                });
+
+        return approvalReviewRepository.findRequestsByReviewer(reviewer);
     }
 }
