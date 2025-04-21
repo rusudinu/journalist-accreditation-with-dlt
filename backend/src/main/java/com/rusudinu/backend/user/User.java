@@ -34,10 +34,12 @@ public class User {
     private boolean isDeleted = false;
 
     @JsonIgnoreProperties("user")
+    @com.fasterxml.jackson.annotation.JsonIgnore
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "user")
     private List<Request> requests;
 
     @JsonIgnoreProperties("reviewer")
+    @com.fasterxml.jackson.annotation.JsonIgnore
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "reviewer")
     private List<ApprovalReview> approvalReviews;
 }

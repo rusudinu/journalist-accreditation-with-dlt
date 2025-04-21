@@ -37,6 +37,7 @@ public class Document {
     private Request request;
 
     @JsonIgnoreProperties("document")
+    @com.fasterxml.jackson.annotation.JsonIgnore
     @OneToMany(mappedBy = "document", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Comment> comments = new ArrayList<>();
 }

@@ -45,6 +45,7 @@ public class ApprovalStep {
     private ApprovalProcess approvalProcess;
 
     @JsonIgnoreProperties("approvalStep")
+    @com.fasterxml.jackson.annotation.JsonIgnore
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "approvalStep")
     private List<ApprovalReview> reviews;
 }

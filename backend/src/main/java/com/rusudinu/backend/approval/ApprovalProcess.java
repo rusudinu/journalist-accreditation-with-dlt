@@ -37,6 +37,7 @@ public class ApprovalProcess {
     private List<ApprovalStep> steps;
 
     @JsonIgnoreProperties("approvalProcess")
+    @com.fasterxml.jackson.annotation.JsonIgnore
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "approvalProcess")
     private List<Request> requests;
 }
