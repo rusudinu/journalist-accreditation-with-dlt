@@ -32,9 +32,16 @@ public class ApprovalReviewService {
         ApprovalStep step = approvalStepRepository.findById(stepId)
                 .orElseThrow(() -> new RuntimeException("Approval step not found with id: " + stepId));
 
-        // Find the user by their database ID
+        // Try to find the user in the database first
         User reviewer = userRepository.findByKeycloakId(reviewerKeycloakId)
-                .orElseThrow(() -> new RuntimeException("User not found with id: " + reviewerKeycloakId));
+                .orElseGet(() -> {
+                    // If not found, try to get from Keycloak and save to database
+                    User keycloakUser = keycloakClient.getUserByKeycloakId(reviewerKeycloakId);
+                    if (keycloakUser == null || keycloakUser.getKeycloakId() == null) {
+                        throw new RuntimeException("User not found with id: " + reviewerKeycloakId);
+                    }
+                    return userRepository.save(keycloakUser);
+                });
 
         // Check if the reviewer has already submitted a review for this step
         List<ApprovalReview> existingReviews = approvalReviewRepository.findByApprovalStepIdAndReviewer(stepId, reviewer);
