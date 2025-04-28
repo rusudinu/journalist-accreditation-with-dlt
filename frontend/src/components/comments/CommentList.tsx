@@ -20,29 +20,40 @@ const CommentList: React.FC<CommentListProps> = ({ comments }) => {
     return dateB - dateA;
   });
 
+  // Check if the last comment is valid
+  const lastComment = sortedComments.length > 0 ? sortedComments[0] : null;
+  const lastCommentValid = lastComment?.isValid === true;
+
   return (
     <div className="space-y-4">
       <h3 className="text-lg font-semibold">Comments</h3>
-      {sortedComments.map((comment) => (
+      {lastCommentValid && (
+        <Badge variant="secondary" className="mb-2">
+          Comments signatures checked and are valid
+        </Badge>
+      )}
+      {sortedComments.map((comment, index) => (
         <Card key={comment.id} className="p-4">
           <div className="flex justify-between items-start">
             <div className="font-medium">{comment.author || 'Anonymous'}</div>
             <div className="flex items-center gap-2">
-              <Badge 
-                variant={
-                  comment.isValid === undefined 
-                    ? "outline" 
+              {index === 0 && (
+                <Badge 
+                  variant={
+                    comment.isValid === undefined 
+                      ? "outline" 
+                      : comment.isValid 
+                        ? "secondary" 
+                        : "destructive"
+                  }
+                >
+                  {comment.isValid === undefined 
+                    ? "Comment signature not verified" 
                     : comment.isValid 
-                      ? "secondary" 
-                      : "destructive"
-                }
-              >
-                {comment.isValid === undefined 
-                  ? "Comment signature not verified" 
-                  : comment.isValid 
-                    ? "Comment signature checked and is valid" 
-                    : "Comment signature checked and is invalid"}
-              </Badge>
+                      ? "Comment signature checked and is valid" 
+                      : "Comment signature checked and is invalid"}
+                </Badge>
+              )}
               <div className="text-sm text-gray-500">
                 {new Date(comment.createdDate || '').toLocaleString()}
               </div>
