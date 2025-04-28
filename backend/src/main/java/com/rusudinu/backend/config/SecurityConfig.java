@@ -39,8 +39,8 @@ class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http, LogoutHandler keycloakLogoutHandler) throws Exception {
         http
+                .cors(withDefaults())
                 .csrf(AbstractHttpConfigurer::disable)
-                .cors(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/auth", "/register", "/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // Allow pre-flight requests for CORS
