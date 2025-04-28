@@ -42,4 +42,18 @@ public class HyperledgerRegistryService implements DistributedStorageService {
         hyperledgerSnapshotRepositoryClient.saveOrUpdateHyperledgerRegistry(hyperledgerRegistry);
         log.info("[HYP] Persisted snapshot hash: {}", snapshotHash);
     }
+
+    // not implemented because we are only
+    // moving forward with ethereum
+    @Override
+    public String getCommentHashByRequestId(Long requestId) {
+        return "";
+    }
+
+    // not implemented because we are only
+    // moving forward with ethereum
+    @Override
+    public void persistCommentHash(Long requestId, String commentHash) {
+
+    }
 }

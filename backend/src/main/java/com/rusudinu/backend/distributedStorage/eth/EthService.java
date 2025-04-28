@@ -24,6 +24,8 @@ public class EthService implements DistributedStorageService {
     @Value("${journalist-accreditation.ministry-account-key}")
     private String ministryAccountPrivateKey;
 
+    private static final String COMMENT_PREFIX = "comment_";
+
     @Override
     public String getRegistrySnapshotHashByRequestId(Long requestId) {
         log.info("[ETH] Getting registry snapshot hash for request id: {}", requestId);
@@ -46,6 +48,50 @@ public class EthService implements DistributedStorageService {
             document.addDocument(String.valueOf(requestId), snapshotHash).send();
             log.info("[ETH] Persisted snapshot hash: {}", snapshotHash);
         } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public String getCommentHashByRequestId(Long requestId) {
+        log.info("[ETH] ====== START: Getting comment hash for request id: {} ======", requestId);
+        DocumentRegistry document = DocumentRegistry.load(contractAddress, web3, Credentials.create(ministryAccountPrivateKey), new DefaultGasProvider());
+        try {
+            String commentKey = COMMENT_PREFIX + requestId;
+            log.info("[ETH] Using comment key: {}", commentKey);
+
+            String commentHash = document.getDocumentsForRequest(commentKey).send();
+
+            if (commentHash != null && !commentHash.isEmpty()) {
+                log.info("[ETH] ====== SUCCESS: Fetched comment hash: {} ======", commentHash);
+            } else {
+                log.info("[ETH] ====== NOTE: No comment hash found for request id: {} ======", requestId);
+            }
+
+            return commentHash;
+        } catch (Exception e) {
+            log.error("[ETH] ====== ERROR: Error fetching comment hash: {} ======", e.getMessage(), e);
+            return "";
+        }
+    }
+
+    @Override
+    public void persistCommentHash(Long requestId, String commentHash) {
+        log.info("[ETH] ====== START: Persisting comment hash for request id: {} ======", requestId);
+        log.info("[ETH] Comment hash to persist: {}", commentHash);
+        DocumentRegistry document = DocumentRegistry.load(contractAddress, web3, Credentials.create(ministryAccountPrivateKey), new DefaultGasProvider());
+        try {
+            String commentKey = COMMENT_PREFIX + requestId;
+            log.info("[ETH] Using comment key: {}", commentKey);
+
+            // Send the transaction
+            document.addDocument(commentKey, commentHash).send();
+
+            // Log success
+            log.info("[ETH] Transaction successful!");
+            log.info("[ETH] ====== SUCCESS: Persisted comment hash: {} ======", commentHash);
+        } catch (Exception e) {
+            log.error("[ETH] ====== ERROR: Failed to persist comment hash ======", e);
             throw new RuntimeException(e);
         }
     }

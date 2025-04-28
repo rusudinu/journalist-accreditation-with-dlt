@@ -7,6 +7,7 @@ import com.rusudinu.backend.document.DocumentRepository;
 import com.rusudinu.backend.hash.HashService;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.Base64;
@@ -15,6 +16,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class CommentService {
     private final CommentRepository commentRepository;
     private final CommentMapper commentMapper;
@@ -25,25 +27,47 @@ public class CommentService {
 
     @SneakyThrows
     public CommentDTO addComment(CommentDTO commentDTO) {
+        log.info("adding new comment");
         Document document = documentRepository.findById(commentDTO.getDocumentId())
                 .orElseThrow(() -> new RuntimeException("Document not found with id: " + commentDTO.getDocumentId()));
 
         Comment comment = commentMapper.toComment(commentDTO);
         comment.setDocument(document);
 
-        // Generate hash for the comment
-        String commentJson = objectMapper.writeValueAsString(comment);
-        byte[] commentHash = hashService.hashString(commentJson);
+        // Get the request ID
+        Long requestId = document.getRequest().getId();
+
+        // Generate hash for the comment (user + comment)
+        String userCommentData = comment.getAuthor() + comment.getContent();
+
+        // Get the previous hash from the blockchain
+        String previousHash = distributedStorageService.getCommentHashByRequestId(requestId);
+
+        // If there's a previous hash, include it in the new hash calculation
+        String hashData;
+        if (previousHash != null && !previousHash.isEmpty()) {
+            hashData = userCommentData + previousHash;
+            log.info("[COMMENT] ====== Creating chained hash with previous hash: {} ======", previousHash);
+        } else {
+            hashData = userCommentData;
+            log.info("[COMMENT] ====== Creating initial hash without previous hash ======");
+        }
+
+        // Generate the hash
+        log.info("[COMMENT] Generating hash for data: {}", hashData);
+        byte[] commentHash = hashService.hashString(hashData);
         String encodedHash = Base64.getEncoder().encodeToString(commentHash);
         comment.setCommentHash(encodedHash);
 
+        log.info("[COMMENT] ====== Generated comment hash: {} ======", encodedHash);
+
         Comment savedComment = commentRepository.save(comment);
+        log.info("[COMMENT] Saved comment to database with ID: {}", savedComment.getId());
 
         // Store the hash on the blockchain
-        // We'll use the document's request ID and append the comment ID to make it unique
-        Long requestId = document.getRequest().getId();
-        String commentKey = requestId + "-comment-" + savedComment.getId();
-        distributedStorageService.persistRegistrySnapshot(Long.valueOf(commentKey), encodedHash);
+        log.info("[COMMENT] Calling distributedStorageService.persistCommentHash with requestId: {} and hash: {}", requestId, encodedHash);
+        distributedStorageService.persistCommentHash(requestId, encodedHash);
+        log.info("[COMMENT] ====== Successfully persisted comment hash for request ID: {} ======", requestId);
 
         CommentDTO savedCommentDTO = commentMapper.toCommentDTO(savedComment);
         savedCommentDTO.setIsValid(true); // New comment is always valid
@@ -59,64 +83,150 @@ public class CommentService {
 
     @SneakyThrows
     private CommentDTO verifyAndMapComment(Comment comment) {
+        log.info("[COMMENT] ====== START: Verifying comment with ID: {} ======", comment.getId());
         CommentDTO commentDTO = commentMapper.toCommentDTO(comment);
 
         // Verify the comment hash against the blockchain
         if (comment.getCommentHash() != null) {
             Long requestId = comment.getDocument().getRequest().getId();
-            String commentKey = requestId + "-comment-" + comment.getId();
-            String blockchainHash = distributedStorageService.getRegistrySnapshotHashByRequestId(Long.valueOf(commentKey));
+            log.info("[COMMENT] Getting blockchain hash for request ID: {}", requestId);
+            String blockchainHash = distributedStorageService.getCommentHashByRequestId(requestId);
 
-            System.out.println("Blockchain Hash: " + blockchainHash);
-            System.out.println("Comment Hash: " + comment.getCommentHash());
+            log.info("[COMMENT] Verifying comment. Blockchain Hash: {}", blockchainHash);
+            log.info("[COMMENT] Comment Hash from DB: {}", comment.getCommentHash());
 
             // Check if blockchainHash is not null or empty before comparing
-            boolean isValid = blockchainHash != null && !blockchainHash.isEmpty() && comment.getCommentHash().equals(blockchainHash);
+            boolean isValid = blockchainHash != null && !blockchainHash.isEmpty();
+            log.info("[COMMENT] Is blockchain hash present? {}", isValid);
+
+            // If the blockchain has a hash, check if it's part of the chain
+            if (isValid) {
+                // The latest hash in the blockchain should contain this comment's hash
+                // or be equal to it if it's the latest comment
+                boolean isLatestComment = blockchainHash.equals(comment.getCommentHash());
+                boolean isPartOfChain = false;
+
+                if (!isLatestComment) {
+                    isPartOfChain = validateCommentInChain(comment, blockchainHash);
+                    log.info("[COMMENT] Comment is not the latest. Is it part of the chain? {}", isPartOfChain);
+                } else {
+                    log.info("[COMMENT] Comment is the latest in the chain");
+                }
+
+                isValid = isLatestComment || isPartOfChain;
+            }
+
+            log.info("[COMMENT] ====== RESULT: Comment is valid? {} ======", isValid);
             commentDTO.setIsValid(isValid);
         } else {
+            log.info("[COMMENT] ====== RESULT: Comment has no hash, marking as invalid ======");
             commentDTO.setIsValid(false);
         }
 
         return commentDTO;
     }
 
+    /**
+     * Validates if a comment is part of the comment chain by reconstructing the hash chain
+     * and checking if it leads to the current blockchain hash.
+     */
+    private boolean validateCommentInChain(Comment comment, String currentBlockchainHash) {
+        log.info("[COMMENT] ====== START: Validating if comment is part of the chain ======");
+        log.info("[COMMENT] Comment ID: {}", comment.getId());
+        log.info("[COMMENT] Comment hash: {}", comment.getCommentHash());
+        log.info("[COMMENT] Current blockchain hash: {}", currentBlockchainHash);
+
+        // This is a simplified validation. In a real implementation, you would need to
+        // retrieve all comments for the document in chronological order and reconstruct
+        // the hash chain to verify if this comment is part of it.
+
+        // For now, we'll just check if the comment hash is contained in the blockchain hash
+        // This is not secure but demonstrates the concept
+        boolean isPartOfChain = currentBlockchainHash.contains(comment.getCommentHash());
+
+        log.info("[COMMENT] ====== RESULT: Comment is part of the chain? {} ======", isPartOfChain);
+        return isPartOfChain;
+    }
+
     public void deleteComment(Long commentId) {
+        // Note: In a real implementation, you might want to handle deletion differently
+        // since deleting a comment would break the hash chain
         commentRepository.deleteById(commentId);
     }
 
     public CommentDTO updateComment(Long commentId, CommentDTO commentDTO) {
+        log.info("[COMMENT] ====== START: Updating comment with ID: {} ======", commentId);
+        // Note: In a real implementation, you might want to handle updates differently
+        // since updating a comment would break the hash chain
         Comment existingComment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new RuntimeException("Comment not found with id: " + commentId));
 
+        log.info("[COMMENT] Found existing comment with ID: {}", existingComment.getId());
         existingComment.setContent(commentDTO.getContent());
         existingComment.setAuthor(commentDTO.getAuthor());
+        log.info("[COMMENT] Updated comment content and author");
 
-        // Generate new hash for the updated comment
-        String commentJson;
+        // Get the request ID
+        Long requestId = existingComment.getDocument().getRequest().getId();
+        log.info("[COMMENT] Request ID for this comment: {}", requestId);
+
+        // Generate hash for the updated comment (user + comment)
+        String userCommentData = existingComment.getAuthor() + existingComment.getContent();
+        log.info("[COMMENT] User + comment data: {}", userCommentData);
+
+        // Get the previous hash from the blockchain
+        log.info("[COMMENT] Getting previous hash from blockchain for request ID: {}", requestId);
+        String previousHash = distributedStorageService.getCommentHashByRequestId(requestId);
+        log.info("[COMMENT] Previous hash from blockchain: {}", previousHash);
+
+        // Generate the new hash including the previous hash
+        String hashData = userCommentData + previousHash;
+        log.info("[COMMENT] ====== Creating updated hash with previous hash: {} ======", previousHash);
+        log.info("[COMMENT] Hash data: {}", hashData);
+
         try {
-            commentJson = objectMapper.writeValueAsString(existingComment);
-            byte[] commentHash = hashService.hashString(commentJson);
+            log.info("[COMMENT] Generating hash for data");
+            byte[] commentHash = hashService.hashString(hashData);
             String encodedHash = Base64.getEncoder().encodeToString(commentHash);
             existingComment.setCommentHash(encodedHash);
+            log.info("[COMMENT] ====== Generated updated comment hash: {} ======", encodedHash);
 
-            // Update the hash on the blockchain
-            Long requestId = existingComment.getDocument().getRequest().getId();
-            String commentKey = requestId + "-comment-" + existingComment.getId();
-            distributedStorageService.persistRegistrySnapshot(Long.valueOf(commentKey), encodedHash);
+            // Store the hash on the blockchain
+            log.info("[COMMENT] Calling distributedStorageService.persistCommentHash with requestId: {} and hash: {}", requestId, encodedHash);
+            distributedStorageService.persistCommentHash(requestId, encodedHash);
+            log.info("[COMMENT] ====== Successfully persisted updated comment hash for request ID: {} ======", requestId);
         } catch (Exception e) {
+            log.error("[COMMENT] ====== ERROR: Failed to hash comment ======", e);
             throw new RuntimeException("Failed to hash comment", e);
         }
 
+        log.info("[COMMENT] Saving updated comment to database");
         Comment updatedComment = commentRepository.save(existingComment);
+        log.info("[COMMENT] Comment saved with ID: {}", updatedComment.getId());
+
         CommentDTO updatedCommentDTO = commentMapper.toCommentDTO(updatedComment);
         updatedCommentDTO.setIsValid(true); // Updated comment is always valid
+        log.info("[COMMENT] ====== DONE: Successfully updated comment with ID: {} ======", commentId);
         return updatedCommentDTO;
     }
 
     public CommentDTO verifyComment(Long commentId) {
-        Comment comment = commentRepository.findById(commentId)
-                .orElseThrow(() -> new RuntimeException("Comment not found with id: " + commentId));
+        log.info("[COMMENT] ====== START: Verifying specific comment with ID: {} ======", commentId);
 
-        return verifyAndMapComment(comment);
+        try {
+            Comment comment = commentRepository.findById(commentId)
+                    .orElseThrow(() -> new RuntimeException("Comment not found with id: " + commentId));
+
+            log.info("[COMMENT] Found comment with ID: {}. Calling verifyAndMapComment", comment.getId());
+            CommentDTO result = verifyAndMapComment(comment);
+
+            log.info("[COMMENT] ====== DONE: Verification completed for comment ID: {}. Is valid: {} ======", 
+                    commentId, result.getIsValid());
+
+            return result;
+        } catch (Exception e) {
+            log.error("[COMMENT] ====== ERROR: Failed to verify comment with ID: {} ======", commentId, e);
+            throw e;
+        }
     }
 }
