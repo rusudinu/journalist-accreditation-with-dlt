@@ -5,6 +5,7 @@ import com.rusudinu.backend.distributedStorage.DistributedStorageService;
 import com.rusudinu.backend.document.Document;
 import com.rusudinu.backend.document.DocumentRepository;
 import com.rusudinu.backend.hash.HashService;
+import java.util.Comparator;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -136,13 +137,69 @@ public class CommentService {
         log.info("[COMMENT] Comment hash: {}", comment.getCommentHash());
         log.info("[COMMENT] Current blockchain hash: {}", currentBlockchainHash);
 
-        // This is a simplified validation. In a real implementation, you would need to
-        // retrieve all comments for the document in chronological order and reconstruct
-        // the hash chain to verify if this comment is part of it.
+        // Retrieve all comments for the document
+        List<Comment> allComments = commentRepository.findByDocumentId(comment.getDocument().getId());
 
-        // For now, we'll just check if the comment hash is contained in the blockchain hash
-        // This is not secure but demonstrates the concept
-        boolean isPartOfChain = currentBlockchainHash.contains(comment.getCommentHash());
+        // Sort comments by creation date to ensure chronological order
+        allComments.sort(Comparator.comparing(Comment::getCreatedDate));
+
+        log.info("[COMMENT] Found {} comments for document ID: {}", allComments.size(), comment.getDocument().getId());
+
+        // Reconstruct the hash chain
+        String reconstructedHash = null;
+        boolean foundTargetComment = false;
+        boolean isPartOfChain = false;
+
+        for (Comment c : allComments) {
+            // Generate hash for the comment (user + comment)
+            String userCommentData = c.getAuthor() + c.getContent();
+
+            // If there's a previous hash, include it in the new hash calculation
+            String hashData;
+            if (reconstructedHash != null) {
+                hashData = userCommentData + reconstructedHash;
+                log.info("[COMMENT] Creating chained hash with previous hash: {}", reconstructedHash);
+            } else {
+                hashData = userCommentData;
+                log.info("[COMMENT] Creating initial hash without previous hash");
+            }
+
+            // Generate the hash
+            try {
+                log.info("[COMMENT] Generating hash for data: {}", hashData);
+                byte[] commentHash = hashService.hashString(hashData);
+                String encodedHash = Base64.getEncoder().encodeToString(commentHash);
+                reconstructedHash = encodedHash;
+
+                log.info("[COMMENT] Generated comment hash: {}", encodedHash);
+
+                // Check if this is our target comment
+                if (c.getId().equals(comment.getId())) {
+                    foundTargetComment = true;
+                    // Verify that the stored hash matches the reconstructed hash
+                    isPartOfChain = encodedHash.equals(c.getCommentHash());
+                    log.info("[COMMENT] Found target comment. Stored hash: {}, Reconstructed hash: {}, Match: {}", 
+                            c.getCommentHash(), encodedHash, isPartOfChain);
+
+                    // If the hash doesn't match, no need to continue
+                    if (!isPartOfChain) {
+                        break;
+                    }
+                }
+
+                // If we've already found and validated our target comment,
+                // check if the final reconstructed hash matches the blockchain hash
+                if (foundTargetComment && encodedHash.equals(currentBlockchainHash)) {
+                    isPartOfChain = true;
+                    log.info("[COMMENT] Final reconstructed hash matches blockchain hash");
+                    break;
+                }
+            } catch (Exception e) {
+                log.error("[COMMENT] Error generating hash", e);
+                isPartOfChain = false;
+                break;
+            }
+        }
 
         log.info("[COMMENT] ====== RESULT: Comment is part of the chain? {} ======", isPartOfChain);
         return isPartOfChain;
