@@ -32,7 +32,7 @@ export const CommentService = {
   verifyComment: async (commentId: number): Promise<IComment> => {
     try {
       const response = await axios.get(`${API_URL}/api/v1/comments/${commentId}/verify`);
-      return response.data;
+      return response.data.isValid;
     } catch (error) {
       console.error('Error verifying comment:', error);
       throw error;

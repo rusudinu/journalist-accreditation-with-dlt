@@ -112,6 +112,34 @@ public class CommentService {
                     log.info("[COMMENT] Comment is not the latest. Is it part of the chain? {}", isPartOfChain);
                 } else {
                     log.info("[COMMENT] Comment is the latest in the chain");
+
+                    // Check if this is the only comment for the document
+                    List<Comment> allComments = commentRepository.findByDocumentId(comment.getDocument().getId());
+                    if (allComments.size() == 1) {
+                        log.info("[COMMENT] This is the only comment for document ID: {}, re-hashing to verify integrity", comment.getDocument().getId());
+
+                        // Re-hash the comment
+                        String userCommentData = comment.getAuthor() + comment.getContent();
+                        try {
+                            byte[] commentHash = hashService.hashString(userCommentData);
+                            String encodedHash = Base64.getEncoder().encodeToString(commentHash);
+
+                            // Compare the re-hashed value with the stored hash
+                            boolean hashesMatch = encodedHash.equals(comment.getCommentHash());
+                            log.info("[COMMENT] Re-hashed comment. Original hash: {}, New hash: {}, Match: {}", 
+                                    comment.getCommentHash(), encodedHash, hashesMatch);
+
+                            // Update validity based on hash comparison
+                            isLatestComment = isLatestComment && hashesMatch;
+
+                            if (!hashesMatch) {
+                                log.warn("[COMMENT] Hash mismatch detected for the only comment in document ID: {}", comment.getDocument().getId());
+                            }
+                        } catch (Exception e) {
+                            log.error("[COMMENT] Error re-hashing comment", e);
+                            isLatestComment = false;
+                        }
+                    }
                 }
 
                 isValid = isLatestComment || isPartOfChain;
