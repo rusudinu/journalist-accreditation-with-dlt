@@ -1,14 +1,18 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { IComment } from '@/bemodel/CommentTypes';
 import { Card } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
+import CommentService from '@/services/CommentService';
 
 interface CommentListProps {
   comments: IComment[];
 }
 
 const CommentList: React.FC<CommentListProps> = ({ comments }) => {
+  const [lastCommentValid, setLastCommentValid] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+
   if (!comments || comments.length === 0) {
     return <p className="text-gray-500 italic">No comments yet.</p>;
   }
@@ -22,12 +26,36 @@ const CommentList: React.FC<CommentListProps> = ({ comments }) => {
 
   // Check if the last comment is valid
   const lastComment = sortedComments.length > 0 ? sortedComments[0] : null;
-  const lastCommentValid = lastComment?.isValid === true;
+
+  const checkIfCommentIsValid = async (comment: IComment | null) => {
+    if (!comment || !comment.id) return;
+
+    setIsLoading(true);
+    try {
+      const verifiedComment = await CommentService.checkIfRequestIsValid(comment.documentId);
+      setLastCommentValid(verifiedComment);
+    } catch (error) {
+      console.error('Error verifying comment:', error);
+      setLastCommentValid(false);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (lastComment) {
+      checkIfCommentIsValid(lastComment);
+    }
+  }, [lastComment]);
 
   return (
     <div className="space-y-4">
       <h3 className="text-lg font-semibold">Comments</h3>
-      {lastCommentValid && (
+      {isLoading ? (
+        <Badge variant="outline" className="mb-2">
+          Verifying comment signature...
+        </Badge>
+      ) : lastCommentValid && (
         <Badge variant="secondary" className="mb-2">
           Comments signatures checked and are valid
         </Badge>
@@ -40,16 +68,16 @@ const CommentList: React.FC<CommentListProps> = ({ comments }) => {
               {index === 0 && (
                 <Badge 
                   variant={
-                    comment.isValid === undefined 
+                    lastCommentValid === undefined
                       ? "outline" 
-                      : comment.isValid 
+                      : lastCommentValid
                         ? "secondary" 
                         : "destructive"
                   }
                 >
-                  {comment.isValid === undefined 
+                  {lastCommentValid === undefined
                     ? "Comment signature not verified" 
-                    : comment.isValid 
+                    : lastCommentValid
                       ? "Comment signature checked and is valid" 
                       : "Comment signature checked and is invalid"}
                 </Badge>

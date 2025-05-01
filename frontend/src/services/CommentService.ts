@@ -26,6 +26,31 @@ export const CommentService = {
       console.error('Error adding comment:', error);
       throw error;
     }
+  },
+
+  // Verify a comment
+  verifyComment: async (commentId: number): Promise<IComment> => {
+    try {
+      const response = await axios.get(`${API_URL}/api/v1/comments/${commentId}/verify`);
+      return response.data;
+    } catch (error) {
+      console.error('Error verifying comment:', error);
+      throw error;
+    }
+  },
+
+  checkIfRequestIsValid: async (requestId: number): Promise<boolean> => {
+    try {
+      const response = await axios.get(`${API_URL}/api/v1/requests/verify/${requestId}`, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Error verifying request:', error);
+      throw error;
+    }
   }
 };
 
