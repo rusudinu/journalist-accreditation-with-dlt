@@ -54,7 +54,7 @@ public class EthService implements DistributedStorageService {
 
     @Override
     public String getCommentHashByRequestId(Long requestId) {
-        log.info("[ETH] ====== START: Getting comment hash for request id: {} ======", requestId);
+        log.info("[ETH] START: Getting comment hash for request id: {}", requestId);
         DocumentRegistry document = DocumentRegistry.load(contractAddress, web3, Credentials.create(ministryAccountPrivateKey), new DefaultGasProvider());
         try {
             String commentKey = COMMENT_PREFIX + requestId;
@@ -63,21 +63,21 @@ public class EthService implements DistributedStorageService {
             String commentHash = document.getDocumentsForRequest(commentKey).send();
 
             if (commentHash != null && !commentHash.isEmpty()) {
-                log.info("[ETH] ====== SUCCESS: Fetched comment hash: {} ======", commentHash);
+                log.info("[ETH] SUCCESS: Fetched comment hash: {}", commentHash);
             } else {
-                log.info("[ETH] ====== NOTE: No comment hash found for request id: {} ======", requestId);
+                log.info("[ETH] NOTE: No comment hash found for request id: {}", requestId);
             }
 
             return commentHash;
         } catch (Exception e) {
-            log.error("[ETH] ====== ERROR: Error fetching comment hash: {} ======", e.getMessage(), e);
+            log.error("[ETH] ERROR: Error fetching comment hash: {}", e.getMessage(), e);
             return "";
         }
     }
 
     @Override
     public void persistCommentHash(Long requestId, String commentHash) {
-        log.info("[ETH] ====== START: Persisting comment hash for request id: {} ======", requestId);
+        log.info("[ETH] START: Persisting comment hash for request id: {}", requestId);
         log.info("[ETH] Comment hash to persist: {}", commentHash);
         DocumentRegistry document = DocumentRegistry.load(contractAddress, web3, Credentials.create(ministryAccountPrivateKey), new DefaultGasProvider());
         try {
@@ -89,9 +89,9 @@ public class EthService implements DistributedStorageService {
 
             // Log success
             log.info("[ETH] Transaction successful!");
-            log.info("[ETH] ====== SUCCESS: Persisted comment hash: {} ======", commentHash);
+            log.info("[ETH] SUCCESS: Persisted comment hash: {}", commentHash);
         } catch (Exception e) {
-            log.error("[ETH] ====== ERROR: Failed to persist comment hash ======", e);
+            log.error("[ETH] ERROR: Failed to persist comment hash", e);
             throw new RuntimeException(e);
         }
     }
