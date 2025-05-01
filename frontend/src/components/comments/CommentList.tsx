@@ -32,7 +32,7 @@ const CommentList: React.FC<CommentListProps> = ({ comments }) => {
 
     setIsLoading(true);
     try {
-      const verifiedComment = await CommentService.checkIfRequestIsValid(comment.documentId);
+      const verifiedComment = await CommentService.verifyComment(comment.id);
       setLastCommentValid(verifiedComment);
     } catch (error) {
       console.error('Error verifying comment:', error);

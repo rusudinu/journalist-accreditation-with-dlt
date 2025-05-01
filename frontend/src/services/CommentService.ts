@@ -39,7 +39,7 @@ export const CommentService = {
     }
   },
 
-  checkIfRequestIsValid: async (requestId: number): Promise<boolean> => {
+  checkIfRequestIsValid: async (requestId: string): Promise<boolean> => {
     try {
       const response = await axios.get(`${API_URL}/api/v1/requests/verify/${requestId}`, {
         headers: {

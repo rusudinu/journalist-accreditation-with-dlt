@@ -16,10 +16,12 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
+import lombok.extern.slf4j.Slf4j;
 
 @RestController
 @RequestMapping("/api/v1/requests")
 @RequiredArgsConstructor
+@Slf4j
 public class RequestController {
     private final RequestService requestService;
     private final UserService userService;
@@ -54,7 +56,9 @@ public class RequestController {
     @GetMapping("verify/{id}")
     public boolean verifyRequestById(@PathVariable Long id) {
         Request request = requestService.getRequestById(id);
-        return snapshotService.verifyRequest(request);
+        boolean response = snapshotService.verifyRequest(request);
+        log.info("Request verification result: {}", response);
+        return response;
     }
 
     @GetMapping("/without-approval-process")

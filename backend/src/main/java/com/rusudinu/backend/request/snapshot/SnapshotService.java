@@ -49,6 +49,7 @@ public class SnapshotService {
 
 	@SneakyThrows
 	public boolean verifyRequest(Request request) {
+		log.info("Verifying request with ID: {}", request.getId());
 		String snapshotHash = distributedStorageService.getRegistrySnapshotHashByRequestId(request.getId());
 		RequestSnapshot snapshot = snapshotRepository.findFirstByRequestIdOrderByIdDesc(request.getId());
 
