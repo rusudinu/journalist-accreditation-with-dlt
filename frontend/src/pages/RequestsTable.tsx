@@ -42,32 +42,28 @@ function RequestsTable() {
                     <TableRow>
                         <TableHead className="w-[100px]">Document ID</TableHead>
                         <TableHead>Created Date</TableHead>
-                        <TableHead>Preview</TableHead>
+                        <TableHead className="text-center">Preview</TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>
                     {reviewRequests.map((document) => (
-
-                        <TableBody>
-                            <TableRow key={document.id}>
-                                <TableCell className="font-medium">{document.id}</TableCell>
-                                <TableCell>
-                                    {document.createdDate
-                                        ? new Date(document.createdDate).toLocaleString()
-                                        : 'N/A'
-                                    }
-                                </TableCell>
-                                <TableCell className="text-center">
-                                    <TableCell>
-                                        <Button
-                                            onClick={() => openRequestPage(document)}
-                                        >
-                                            Open
-                                        </Button>
-                                    </TableCell>
-                                </TableCell>
-                            </TableRow>
-                        </TableBody>
+                        // The map function returns TableRow elements directly
+                        <TableRow key={document.id}>
+                            <TableCell className="font-medium">{document.id}</TableCell>
+                            <TableCell>
+                                {document.createdDate
+                                    ? new Date(document.createdDate).toLocaleString()
+                                    : 'N/A'
+                                }
+                            </TableCell>
+                            <TableCell className="text-center">
+                                <Button
+                                    onClick={() => openRequestPage(document)}
+                                >
+                                    Open
+                                </Button>
+                            </TableCell>
+                        </TableRow>
                     ))}
                 </TableBody>
             </Table>
