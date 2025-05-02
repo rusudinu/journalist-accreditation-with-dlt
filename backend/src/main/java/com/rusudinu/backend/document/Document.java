@@ -1,9 +1,6 @@
 package com.rusudinu.backend.document;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.rusudinu.backend.comment.Comment;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -35,45 +32,19 @@ public class Document {
     REGISTRATION PARLIMENT
     general secretariat, legislative council, economic and social council
      */
-    @JsonIgnoreProperties("document")
-    @JsonIgnore
-    @OneToOne
-    Comment generalSecretariatComment;
-
-
-    @JsonIgnoreProperties("document")
-    @JsonIgnore
-    @OneToOne
-    Comment legislativeCouncilComment;
-
-    @JsonIgnoreProperties("document")
-    @JsonIgnore
-    @OneToOne
-    Comment economicAndSocialCouncilComment;
+    String generalSecretariatComment;
+    String legislativeCouncilComment;
+    String economicAndSocialCouncilComment;
 
     /*
     AMENDMENTS / OPINIONS
     advisory committee, budget committee, public administration
      */
-    @JsonIgnoreProperties("document")
-    @JsonIgnore
-    @OneToOne
-    Comment legalCommitteeComment;
+    String legalCommitteeComment;
+    String budgetCommitteeComment;
+    String publicAdministrationComment;
 
-    @JsonIgnoreProperties("document")
-    @JsonIgnore
-    @OneToOne
-    Comment budgetCommitteeComment;
-
-    @JsonIgnoreProperties("document")
-    @JsonIgnore
-    @OneToOne
-    Comment publicAdministrationComment;
-
-    @JsonIgnoreProperties("document")
-    @JsonIgnore
-    @OneToOne
-    Comment specialtyCommissionComment;
+    String specialtyCommissionComment;
 
     Boolean debateAndApprovalInPlenarySession; // true / false
 }

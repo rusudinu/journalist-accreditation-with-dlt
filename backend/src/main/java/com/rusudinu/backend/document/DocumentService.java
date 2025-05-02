@@ -105,4 +105,46 @@ public class DocumentService {
 	Document createDocument() {
         return documentRepository.save(new Document());
     }
+
+	Document addEconomicAndSocialCouncilComment(Long documentId, String comment) {
+		Document document = documentRepository.findById(documentId).orElseThrow(() -> new RuntimeException("Document not found with id: " + documentId));
+		document.setEconomicAndSocialCouncilComment(comment);
+		return documentRepository.save(document);
+	}
+
+	Document addGeneralSecretariatComment(Long documentId, String comment) {
+		Document document = documentRepository.findById(documentId).orElseThrow(() -> new RuntimeException("Document not found with id: " + documentId));
+		document.setGeneralSecretariatComment(comment);
+		return documentRepository.save(document);
+	}
+
+	Document addLegislativeCouncilComment(Long documentId, String comment) {
+		Document document = documentRepository.findById(documentId).orElseThrow(() -> new RuntimeException("Document not found with id: " + documentId));
+		document.setLegislativeCouncilComment(comment);
+		return documentRepository.save(document);
+	}
+
+	Document addLegalCommitteeComment(Long documentId, String comment) {
+		Document document = documentRepository.findById(documentId).orElseThrow(() -> new RuntimeException("Document not found with id: " + documentId));
+		document.setLegalCommitteeComment(comment);
+		return documentRepository.save(document);
+	}
+
+	Document addBudgetCommitteeComment(Long documentId, String comment) {
+		Document document = documentRepository.findById(documentId).orElseThrow(() -> new RuntimeException("Document not found with id: " + documentId));
+		document.setBudgetCommitteeComment(comment);
+		return documentRepository.save(document);
+	}
+
+	Document addPublicAdministrationComment(Long documentId, String comment) {
+		Document document = documentRepository.findById(documentId).orElseThrow(() -> new RuntimeException("Document not found with id: " + documentId));
+		document.setPublicAdministrationComment(comment);
+		return documentRepository.save(document);
+	}
+
+	Document addSpecialtyCommissionComment(Long documentId, String comment) {
+		Document document = documentRepository.findById(documentId).orElseThrow(() -> new RuntimeException("Document not found with id: " + documentId));
+		document.setSpecialtyCommissionComment(comment);
+		return documentRepository.save(document);
+	}
 }

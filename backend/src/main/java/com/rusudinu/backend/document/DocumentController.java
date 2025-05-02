@@ -49,4 +49,39 @@ public class DocumentController {
 
         return new ResponseEntity<>(documentContent, headers, HttpStatus.OK);
     }
+
+    @PostMapping("/economic-and-social/{documentId}")
+    public Document addEconomicAndSocialCouncilComment(@PathVariable Long documentId, @RequestParam String comment) {
+        return documentService.addEconomicAndSocialCouncilComment(documentId, comment);
+    }
+
+	@PostMapping("/general-secretariat/{documentId}")
+	public Document addGeneralSecretariatComment(@PathVariable Long documentId, @RequestParam String comment) {
+		return documentService.addGeneralSecretariatComment(documentId, comment);
+	}
+
+	@PostMapping("/legislative-council/{documentId}")
+	public Document addLegislativeCouncilComment(@PathVariable Long documentId, @RequestParam String comment) {
+		return documentService.addLegislativeCouncilComment(documentId, comment);
+	}
+
+	@PostMapping("/legal-committee/{documentId}")
+	public Document addLegalCommitteeComment(@PathVariable Long documentId, @RequestParam String comment) {
+		return documentService.addLegalCommitteeComment(documentId, comment);
+	}
+
+	@PostMapping("/budget-committee/{documentId}")
+	public Document addBudgetCommitteeComment(@PathVariable Long documentId, @RequestParam String comment) {
+		return documentService.addBudgetCommitteeComment(documentId, comment);
+	}
+
+	@PostMapping("/public-administration/{documentId}")
+	public Document addPublicAdministrationComment(@PathVariable Long documentId, @RequestParam String comment) {
+		return documentService.addPublicAdministrationComment(documentId, comment);
+	}
+
+	@PostMapping("/specialty-commission/{documentId}")
+	public Document addSpecialtyCommissionComment(@PathVariable Long documentId, @RequestParam String comment) {
+		return documentService.addSpecialtyCommissionComment(documentId, comment);
+	}
 }
