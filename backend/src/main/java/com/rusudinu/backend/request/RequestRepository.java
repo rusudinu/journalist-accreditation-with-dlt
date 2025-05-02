@@ -9,7 +9,4 @@ public interface RequestRepository extends JpaRepository<Request, Long> {
 
     List<Request> findAllByStatusIn(List<RequestStatus> statusFilter);
 
-    List<Request> findByApprovalProcessIsNull();
-
-    List<Request> findByApprovalProcessIsNotNull();
 }

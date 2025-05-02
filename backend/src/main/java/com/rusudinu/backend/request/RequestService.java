@@ -1,9 +1,5 @@
 package com.rusudinu.backend.request;
 
-import com.rusudinu.backend.approval.ApprovalProcess;
-import com.rusudinu.backend.approval.ApprovalProcessService;
-import com.rusudinu.backend.approval.ApprovalStep;
-import com.rusudinu.backend.approval.ApprovalStepStatus;
 import com.rusudinu.backend.request.dto.RequestWithApprovalStatusDTO;
 import com.rusudinu.backend.user.User;
 import lombok.RequiredArgsConstructor;
@@ -17,7 +13,6 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class RequestService {
     private final RequestRepository requestRepository;
-    private final ApprovalProcessService approvalProcessService;
 
     public Request createRequest(User user) {
         Request request = Request.builder()
@@ -36,35 +31,6 @@ public class RequestService {
 
         request.setStatus(status);
 
-        // If the request is being approved or rejected, check if it has an approval process
-        if ((status == RequestStatus.APPROVED || status == RequestStatus.REJECTED) && request.getApprovalProcess() != null) {
-            // Check if all steps in the approval process are completed
-            ApprovalProcess approvalProcess = request.getApprovalProcess();
-            boolean allStepsCompleted = true;
-
-            for (ApprovalStep step : approvalProcess.getSteps()) {
-                ApprovalStepStatus stepStatus = step.getStatus();
-
-                // If any step is not approved/completed, the request cannot be approved
-                if (status == RequestStatus.APPROVED && 
-                    (stepStatus != ApprovalStepStatus.APPROVED && stepStatus != ApprovalStepStatus.COMPLETED)) {
-                    allStepsCompleted = false;
-                    break;
-                }
-
-                // If any step is rejected, the request should be rejected
-                if (stepStatus == ApprovalStepStatus.REJECTED) {
-                    request.setStatus(RequestStatus.REJECTED);
-                    return requestRepository.save(request);
-                }
-            }
-
-            // If not all steps are completed, the request cannot be approved
-            if (status == RequestStatus.APPROVED && !allStepsCompleted) {
-                throw new RuntimeException("Cannot approve request. Not all approval steps are completed.");
-            }
-        }
-
         return requestRepository.save(request);
     }
 
@@ -74,8 +40,6 @@ public class RequestService {
                 () -> new RuntimeException("Request with id " + requestId + " not found")
         );
 
-        ApprovalProcess approvalProcess = approvalProcessService.getApprovalProcessById(approvalProcessId);
-        request.setApprovalProcess(approvalProcess);
 
         return requestRepository.save(request);
     }
@@ -110,16 +74,5 @@ public class RequestService {
             // for deputy, etc use director filter
             return requestRepository.findAllByStatusIn(directorStatusFilter);
         }
-    }
-
-    public List<Request> getRequestsWithoutApprovalProcess() {
-        return requestRepository.findByApprovalProcessIsNull();
-    }
-
-    public List<RequestWithApprovalStatusDTO> getRequestsWithApprovalProcess() {
-        List<Request> requests = requestRepository.findByApprovalProcessIsNotNull();
-        return requests.stream()
-                .map(RequestWithApprovalStatusDTO::fromRequest)
-                .collect(Collectors.toList());
     }
 }

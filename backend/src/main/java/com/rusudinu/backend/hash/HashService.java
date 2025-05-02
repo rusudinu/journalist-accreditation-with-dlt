@@ -56,11 +56,11 @@ public class HashService {
         Map<String, Object> documentData = new HashMap<>();
         documentData.put("content", documentContent);
 
-        // Add comments to the map
-        List<Comment> comments = document.getComments();
-        if (comments != null && !comments.isEmpty()) {
-            documentData.put("comments", comments);
-        }
+//        // Add comments to the map
+//        List<Comment> comments = document.getComments();
+//        if (comments != null && !comments.isEmpty()) {
+//            documentData.put("comments", comments);
+//        }
 
         // Convert the map to JSON and hash it
         String jsonData = objectMapper.writeValueAsString(documentData);
@@ -83,10 +83,10 @@ public class HashService {
         documentData.put("content", documentContent);
 
         // Add comments to the map
-        List<Comment> comments = document.getComments();
-        if (comments != null && !comments.isEmpty()) {
-            documentData.put("comments", comments);
-        }
+//        List<Comment> comments = document.getComments();
+//        if (comments != null && !comments.isEmpty()) {
+//            documentData.put("comments", comments);
+//        }
 
         // Convert the map to JSON and verify the hash
         String jsonData = objectMapper.writeValueAsString(documentData);

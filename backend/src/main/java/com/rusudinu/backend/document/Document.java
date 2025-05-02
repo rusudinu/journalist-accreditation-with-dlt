@@ -1,6 +1,7 @@
 package com.rusudinu.backend.document;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.rusudinu.backend.comment.Comment;
 import com.rusudinu.backend.request.Request;
@@ -32,12 +33,49 @@ public class Document {
 
     private boolean isDeleted = false;
     private String storedDocumentName;
+
     @JsonIgnoreProperties("documents")
     @ManyToOne(fetch = FetchType.LAZY)
     private Request request;
 
+    /*
+    REGISTRATION PARLIMENT
+    general secretariat, legislative council, economic and social council
+     */
     @JsonIgnoreProperties("document")
-    @com.fasterxml.jackson.annotation.JsonIgnore
-    @OneToMany(mappedBy = "document", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Comment> comments = new ArrayList<>();
+    @JsonIgnore
+    @OneToOne
+    Comment generalSecretariatComment;
+
+
+    @JsonIgnoreProperties("document")
+    @JsonIgnore
+    @OneToOne
+    Comment legislativeCouncilComment;
+
+    @JsonIgnoreProperties("document")
+    @JsonIgnore
+    @OneToOne
+    Comment economicAndSocialCouncilComment;
+
+    /*
+    AMENDMENTS / OPINIONS
+    advisory committee, budget committee, public administration
+     */
+    @JsonIgnoreProperties("document")
+    @JsonIgnore
+    @OneToOne
+    Comment advisoryCommitteeComment;
+
+    @JsonIgnoreProperties("document")
+    @JsonIgnore
+    @OneToOne
+    Comment budgetCommitteeComment;
+
+    @JsonIgnoreProperties("document")
+    @JsonIgnore
+    @OneToOne
+    Comment publicAdministrationComment;
+
+    Boolean debateAndApprovalInPlenarySession; // true / false
 }

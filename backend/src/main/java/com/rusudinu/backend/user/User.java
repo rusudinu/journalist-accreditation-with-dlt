@@ -2,7 +2,6 @@ package com.rusudinu.backend.user;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.rusudinu.backend.approval.ApprovalReview;
 import com.rusudinu.backend.request.Request;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -38,9 +37,4 @@ public class User {
     @com.fasterxml.jackson.annotation.JsonIgnore
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "user")
     private List<Request> requests;
-
-    @JsonIgnoreProperties("reviewer")
-    @com.fasterxml.jackson.annotation.JsonIgnore
-    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "reviewer")
-    private List<ApprovalReview> approvalReviews;
 }

@@ -61,12 +61,6 @@ public class RequestController {
         return response;
     }
 
-    @GetMapping("/without-approval-process")
-    @PreAuthorize("hasAuthority('ADMIN')")
-    public ResponseEntity<List<Request>> getRequestsWithoutApprovalProcess() {
-        return ResponseEntity.ok(requestService.getRequestsWithoutApprovalProcess());
-    }
-
     @PostMapping("/{requestId}/assign-approval-process/{approvalProcessId}")
     @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<Request> assignApprovalProcess(
@@ -75,9 +69,4 @@ public class RequestController {
         return ResponseEntity.ok(requestService.assignApprovalProcess(requestId, approvalProcessId));
     }
 
-    @GetMapping("/with-approval-process")
-    @PreAuthorize("hasAuthority('ADMIN')")
-    public ResponseEntity<List<RequestWithApprovalStatusDTO>> getRequestsWithApprovalProcess() {
-        return ResponseEntity.ok(requestService.getRequestsWithApprovalProcess());
-    }
 }
