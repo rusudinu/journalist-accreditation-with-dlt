@@ -8,6 +8,7 @@ import com.rusudinu.backend.request.Request;
 import com.rusudinu.backend.request.RequestService;
 import com.rusudinu.backend.request.RequestStatus;
 import com.rusudinu.backend.user.UserService;
+import java.util.ArrayList;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -113,6 +114,7 @@ public class DocumentService {
 			case "legislativecouncil" -> documentRepository.findByLegislativeCouncilCommentIsNull();
 			case "publicadministration" -> documentRepository.findByPublicAdministrationCommentIsNull();
 			case "specialtycommission" -> documentRepository.findBySpecialtyCommissionCommentIsNull();
+            case "proposer" -> new ArrayList<>();
 			default -> throw new IllegalArgumentException("Invalid name: " + name);
 		};
     }
