@@ -15,39 +15,7 @@ export interface IDocument {
   /** @format date-time */
   createdDate?: string;
   storedDocumentName?: string;
-  deleted?: boolean;
-}
-
-export interface IRequest {
-  /** @format int64 */
-  id?: number;
-  /** @format date-time */
-  createdDate?: string;
-  status?: "CREATED" | "VALIDATED" | "APPROVED" | "REJECTED";
-  user?: IUser;
-  documents?: IDocument[];
-  approvalProcess?: any; // Using any for now, will be replaced with IApprovalProcess when needed
-}
-
-export interface IUser {
-  /** @format int64 */
-  id?: number;
-  keycloakId?: string;
-  name?: string;
-  /** @format date-time */
-  createdDate?: string;
-  deleted?: boolean;
-}
-
-export interface IDocumentDTO {
-  /** @format int64 */
-  id?: number;
-  /** @format date-time */
-  createdDate?: string;
-  storedDocumentName?: string;
-  status?: string;
-  /** @format int64 */
-  userId?: number;
+  debateAndApprovalInPlenarySession?: boolean;
   deleted?: boolean;
 }
 
@@ -57,7 +25,16 @@ export interface IUserDTO {
   keycloakId?: string;
   /** @format date-time */
   createdDate?: string;
-  documents?: IDocumentDTO[];
+  deleted?: boolean;
+}
+
+export interface IUser {
+  /** @format int64 */
+  id?: number;
+  keycloakId?: string;
+  name?: string;
+  /** @format date-time */
+  createdDate?: string;
   deleted?: boolean;
 }
 
@@ -206,22 +183,6 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
-     * @tags request-controller
-     * @name CreateRequest
-     * @request POST:/api/v1/requests
-     * @secure
-     */
-    createRequest: (params: RequestParams = {}) =>
-      this.request<IRequest, any>({
-        path: `/api/v1/requests`,
-        method: "POST",
-        secure: true,
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
      * @tags document-controller
      * @name UploadDocument
      * @request POST:/api/v1/documents
@@ -229,9 +190,8 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      */
     uploadDocument: (
       query: {
-        status: "CREATED" | "VALIDATED" | "APPROVED" | "REJECTED";
         /** @format int64 */
-        requestId: number;
+        documentId: number;
       },
       data: {
         /** @format binary */
@@ -246,6 +206,22 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         body: data,
         secure: true,
         type: ContentType.FormData,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags document-controller
+     * @name CreateDocument
+     * @request POST:/api/v1/documents/create-document
+     * @secure
+     */
+    createDocument: (params: RequestParams = {}) =>
+      this.request<IDocument, any>({
+        path: `/api/v1/documents/create-document`,
+        method: "POST",
+        secure: true,
         ...params,
       }),
 
@@ -301,61 +277,45 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * No description
      *
      * @tags document-controller
+     * @name GetDocumentById
+     * @request GET:/api/v1/documents/{documentId}
+     * @secure
+     */
+    getDocumentById: (documentId: number, params: RequestParams = {}) =>
+      this.request<IDocument, any>({
+        path: `/api/v1/documents/${documentId}`,
+        method: "GET",
+        secure: true,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags document-controller
+     * @name GetNeedReviewDocuments
+     * @request GET:/api/v1/documents/need-review
+     * @secure
+     */
+    getNeedReviewDocuments: (params: RequestParams = {}) =>
+      this.request<IDocument[], any>({
+        path: `/api/v1/documents/need-review`,
+        method: "GET",
+        secure: true,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags document-controller
      * @name GetDocument
-     * @request GET:/api/v1/documents/{storedDocumentName}
+     * @request GET:/api/v1/documents/download/{storedDocumentName}
      * @secure
      */
     getDocument: (storedDocumentName: string, params: RequestParams = {}) =>
       this.request<string, any>({
-        path: `/api/v1/documents/${storedDocumentName}`,
-        method: "GET",
-        secure: true,
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @tags document-controller
-     * @name TestMinistry
-     * @request GET:/api/v1/documents/only-ministry
-     * @secure
-     */
-    testMinistry: (params: RequestParams = {}) =>
-      this.request<string, any>({
-        path: `/api/v1/documents/only-ministry`,
-        method: "GET",
-        secure: true,
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @tags document-controller
-     * @name TestJournalist
-     * @request GET:/api/v1/documents/only-journalist
-     * @secure
-     */
-    testJournalist: (params: RequestParams = {}) =>
-      this.request<string, any>({
-        path: `/api/v1/documents/only-journalist`,
-        method: "GET",
-        secure: true,
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @tags document-controller
-     * @name TestJournalistAndMinistry
-     * @request GET:/api/v1/documents/journalist-and-ministry
-     * @secure
-     */
-    testJournalistAndMinistry: (params: RequestParams = {}) =>
-      this.request<string, any>({
-        path: `/api/v1/documents/journalist-and-ministry`,
+        path: `/api/v1/documents/download/${storedDocumentName}`,
         method: "GET",
         secure: true,
         ...params,

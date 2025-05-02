@@ -10,14 +10,13 @@ import {Button} from "@/components/ui/button.tsx";
 import axios from 'axios';
 import {toast} from "sonner";
 import {useParams} from "react-router-dom";
-import {IRequest} from "@/bemodel/Api.ts";
 import RequestsDocumentTable from "@/pages/RequestsDocumentTable.tsx";
-import {Status} from "@/components/extension/Combobox.tsx";
 import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "@/components/ui/table.tsx";
 import {Badge} from "@/components/ui/badge.tsx";
 import {Separator} from "@/components/ui/separator.tsx";
 import {IoIosWarning} from "react-icons/io";
 import {Alert, AlertDescription, AlertTitle} from "@/components/ui/alert.tsx";
+import {IDocument} from "@/bemodel/Api.ts";
 
 const FileSvgDraw = () => {
     return (
@@ -51,7 +50,7 @@ const FileSvgDraw = () => {
 function RequestPage() {
     const {requestId} = useParams<{ requestId: string }>();
     const [files, setFiles] = useState<File[] | null>([]);
-    const [request, setRequest] = useState<IRequest | null>(null);
+    const [document, setDocument] = useState<IDocument | null>(null);
     const [verifiedRequest, setVerifiedRequest] = useState<boolean | null>(null);
     const [selectedDocumentId, setSelectedDocumentId] = useState<number | null>(null);
 
@@ -67,7 +66,7 @@ function RequestPage() {
                 },
             })
                 .then((response) => {
-                    setRequest(response.data);
+                    setDocument(response.data);
                     // Set the selected document ID to the most recent document's ID if available
                     if (response.data.documents && response.data.documents.length > 0) {
                         const mostRecentDocument = response.data.documents[response.data.documents.length - 1];
