@@ -102,9 +102,14 @@ public class CommentService {
 
             // If the blockchain has a hash, check if it's part of the chain
             if (isValid) {
+                // re-compute the hash for the comment
+                String computedCommentHashA = comment.getAuthor() + comment.getContent();
+                byte[] commentHashA = hashService.hashString(computedCommentHashA);
+                String encodedHashA = Base64.getEncoder().encodeToString(commentHashA);
                 // The latest hash in the blockchain should contain this comment's hash
                 // or be equal to it if it's the latest comment
-                boolean isLatestComment = blockchainHash.equals(comment.getCommentHash());
+                boolean isLatestComment = blockchainHash.equals(encodedHashA);
+//                boolean isLatestComment = blockchainHash.equals(comment.getCommentHash());
                 boolean isPartOfChain = false;
 
                 if (!isLatestComment) {
