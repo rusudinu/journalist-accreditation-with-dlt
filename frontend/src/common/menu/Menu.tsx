@@ -1,5 +1,12 @@
 import {useUserIsAuthenticated} from '@/common/auth/UserUtils.ts';
-import {NavigationMenu, NavigationMenuItem, NavigationMenuList, NavigationMenuTrigger, NavigationMenuContent, NavigationMenuLink} from '@/components/ui/navigation-menu.tsx';
+import {
+    NavigationMenu,
+    NavigationMenuItem,
+    NavigationMenuList,
+    NavigationMenuTrigger,
+    NavigationMenuContent,
+    NavigationMenuLink
+} from '@/components/ui/navigation-menu.tsx';
 import {cn} from '@/lib/utils.ts';
 import React, {useContext, useEffect} from 'react';
 import {Link, Outlet, useLocation} from 'react-router-dom';
@@ -11,12 +18,7 @@ const generalComponents = [
         title: 'Home',
         href: '/home',
         description: 'View your own documents',
-    },
-    {
-        title: 'Users',
-        href: '/users',
-        description: 'View all users',
-    },
+    }
 ]
 
 const pathsWhereMenuIsHidden: string[] = [];

@@ -8,7 +8,6 @@ import React from 'react';
 import {store} from "@/store.ts";
 import Menu from "@/common/menu/Menu.tsx";
 import RequestPage from "@/pages/RequestPage.tsx";
-import Users from "@/pages/Users.tsx";
 import Home from "@/pages/Home.tsx";
 
 const router = createBrowserRouter([
@@ -23,10 +22,6 @@ const router = createBrowserRouter([
             {
                 path: '/home',
                 element: <Home/>,
-            },
-            {
-                path: '/users',
-                element: <Users/>,
             },
             {
                 path: '/request/:requestId',

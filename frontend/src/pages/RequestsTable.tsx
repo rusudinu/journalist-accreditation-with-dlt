@@ -1,15 +1,14 @@
 import {useEffect, useState} from 'react';
 import axios from 'axios';
-import {IRequest} from "@/bemodel/Api.ts";
 import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "@/components/ui/table.tsx";
 import {Button} from "@/components/ui/button.tsx";
 import {useNavigate} from "react-router-dom";
-import {Badge} from "@/components/ui/badge.tsx";
 import {useAppSelector} from "@/hooks.ts";
+import {IDocument} from "@/bemodel/Api.ts";
 
 function RequestsTable() {
     const navigate = useNavigate();
-    const [reviewRequests, setReviewRequests] = useState<IRequest[]>([]);
+    const [reviewRequests, setReviewRequests] = useState<IDocument[]>([]);
     const userId = useAppSelector((state) => state.core.authenticatedUserId);
 
     useEffect(() => {
@@ -32,7 +31,7 @@ function RequestsTable() {
             });
     }
 
-    const openRequestPage = (request: IRequest) => {
+    const openRequestPage = (request: IDocument) => {
         navigate(`/request/${request.id}`);
     }
 
@@ -41,32 +40,34 @@ function RequestsTable() {
             <Table>
                 <TableHeader>
                     <TableRow>
-                        <TableHead className="w-[100px]">Request ID</TableHead>
-                        <TableHead>Uploaded documents</TableHead>
-                        <TableHead>Status</TableHead>
-                        <TableHead>Review Status</TableHead>
+                        <TableHead className="w-[100px]">Document ID</TableHead>
                         <TableHead>Created Date</TableHead>
-                        <TableHead>Action</TableHead>
+                        <TableHead>Preview</TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>
-                    {reviewRequests.map((request) => (
-                        <TableRow key={request.id}>
-                            <TableCell className="font-medium">{request.id}</TableCell>
-                            <TableCell>{request.documents?.length}</TableCell>
-                            <TableCell><Badge variant={request.status}>{request.status}</Badge></TableCell>
-                            <TableCell>
-                                <Badge variant="destructive">Needs Review</Badge>
-                            </TableCell>
-                            <TableCell>{request.createdDate}</TableCell>
-                            <TableCell>
-                                <Button
-                                    onClick={() => openRequestPage(request)}
-                                >
-                                    Open
-                                </Button>
-                            </TableCell>
-                        </TableRow>
+                    {reviewRequests.map((document) => (
+
+                        <TableBody>
+                            <TableRow key={document.id}>
+                                <TableCell className="font-medium">{document.id}</TableCell>
+                                <TableCell>
+                                    {document.createdDate
+                                        ? new Date(document.createdDate).toLocaleString()
+                                        : 'N/A'
+                                    }
+                                </TableCell>
+                                <TableCell className="text-center">
+                                    <TableCell>
+                                        <Button
+                                            onClick={() => openRequestPage(document)}
+                                        >
+                                            Open
+                                        </Button>
+                                    </TableCell>
+                                </TableCell>
+                            </TableRow>
+                        </TableBody>
                     ))}
                 </TableBody>
             </Table>
