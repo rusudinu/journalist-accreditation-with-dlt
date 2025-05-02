@@ -36,18 +36,6 @@ public class RequestController {
         return requestService.createRequest(user);
     }
 
-    @GetMapping
-    public List<Request> getHomepageRequests() {
-        Authentication authToken = SecurityContextHolder.getContext().getAuthentication();
-        Map<String, Object> attributes = ((JwtAuthenticationToken) authToken).getTokenAttributes();
-        String userId = (String) attributes.get("sub");
-        User user = userService.findOrCreateByKeycloakId(userId);
-        LinkedTreeMap<String, Object> roles = (LinkedTreeMap<String, Object>) attributes.get("realm_access");
-        List<String> rolesList = (List<String>) roles.get("roles");
-        List<Request> requests = requestService.fetchHomePageRequests(user.getId(), rolesList);
-        return requests;
-    }
-
     @GetMapping("{id}")
     public Request getRequestById(@PathVariable Long id) {
         return requestService.getRequestById(id);

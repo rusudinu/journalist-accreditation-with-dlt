@@ -6,7 +6,6 @@ import com.rusudinu.backend.comment.CommentMapper;
 import com.rusudinu.backend.comment.CommentRepository;
 import com.rusudinu.backend.request.Request;
 import com.rusudinu.backend.request.RequestService;
-import com.rusudinu.backend.request.RequestStatus;
 import com.rusudinu.backend.user.UserService;
 import java.util.ArrayList;
 import lombok.RequiredArgsConstructor;
@@ -33,7 +32,7 @@ public class DocumentService {
     private final CommentMapper commentMapper;
     private final UserService userService;
 
-    public Document uploadDocument(MultipartFile file, RequestStatus status, Long requestId) {
+    public Document uploadDocument(MultipartFile file, Long requestId) {
         File directory = new File(UPLOAD_DIR);
         if (!directory.exists()) {
             if (!directory.mkdirs()) {
@@ -53,9 +52,7 @@ public class DocumentService {
 
         try {
             Files.write(filePath, file.getBytes());
-            Document documentEntity = documentRepository.save(document);
-            requestService.updateRequestStatus(requestId, status);
-            return documentEntity;
+			return documentRepository.save(document);
         } catch (IOException e) {
             return null;
         }

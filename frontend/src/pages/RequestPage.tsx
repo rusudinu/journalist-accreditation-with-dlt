@@ -13,7 +13,6 @@ import {useParams} from "react-router-dom";
 import {IRequest} from "@/bemodel/Api.ts";
 import RequestsDocumentTable from "@/pages/RequestsDocumentTable.tsx";
 import {ComboboxPopover, Status} from "@/components/extension/Combobox.tsx";
-import {useUserHasRole} from "@/common/auth/UserUtils.ts";
 import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "@/components/ui/table.tsx";
 import {Badge} from "@/components/ui/badge.tsx";
 import {Separator} from "@/components/ui/separator.tsx";
@@ -56,46 +55,6 @@ function RequestPage() {
     const [selectedStatus, setSelectedStatus] = useState<Status | null>(null);
     const [verifiedRequest, setVerifiedRequest] = useState<boolean | null>(null);
     const [selectedDocumentId, setSelectedDocumentId] = useState<number | null>(null);
-    const isJournalist = useUserHasRole('JOURNALIST');
-    const isJuridic = useUserHasRole('JURIDIC');
-    const isDirector = useUserHasRole('DIRECTOR');
-
-    const allStatuses: Status[] = [
-        {value: "CREATED", label: "Created",},
-        {value: "VALIDATED", label: "Validated",},
-        {value: "APPROVED", label: "Approved",},
-        {value: "REJECTED", label: "Rejected",},
-    ];
-    const journalistStatuses: Status[] = [
-        {value: "CREATED", label: "Created",},
-    ];
-
-    const juridicStatuses: Status[] = [
-        {value: "VALIDATED", label: "Validated",},
-    ];
-
-    const directorStatuses: Status[] = [
-        {value: "APPROVED", label: "Approved",},
-        {value: "REJECTED", label: "Rejected",},
-    ];
-
-    const [defaultStatus, setDefaultStatus] = useState<Status | null>(null);
-
-    const [statuses, setStatuses] = useState<Status[]>([allStatuses[0]]);
-
-    useEffect(() => {
-        if (isJournalist) {
-            setStatuses(journalistStatuses);
-            setDefaultStatus(journalistStatuses[0]);
-        } else if (isJuridic) {
-            setStatuses(juridicStatuses);
-            setDefaultStatus(juridicStatuses[0]);
-        } else if (isDirector) {
-            setStatuses(directorStatuses);
-            setDefaultStatus(directorStatuses[0]);
-        }
-
-    }, [isJournalist, isJuridic, isDirector, journalistStatuses, juridicStatuses, directorStatuses]);
 
     useEffect(() => {
         fetchRequest();
@@ -199,7 +158,8 @@ function RequestPage() {
     return (
         <>
             {
-                verifiedRequest === null ? <div>Loading...</div> : <Badge>{verifiedRequest ? "Verified" : "Request or its documents were altered."}</Badge>
+                verifiedRequest === null ? <div>Loading...</div> :
+                    <Badge>{verifiedRequest ? "Verified" : "Request or its documents were altered."}</Badge>
             }
             {
                 request && <Table>
@@ -232,7 +192,7 @@ function RequestPage() {
                         <h2 className="text-xl font-bold">Document Comments</h2>
                         <div className="flex items-center">
                             <span className="mr-2">Select Document:</span>
-                            <select 
+                            <select
                                 className="p-2 border rounded-md"
                                 value={selectedDocumentId}
                                 onChange={(e) => setSelectedDocumentId(Number(e.target.value))}
@@ -254,11 +214,11 @@ function RequestPage() {
                 <Alert className="mb-2">
                     <IoIosWarning className="h-4 w-4" color="orange"/>
                     <AlertTitle>Readonly request</AlertTitle>
-                    <AlertDescription>This request has been automatically archived and can no longer receive documents or status updates.</AlertDescription>
+                    <AlertDescription>This request has been automatically archived and can no longer receive documents
+                        or status updates.</AlertDescription>
                 </Alert>
             }
             {
-                (request?.status === "CREATED" || request?.status === "VALIDATED") &&
                 <>
                     <FileUploader
                         value={files}
@@ -280,14 +240,9 @@ function RequestPage() {
                         </FileUploaderContent>
                     </FileUploader>
                     <div className="mt-4 flex justify-between items-center">
-                        <ComboboxPopover
-                            statuses={statuses}
-                            defaultStatus={defaultStatus}
-                            onStatusChange={handleStatusChange}
-                        />
                         <Button
                             onClick={handleUpload}
-                            disabled={!files || files.length === 0 || !selectedStatus}
+                            disabled={!files || files.length === 0}
                         >
                             Upload
                         </Button>

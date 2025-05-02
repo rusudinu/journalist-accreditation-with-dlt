@@ -29,12 +29,6 @@ public class Request {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     private ZonedDateTime createdDate;
 
-    // IF STATUS IS CREATED SHOW TO JURIDIC
-    // IF STATUS IS VALIDATED SHOW TO DIRECTOR
-    // IF STATUS IS APPROVED OR DENIED THE REQUEST IS CLOSED
-    @Enumerated(EnumType.STRING)
-    private RequestStatus status;
-
     @JsonIgnoreProperties("requests")
     @ManyToOne
     private User user;

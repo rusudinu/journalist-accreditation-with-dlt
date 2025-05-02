@@ -1,12 +1,9 @@
 package com.rusudinu.backend.document;
 
 import com.rusudinu.backend.comment.CommentDTO;
-import com.rusudinu.backend.request.RequestStatus;
 import com.rusudinu.backend.request.snapshot.SnapshotService;
-import java.util.ArrayList;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.*;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
@@ -23,9 +20,9 @@ public class DocumentController {
 
     @PostMapping
 //    @PreAuthorize("hasAnyAuthority('MINISTRY', 'JOURNALIST')")
-    public Document uploadDocument(@RequestParam("file") MultipartFile file, @RequestParam RequestStatus status, @RequestParam Long requestId) {
-        Document document = documentService.uploadDocument(file, status, requestId);
-        snapshotService.createAndPersistRequestSnapshot(status, requestId, document.getStoredDocumentName());
+    public Document uploadDocument(@RequestParam("file") MultipartFile file, @RequestParam Long requestId) {
+        Document document = documentService.uploadDocument(file, requestId);
+        snapshotService.createAndPersistRequestSnapshot(requestId, document.getStoredDocumentName());
         return document;
     }
 
@@ -57,7 +54,6 @@ public class DocumentController {
         // After adding a comment, create a new snapshot to update the hash in the blockchain
         Document document = documentService.getDocumentById(documentId);
         snapshotService.createAndPersistRequestSnapshot(
-                document.getRequest().getStatus(),
                 document.getRequest().getId(),
                 document.getStoredDocumentName());
 

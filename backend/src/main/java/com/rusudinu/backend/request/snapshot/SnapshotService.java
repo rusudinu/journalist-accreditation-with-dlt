@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.ObjectWriter;
 import com.rusudinu.backend.distributedStorage.DistributedStorageService;
 import com.rusudinu.backend.hash.HashService;
 import com.rusudinu.backend.request.Request;
-import com.rusudinu.backend.request.RequestStatus;
 import com.rusudinu.backend.request.vc.VerifiableCredentialService;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
@@ -23,13 +22,11 @@ public class SnapshotService {
 	private final DistributedStorageService distributedStorageService;
 	private final HashService hashService;
 	private final SnapshotRepository snapshotRepository;
-	private final VerifiableCredentialService verifiableCredentialService;
-
 
 	@SneakyThrows
-	public void createAndPersistRequestSnapshot(RequestStatus status, Long requestId, String documentUniqueName) {
+	public void createAndPersistRequestSnapshot(Long requestId, String documentUniqueName) {
 		RequestSnapshot snapshot = RequestSnapshot.builder().requestId(requestId)
-				.documentHash(hashService.hashDocument(documentUniqueName)).status(status)
+				.documentHash(hashService.hashDocument(documentUniqueName))
 				.previousSnapshotHash(distributedStorageService.getRegistrySnapshotHashByRequestId(requestId)).build();
 
 		snapshot = snapshotRepository.save(snapshot);
@@ -41,10 +38,6 @@ public class SnapshotService {
 		distributedStorageService.persistRegistrySnapshot(requestId, newSnapshotHash);
 
 		log.info("Persisted snapshot hash: {}", newSnapshotHash);
-		log.info("Persisted snapshot status: {}", status);
-		if (status == RequestStatus.APPROVED) {
-			verifiableCredentialService.createVerifiableCredentialFromDocumentHash(newSnapshotHash, requestId);
-		}
 	}
 
 	@SneakyThrows
@@ -67,7 +60,7 @@ public class SnapshotService {
 
 		// rebuild the snapshot such that we can compare with the one stored on the blockchain
 		RequestSnapshot rebuiltSnapshot = RequestSnapshot.builder().id(snapshot.getId()).requestId(request.getId())
-				.documentHash(documentHash).status(request.getStatus())
+				.documentHash(documentHash)
 				.previousSnapshotHash(snapshot.getPreviousSnapshotHash()).build();
 
 		ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
