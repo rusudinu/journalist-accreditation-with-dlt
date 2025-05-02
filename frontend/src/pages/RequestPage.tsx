@@ -12,7 +12,7 @@ import {toast} from "sonner";
 import {useParams} from "react-router-dom";
 import {IRequest} from "@/bemodel/Api.ts";
 import RequestsDocumentTable from "@/pages/RequestsDocumentTable.tsx";
-import {ComboboxPopover, Status} from "@/components/extension/Combobox.tsx";
+import {Status} from "@/components/extension/Combobox.tsx";
 import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "@/components/ui/table.tsx";
 import {Badge} from "@/components/ui/badge.tsx";
 import {Separator} from "@/components/ui/separator.tsx";
@@ -62,7 +62,7 @@ function RequestPage() {
 
     const fetchRequest = () => {
         if (requestId) {
-            axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/v1/requests/${requestId}`, {
+            axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/v1/documents/${requestId}`, {
                 headers: {
                     'Content-Type': 'application/json',
                 },
@@ -86,22 +86,22 @@ function RequestPage() {
     }
 
     const checkIfRequestIsValid = () => {
-        if (requestId) {
-            axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/v1/requests/verify/${requestId}`, {
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-            })
-                .then((response) => {
-                    setVerifiedRequest(response.data);
-                })
-                .catch((error: unknown) => {
-                    console.error('Error:', error);
-                    setTimeout(() => {
-                        fetchRequest();
-                    }, 200);
-                });
-        }
+        // if (requestId) {
+        //     axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/v1/requests/verify/${requestId}`, {
+        //         headers: {
+        //             'Content-Type': 'application/json',
+        //         },
+        //     })
+        //         .then((response) => {
+        //             setVerifiedRequest(response.data);
+        //         })
+        //         .catch((error: unknown) => {
+        //             console.error('Error:', error);
+        //             setTimeout(() => {
+        //                 fetchRequest();
+        //             }, 200);
+        //         });
+        // }
     }
 
     const dropzone = {
@@ -130,7 +130,7 @@ function RequestPage() {
         });
 
         try {
-            const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/v1/documents?status=${selectedStatus?.value}&requestId=${requestId}`, formData, {
+            const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/v1/documents?documentId=${requestId}`, formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data'
                 }

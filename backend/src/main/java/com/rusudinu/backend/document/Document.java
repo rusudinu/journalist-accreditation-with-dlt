@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.rusudinu.backend.comment.Comment;
-import com.rusudinu.backend.request.Request;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -31,10 +30,6 @@ public class Document {
 
     private boolean isDeleted = false;
     private String storedDocumentName;
-
-    @JsonIgnoreProperties("documents")
-    @ManyToOne(fetch = FetchType.LAZY)
-    private Request request;
 
     /*
     REGISTRATION PARLIMENT

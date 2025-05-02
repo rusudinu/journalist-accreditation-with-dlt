@@ -1,13 +1,8 @@
 package com.rusudinu.backend.document;
 
-import com.rusudinu.backend.comment.Comment;
-import com.rusudinu.backend.comment.CommentDTO;
-import com.rusudinu.backend.comment.CommentMapper;
-import com.rusudinu.backend.comment.CommentRepository;
-import com.rusudinu.backend.request.Request;
-import com.rusudinu.backend.request.RequestService;
 import com.rusudinu.backend.user.UserService;
 import java.util.ArrayList;
+import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -27,12 +22,9 @@ public class DocumentService {
     private static final String UPLOAD_DIR = "uploads/";
 
     private final DocumentRepository documentRepository;
-    private final RequestService requestService;
-    private final CommentRepository commentRepository;
-    private final CommentMapper commentMapper;
     private final UserService userService;
 
-    public Document uploadDocument(MultipartFile file, Long requestId) {
+    public Document uploadDocument(MultipartFile file, Long documentId) {
         File directory = new File(UPLOAD_DIR);
         if (!directory.exists()) {
             if (!directory.mkdirs()) {
@@ -40,16 +32,13 @@ public class DocumentService {
             }
         }
 
-        Request request = requestService.getRequestById(requestId);
 
-        String uniqueFileName = System.currentTimeMillis() + "_" + UUID.randomUUID() + "." + file.getOriginalFilename().split("\\.")[1];
+        String uniqueFileName = System.currentTimeMillis() + "_" + UUID.randomUUID() + "." + Objects.requireNonNull(file.getOriginalFilename())
+				.split("\\.")[1];
         Path filePath = Paths.get(UPLOAD_DIR, uniqueFileName);
 
-        Document document = Document.builder()
-                .request(request)
-                .storedDocumentName(uniqueFileName)
-                .build();
-
+        Document document = documentRepository.findById(documentId).orElseThrow(() -> new RuntimeException("Document not found with id: " + documentId));
+        document.setStoredDocumentName(uniqueFileName);
         try {
             Files.write(filePath, file.getBytes());
 			return documentRepository.save(document);
@@ -68,24 +57,6 @@ public class DocumentService {
         } catch (IOException e) {
             throw new RuntimeException("Failed to retrieve document content", e);
         }
-    }
-
-    public CommentDTO addCommentToDocument(Long documentId, CommentDTO commentDTO) {
-        Document document = documentRepository.findById(documentId)
-                .orElseThrow(() -> new RuntimeException("Document not found with id: " + documentId));
-
-        Comment comment = commentMapper.toComment(commentDTO);
-        comment.setDocument(document);
-
-        Comment savedComment = commentRepository.save(comment);
-        return commentMapper.toCommentDTO(savedComment);
-    }
-
-    public List<CommentDTO> getCommentsForDocument(Long documentId) {
-        List<Comment> comments = commentRepository.findByDocumentId(documentId);
-        return comments.stream()
-                .map(commentMapper::toCommentDTO)
-                .collect(Collectors.toList());
     }
 
     public Document getDocumentById(Long documentId) {
@@ -114,5 +85,9 @@ public class DocumentService {
             case "proposer" -> new ArrayList<>();
 			default -> throw new IllegalArgumentException("Invalid name: " + name);
 		};
+    }
+
+    Document createDocument() {
+        return documentRepository.save(new Document());
     }
 }

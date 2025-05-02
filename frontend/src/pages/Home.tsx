@@ -8,7 +8,7 @@ function Home() {
     // const isJournalist = useUserHasRole('JOURNALIST');
     
     const createNewRequest = () => {
-        axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/v1/requests`, {
+        axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/v1/documents/create-document`, {
             headers: {
                 'Content-Type': 'application/json',
             },
