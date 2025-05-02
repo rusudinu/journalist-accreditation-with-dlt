@@ -62,7 +62,7 @@ public class RequestController {
     }
 
     @PostMapping("/{requestId}/assign-approval-process/{approvalProcessId}")
-    @PreAuthorize("hasAuthority('ADMIN')")
+//    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<Request> assignApprovalProcess(
             @PathVariable Long requestId,
             @PathVariable Long approvalProcessId) {

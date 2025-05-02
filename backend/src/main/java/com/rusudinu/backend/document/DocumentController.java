@@ -19,7 +19,7 @@ public class DocumentController {
     private final SnapshotService snapshotService;
 
     @PostMapping
-    @PreAuthorize("hasAnyAuthority('MINISTRY', 'JOURNALIST')")
+//    @PreAuthorize("hasAnyAuthority('MINISTRY', 'JOURNALIST')")
     public Document uploadDocument(@RequestParam("file") MultipartFile file, @RequestParam RequestStatus status, @RequestParam Long requestId) {
         Document document = documentService.uploadDocument(file, status, requestId);
         snapshotService.createAndPersistRequestSnapshot(status, requestId, document.getStoredDocumentName());
@@ -39,13 +39,13 @@ public class DocumentController {
     }
 
     @GetMapping("/{documentId}/with-comments")
-    @PreAuthorize("hasAnyAuthority('MINISTRY', 'JOURNALIST', 'DEPUTY')")
+//    @PreAuthorize("hasAnyAuthority('MINISTRY', 'JOURNALIST', 'DEPUTY')")
     public ResponseEntity<DocumentDTO> getDocumentWithComments(@PathVariable Long documentId) {
         return ResponseEntity.ok(documentService.getDocumentWithComments(documentId));
     }
 
     @PostMapping("/{documentId}/comments")
-    @PreAuthorize("hasAnyAuthority('MINISTRY', 'JOURNALIST', 'DEPUTY')")
+//    @PreAuthorize("hasAnyAuthority('MINISTRY', 'JOURNALIST', 'DEPUTY')")
     public ResponseEntity<CommentDTO> addCommentToDocument(
             @PathVariable Long documentId,
             @RequestBody CommentDTO commentDTO) {
@@ -62,7 +62,7 @@ public class DocumentController {
     }
 
     @GetMapping("/{documentId}/comments")
-    @PreAuthorize("hasAnyAuthority('MINISTRY', 'JOURNALIST', 'DEPUTY')")
+//    @PreAuthorize("hasAnyAuthority('MINISTRY', 'JOURNALIST', 'DEPUTY')")
     public ResponseEntity<List<CommentDTO>> getCommentsForDocument(@PathVariable Long documentId) {
         return ResponseEntity.ok(documentService.getCommentsForDocument(documentId));
     }
