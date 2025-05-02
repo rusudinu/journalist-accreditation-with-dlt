@@ -9,19 +9,11 @@ interface UserDocumentsTableProps {
 }
 
 const RequestsDocumentTable: React.FC<UserDocumentsTableProps> = ({request}) => {
-    const [selectedDocumentId, setSelectedDocumentId] = useState<number | null>(null);
     const [isCommentsOpen, setIsCommentsOpen] = useState(false);
 
     const handlePreview = (documentName: string | undefined) => {
         if (documentName) {
             window.open(`${import.meta.env.VITE_BACKEND_URL}/api/v1/documents/${documentName}`, '_blank');
-        }
-    };
-
-    const handleViewComments = (documentId: number | undefined) => {
-        if (documentId) {
-            setSelectedDocumentId(documentId);
-            setIsCommentsOpen(true);
         }
     };
 
@@ -53,12 +45,6 @@ const RequestsDocumentTable: React.FC<UserDocumentsTableProps> = ({request}) => 
                                         onClick={() => handlePreview(document.storedDocumentName)}
                                     >
                                         Preview
-                                    </Button>
-                                    <Button
-                                        variant="outline"
-                                        onClick={() => handleViewComments(document.id)}
-                                    >
-                                        Comments
                                     </Button>
                                 </div>
                             </TableCell>

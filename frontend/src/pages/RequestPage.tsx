@@ -19,7 +19,6 @@ import {Badge} from "@/components/ui/badge.tsx";
 import {Separator} from "@/components/ui/separator.tsx";
 import {IoIosWarning} from "react-icons/io";
 import {Alert, AlertDescription, AlertTitle} from "@/components/ui/alert.tsx";
-import {CredentialQRCode} from "@/components/extension/CredentialQRCode";
 
 const FileSvgDraw = () => {
     return (
@@ -223,17 +222,6 @@ function RequestPage() {
                 </Table>
             }
             <Separator className="my-4"/>
-
-            {/* Add the QR Code component if request exists */}
-            {request && (
-                <>
-                    <h2 className="text-xl font-bold mb-4">Verifiable Credential</h2>
-                    <div className="mb-6">
-                        <CredentialQRCode requestId={requestId || ""} />
-                    </div>
-                    <Separator className="my-4"/>
-                </>
-            )}
 
             {request && <div className="pb-6"><RequestsDocumentTable request={request}/></div>}
 
