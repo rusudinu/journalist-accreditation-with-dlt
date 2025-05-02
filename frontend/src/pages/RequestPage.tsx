@@ -56,6 +56,7 @@ function RequestPage() {
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [comment, setComment] = useState<string>("");
     const [isSubmittingComment, setIsSubmittingComment] = useState<boolean>(false);
+    const [isDocumentValid, setIsDocumentValid] = useState<boolean | null>(null);
     const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
     // Get the authenticated user's name from Redux store
@@ -68,6 +69,8 @@ function RequestPage() {
     const fetchDocument = () => {
         if (documentIdParam) {
             setIsLoading(true); // Set loading true before fetch
+
+            // Fetch document details
             axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/v1/documents/${documentIdParam}`, {
                 headers: {
                     'Content-Type': 'application/json',
@@ -75,8 +78,16 @@ function RequestPage() {
             })
                 .then((response) => {
                     setDocument(response.data);
-                    // Removed: logic related to request.documents or selectedDocumentId
-                    // Removed: checkIfRequestIsValid call
+
+                    // After getting document, fetch document validity
+                    axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/v1/documents/document-valid/${documentIdParam}`)
+                        .then((validityResponse) => {
+                            setIsDocumentValid(validityResponse.data);
+                        })
+                        .catch((validityError) => {
+                            console.error('Error fetching document validity:', validityError);
+                            setIsDocumentValid(null);
+                        });
                 })
                 .catch((error: unknown) => {
                     console.error('Error fetching document:', error);
@@ -304,6 +315,20 @@ function RequestPage() {
             </Table>
 
             <Separator className="my-4"/>
+
+            {/* Document Validity Status */}
+            {isDocumentValid !== null && (
+                <Alert className="mb-4" variant={isDocumentValid ? "default" : "destructive"}>
+                    <IoIosWarning className="h-4 w-4"/>
+                    <AlertTitle>{isDocumentValid ? "Document Valid" : "Document Invalid"}</AlertTitle>
+                    <AlertDescription>
+                        {isDocumentValid 
+                            ? "All document hashes are valid. The document has not been tampered with."
+                            : "Some document hashes are invalid. The document may have been tampered with."
+                        }
+                    </AlertDescription>
+                </Alert>
+            )}
 
             { isReadOnly &&
                 <Alert className="mb-4" variant="destructive">

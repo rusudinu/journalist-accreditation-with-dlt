@@ -180,6 +180,11 @@ public class DocumentService {
 	}
 
 	boolean isCommentHashValid(Long documentId, String prefix, String comment) {
+		// we'll assume that the comment is valid if it's null or empty
+		if(comment == null || comment.isEmpty()) {
+			return true;
+		}
+
 		Document document = documentRepository.findById(documentId).orElseThrow(() -> new RuntimeException("Document not found with id: " + documentId));
 		String commentKey = document.getId() + "_comment_" + prefix;
 
