@@ -57,6 +57,7 @@ function RequestPage() {
     const [comment, setComment] = useState<string>("");
     const [isSubmittingComment, setIsSubmittingComment] = useState<boolean>(false);
     const [isDocumentValid, setIsDocumentValid] = useState<boolean | null>(null);
+    const [isDocumentUploadValid, setIsDocumentUploadValid] = useState<boolean | null>(null);
     const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
     // Get the authenticated user's name from Redux store
@@ -87,6 +88,16 @@ function RequestPage() {
                         .catch((validityError) => {
                             console.error('Error fetching document validity:', validityError);
                             setIsDocumentValid(null);
+                        });
+
+                    // Fetch document upload validity
+                    axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/v1/documents/document-doc-valid/${documentIdParam}`)
+                        .then((uploadValidityResponse) => {
+                            setIsDocumentUploadValid(uploadValidityResponse.data);
+                        })
+                        .catch((uploadValidityError) => {
+                            console.error('Error fetching document upload validity:', uploadValidityError);
+                            setIsDocumentUploadValid(null);
                         });
                 })
                 .catch((error: unknown) => {
@@ -316,15 +327,29 @@ function RequestPage() {
 
             <Separator className="my-4"/>
 
-            {/* Document Validity Status */}
+            {/* Document Comments Validity Status */}
             {isDocumentValid !== null && (
                 <Alert className="mb-4" variant={isDocumentValid ? "default" : "destructive"}>
                     <IoIosWarning className="h-4 w-4"/>
-                    <AlertTitle>{isDocumentValid ? "Document Valid" : "Document Invalid"}</AlertTitle>
+                    <AlertTitle>{isDocumentValid ? "Document Comments Valid" : "Document Comments Invalid"}</AlertTitle>
                     <AlertDescription>
                         {isDocumentValid 
-                            ? "All document hashes are valid. The document has not been tampered with."
-                            : "Some document hashes are invalid. The document may have been tampered with."
+                            ? "All document comment hashes are valid. The comments have not been tampered with."
+                            : "Some document comment hashes are invalid. The comments may have been tampered with."
+                        }
+                    </AlertDescription>
+                </Alert>
+            )}
+
+            {/* Document Upload Validity Status */}
+            {isDocumentUploadValid !== null && (
+                <Alert className="mb-4" variant={isDocumentUploadValid ? "default" : "destructive"}>
+                    <IoIosWarning className="h-4 w-4"/>
+                    <AlertTitle>{isDocumentUploadValid ? "Document Upload Valid" : "Document Upload Invalid"}</AlertTitle>
+                    <AlertDescription>
+                        {isDocumentUploadValid 
+                            ? "The document upload hash is valid. The uploaded file has not been tampered with."
+                            : "The document upload hash is invalid. The uploaded file may have been tampered with."
                         }
                     </AlertDescription>
                 </Alert>

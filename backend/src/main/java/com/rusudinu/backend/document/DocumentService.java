@@ -49,9 +49,9 @@ public class DocumentService {
 			Files.write(filePath, file.getBytes());
 
 			// store the document hash in the blockchain
-			byte[] documentHash = hashService.hashDocument(getDocument(uniqueFileName));
+			String documentHash = hashService.hashDocument(getDocument(uniqueFileName));
 			String documentHashKey = document.getId() + "_document_hash";
-			distributedStorageService.persistCommentHash(documentHashKey, new String(documentHash, StandardCharsets.UTF_8));
+			distributedStorageService.persistCommentHash(documentHashKey, documentHash);
 
 			return documentRepository.save(document);
 		}
@@ -234,13 +234,10 @@ public class DocumentService {
 		if (storedDocumentName == null || storedDocumentName.isEmpty()) {
 			return false;
 		}
-
-		byte[] documentHash = hashService.hashDocument(getDocument(storedDocumentName));
+		String documentHash = hashService.hashDocument(getDocument(storedDocumentName));
 		String documentHashKey = document.getId() + "_document_hash";
 
 		String blockchainDocumentHash = distributedStorageService.getCommentHashByCommentKey(documentHashKey);
-		String currentDocumentHash = new String(documentHash, StandardCharsets.UTF_8);
-
-		return blockchainDocumentHash.equals(currentDocumentHash);
+		return blockchainDocumentHash.equals(documentHash);
 	}
 }

@@ -37,13 +37,8 @@ public class HashService {
 	}
 
 	@SneakyThrows
-	public byte[] hashDocument(byte[] document) {
-		return encryptWithRSA(createDigestInfo(document));
-	}
-
-	@SneakyThrows
-	public boolean verifyDocument(byte[] encryptedMessageHash, byte[] document) {
-		return Arrays.equals(decryptWithRSA(encryptedMessageHash), createDigestInfo(document));
+	public String hashDocument(byte[] document) {
+		return DigestUtils.sha256Hex(document);
 	}
 
 	@SneakyThrows
