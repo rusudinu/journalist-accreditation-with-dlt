@@ -52,7 +52,6 @@ function RequestPage() {
     const {requestId} = useParams<{ requestId: string }>();
     const [files, setFiles] = useState<File[] | null>([]);
     const [request, setRequest] = useState<IRequest | null>(null);
-    const [selectedStatus, setSelectedStatus] = useState<Status | null>(null);
     const [verifiedRequest, setVerifiedRequest] = useState<boolean | null>(null);
     const [selectedDocumentId, setSelectedDocumentId] = useState<number | null>(null);
 
@@ -111,10 +110,6 @@ function RequestPage() {
         multiple: false,
         maxSize: 5 * 1024 * 1024, // 5MB
     } satisfies DropzoneOptions;
-
-    const handleStatusChange = (status: Status | null) => {
-        setSelectedStatus(status)
-    }
 
     const handleUpload = async () => {
         if (!files || files.length === 0) {
