@@ -14,7 +14,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Separator } from "@/components/ui/separator.tsx";
 import { IoIosWarning } from "react-icons/io";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert.tsx";
-import { IDocument } from "@/bemodel/Api.ts"; // Assuming this path is correct
+import { IDocument } from "@/bemodel/Api.ts";
+import { Eye } from 'lucide-react';
 
 const FileSvgDraw = () => {
     return (
@@ -46,14 +47,11 @@ const FileSvgDraw = () => {
 };
 
 function RequestPage() {
-    // Use a more specific param name if possible, e.g., documentId
     const { requestId: documentIdParam } = useParams<{ requestId: string }>();
     const [files, setFiles] = useState<File[] | null>([]);
     const [document, setDocument] = useState<IDocument | null>(null);
-    const [isLoading, setIsLoading] = useState<boolean>(true); // Added loading state
-
-    // Removed: verifiedRequest state
-    // Removed: selectedDocumentId state
+    const [isLoading, setIsLoading] = useState<boolean>(true);
+    const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
     useEffect(() => {
         fetchDocument();
@@ -160,6 +158,16 @@ function RequestPage() {
         return <div className="text-red-600">Failed to load document details. Please try again later.</div>;
     }
 
+    const handlePreview = () => {
+        if (document?.storedDocumentName && backendUrl) {
+            const previewUrl = `${backendUrl}/api/v1/documents/download/${document.storedDocumentName}`;
+            window.open(previewUrl, '_blank', 'noopener,noreferrer'); // Added rel for security
+        } else {
+            toast('Error', {
+                description: 'Cannot preview file: Stored document name or backend URL is missing.',
+            });
+        }
+    };
 
     return (
         <>
@@ -169,6 +177,7 @@ function RequestPage() {
                         <TableHead className="w-[100px]">Document ID</TableHead>
                         <TableHead>Uploaded Filename</TableHead>
                         <TableHead>Created Date</TableHead>
+                        <TableHead>Preview</TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -185,6 +194,18 @@ function RequestPage() {
                                 ? new Date(document.createdDate).toLocaleString()
                                 : 'N/A'
                             }
+                        </TableCell>
+                        <TableCell className="text-center"> {/* Added Actions Cell */}
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={handlePreview}
+                                disabled={!document.storedDocumentName} // Disable if no stored name
+                                title="Preview Document" // Add tooltip
+                            >
+                                <Eye className="h-4 w-4 mr-1" /> {/* Optional icon */}
+                                Preview
+                            </Button>
                         </TableCell>
                     </TableRow>
                 </TableBody>
