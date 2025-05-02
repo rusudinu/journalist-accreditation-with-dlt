@@ -75,14 +75,14 @@ public class DocumentService {
         normalizedName = normalizedName.replaceAll("\\s+", "").toLowerCase();
 
 		return switch (normalizedName) {
-			case "budgetcommittee" -> documentRepository.findByBudgetCommitteeCommentIsNull();
 			case "economicandsocialcouncil" -> documentRepository.findByEconomicAndSocialCouncilCommentIsNull();
 			case "generalsecretariat" -> documentRepository.findByGeneralSecretariatCommentIsNull();
-			case "legalcommittee" -> documentRepository.findByLegalCommitteeCommentIsNull();
 			case "legislativecouncil" -> documentRepository.findByLegislativeCouncilCommentIsNull();
-			case "publicadministration" -> documentRepository.findByPublicAdministrationCommentIsNull();
 			case "specialtycommission" -> documentRepository.findBySpecialtyCommissionCommentIsNull();
-            case "proposer" -> new ArrayList<>();
+			case "legalcommittee" -> documentRepository.findByLegalCommitteeCommentIsNull();
+			case "budgetcommittee" -> documentRepository.findByBudgetCommitteeCommentIsNull();
+			case "publicadministration" -> documentRepository.findByPublicAdministrationCommentIsNull();
+			case "proposer" -> new ArrayList<>();
 			default -> throw new IllegalArgumentException("Invalid name: " + name);
 		};
     }
