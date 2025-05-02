@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import {Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow} from "@/components/ui/table.tsx";
 import {IRequest} from "@/bemodel/Api.ts";
 import {Button} from "@/components/ui/button.tsx";
-import DocumentComments from "@/components/comments/DocumentComments";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 interface UserDocumentsTableProps {
@@ -73,9 +72,6 @@ const RequestsDocumentTable: React.FC<UserDocumentsTableProps> = ({request}) => 
                     <DialogHeader>
                         <DialogTitle>Document Comments</DialogTitle>
                     </DialogHeader>
-                    {selectedDocumentId && (
-                        <DocumentComments documentId={selectedDocumentId} />
-                    )}
                 </DialogContent>
             </Dialog>
         </>

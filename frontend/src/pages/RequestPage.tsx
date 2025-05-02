@@ -20,7 +20,6 @@ import {Separator} from "@/components/ui/separator.tsx";
 import {IoIosWarning} from "react-icons/io";
 import {Alert, AlertDescription, AlertTitle} from "@/components/ui/alert.tsx";
 import {CredentialQRCode} from "@/components/extension/CredentialQRCode";
-import DocumentComments from "@/components/comments/DocumentComments";
 
 const FileSvgDraw = () => {
     return (
@@ -258,7 +257,6 @@ function RequestPage() {
                             </select>
                         </div>
                     </div>
-                    <DocumentComments documentId={selectedDocumentId} />
                     <Separator className="my-4"/>
                 </div>
             )}
