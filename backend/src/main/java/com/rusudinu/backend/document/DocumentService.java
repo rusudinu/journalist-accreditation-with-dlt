@@ -65,29 +65,44 @@ public class DocumentService {
     }
 
     // possible names: budgetcommittee,economicandsocialcouncil,generalsecretariat,legalcommittee,legislativecouncil,publicadministration,specialtycommission
-    List<Document> getNeedReviewDocuments(String name) {
-        String normalizedName = name.trim().toLowerCase();
+	List<Document> getNeedReviewDocuments(String name) {
+		String normalizedName = name.trim().toLowerCase();
 
-        if (normalizedName.length() > 20) {
-            normalizedName = userService.findOrCreateByKeycloakId(normalizedName).getName();
-        }
+		if (normalizedName.length() > 20) {
+			normalizedName = userService.findOrCreateByKeycloakId(normalizedName).getName();
+		}
 
-        normalizedName = normalizedName.replaceAll("\\s+", "").toLowerCase();
+		normalizedName = normalizedName.replaceAll("\\s+", "").toLowerCase();
 
 		return switch (normalizedName) {
 			case "economicandsocialcouncil" -> documentRepository.findByEconomicAndSocialCouncilCommentIsNull();
 			case "generalsecretariat" -> documentRepository.findByGeneralSecretariatCommentIsNull();
 			case "legislativecouncil" -> documentRepository.findByLegislativeCouncilCommentIsNull();
 			case "specialtycommission" -> documentRepository.findBySpecialtyCommissionCommentIsNull();
-			case "legalcommittee" -> documentRepository.findByLegalCommitteeCommentIsNull();
-			case "budgetcommittee" -> documentRepository.findByBudgetCommitteeCommentIsNull();
-			case "publicadministration" -> documentRepository.findByPublicAdministrationCommentIsNull();
+			case "legalcommittee" -> documentRepository.findByLegalCommitteeCommentIsNull()
+					.stream()
+					.filter(d -> d.getEconomicAndSocialCouncilComment() != null
+							&& d.getGeneralSecretariatComment() != null
+							&& d.getLegislativeCouncilComment() != null)
+					.toList();
+			case "budgetcommittee" -> documentRepository.findByBudgetCommitteeCommentIsNull()
+					.stream()
+					.filter(d -> d.getEconomicAndSocialCouncilComment() != null
+							&& d.getGeneralSecretariatComment() != null
+							&& d.getLegislativeCouncilComment() != null)
+					.toList();
+			case "publicadministration" -> documentRepository.findByPublicAdministrationCommentIsNull()
+					.stream()
+					.filter(d -> d.getEconomicAndSocialCouncilComment() != null
+							&& d.getGeneralSecretariatComment() != null
+							&& d.getLegislativeCouncilComment() != null)
+					.toList();
 			case "proposer" -> new ArrayList<>();
 			default -> throw new IllegalArgumentException("Invalid name: " + name);
 		};
-    }
+	}
 
-    Document createDocument() {
+	Document createDocument() {
         return documentRepository.save(new Document());
     }
 }
