@@ -1,22 +1,20 @@
-import {useEffect, useState} from 'react';
+import { useEffect, useState } from 'react';
 import {
     FileUploader,
     FileUploaderContent,
     FileUploaderItem,
     FileInput,
 } from "@/components/extension/file-uploader";
-import {DropzoneOptions} from "react-dropzone";
-import {Button} from "@/components/ui/button.tsx";
+import { DropzoneOptions } from "react-dropzone";
+import { Button } from "@/components/ui/button.tsx";
 import axios from 'axios';
-import {toast} from "sonner";
-import {useParams} from "react-router-dom";
-import RequestsDocumentTable from "@/pages/RequestsDocumentTable.tsx";
-import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "@/components/ui/table.tsx";
-import {Badge} from "@/components/ui/badge.tsx";
-import {Separator} from "@/components/ui/separator.tsx";
-import {IoIosWarning} from "react-icons/io";
-import {Alert, AlertDescription, AlertTitle} from "@/components/ui/alert.tsx";
-import {IDocument} from "@/bemodel/Api.ts";
+import { toast } from "sonner";
+import { useParams } from "react-router-dom";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table.tsx";
+import { Separator } from "@/components/ui/separator.tsx";
+import { IoIosWarning } from "react-icons/io";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert.tsx";
+import { IDocument } from "@/bemodel/Api.ts"; // Assuming this path is correct
 
 const FileSvgDraw = () => {
     return (
@@ -38,7 +36,7 @@ const FileSvgDraw = () => {
             </svg>
             <p className="mb-1 text-sm text-gray-500 dark:text-gray-400">
                 <span className="font-semibold">Click to upload</span>
-                &nbsp; or drag and drop
+                or drag and drop
             </p>
             <p className="text-xs text-gray-500 dark:text-gray-400">
                 A document in PDF format
@@ -48,83 +46,85 @@ const FileSvgDraw = () => {
 };
 
 function RequestPage() {
-    const {requestId} = useParams<{ requestId: string }>();
+    // Use a more specific param name if possible, e.g., documentId
+    const { requestId: documentIdParam } = useParams<{ requestId: string }>();
     const [files, setFiles] = useState<File[] | null>([]);
     const [document, setDocument] = useState<IDocument | null>(null);
-    const [verifiedRequest, setVerifiedRequest] = useState<boolean | null>(null);
-    const [selectedDocumentId, setSelectedDocumentId] = useState<number | null>(null);
+    const [isLoading, setIsLoading] = useState<boolean>(true); // Added loading state
+
+    // Removed: verifiedRequest state
+    // Removed: selectedDocumentId state
 
     useEffect(() => {
-        fetchRequest();
-    }, [requestId]);
+        fetchDocument();
+    }, [documentIdParam]); // Dependency on the param from URL
 
-    const fetchRequest = () => {
-        if (requestId) {
-            axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/v1/documents/${requestId}`, {
+    const fetchDocument = () => {
+        if (documentIdParam) {
+            setIsLoading(true); // Set loading true before fetch
+            axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/v1/documents/${documentIdParam}`, {
                 headers: {
                     'Content-Type': 'application/json',
                 },
             })
                 .then((response) => {
                     setDocument(response.data);
-                    // Set the selected document ID to the most recent document's ID if available
-                    if (response.data.documents && response.data.documents.length > 0) {
-                        const mostRecentDocument = response.data.documents[response.data.documents.length - 1];
-                        setSelectedDocumentId(mostRecentDocument.id);
-                    }
-                    checkIfRequestIsValid();
+                    // Removed: logic related to request.documents or selectedDocumentId
+                    // Removed: checkIfRequestIsValid call
                 })
                 .catch((error: unknown) => {
-                    console.error('Error:', error);
-                    setTimeout(() => {
-                        fetchRequest();
-                    }, 200);
+                    console.error('Error fetching document:', error);
+                    toast('Error', {
+                        description: `Failed to fetch document details: ${error instanceof Error ? error.message : 'Unknown error'}`,
+                    });
+                    // Consider adding retry logic or error state handling here
+                    // Example retry:
+                    // setTimeout(() => {
+                    //     fetchDocument();
+                    // }, 5000); // Retry after 5 seconds
+                })
+                .finally(() => {
+                    setIsLoading(false); // Set loading false after fetch attempt
                 });
+        } else {
+            setIsLoading(false); // No ID, stop loading
+            console.error("Document ID parameter is missing.");
+            toast('Error', { description: 'Document ID is missing in the URL.' });
         }
     }
 
-    const checkIfRequestIsValid = () => {
-        // if (requestId) {
-        //     axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/v1/requests/verify/${requestId}`, {
-        //         headers: {
-        //             'Content-Type': 'application/json',
-        //         },
-        //     })
-        //         .then((response) => {
-        //             setVerifiedRequest(response.data);
-        //         })
-        //         .catch((error: unknown) => {
-        //             console.error('Error:', error);
-        //             setTimeout(() => {
-        //                 fetchRequest();
-        //             }, 200);
-        //         });
-        // }
-    }
+    // Removed: checkIfRequestIsValid function
 
     const dropzone = {
         accept: {
             "application/pdf": [".pdf"],
         },
-        multiple: false,
+        multiple: false, // Keep as false if only one file should replace the existing one
         maxSize: 5 * 1024 * 1024, // 5MB
     } satisfies DropzoneOptions;
 
     const handleUpload = async () => {
         if (!files || files.length === 0) {
-            toast('No files selected', {
-                description: 'Please select files to upload.',
+            toast('No file selected', {
+                description: 'Please select a file to upload.',
+            });
+            return;
+        }
+        if (!document?.id) {
+            toast('Error', {
+                description: 'Cannot upload file: Document ID is missing.',
             });
             return;
         }
 
         const formData = new FormData();
-        files.forEach(file => {
-            formData.append("file", file);
-        });
+        // Since multiple: false, we expect only one file
+        formData.append("file", files[0]);
 
         try {
-            const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/v1/documents?documentId=${requestId}`, formData, {
+            // Assuming POST updates the document file or creates a new version
+            // The query parameter identifies which document record to associate the file with
+            const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/v1/documents?documentId=${document.id}`, formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data'
                 }
@@ -132,99 +132,89 @@ function RequestPage() {
 
             if (response.status === 200) {
                 toast('Success', {
-                    description: 'Files uploaded successfully!',
+                    description: 'File uploaded successfully!',
                 });
-                setFiles([]);
-                fetchRequest();
+                setFiles([]); // Clear the selection
+                fetchDocument(); // Refresh document data to show the new storedDocumentName etc.
             } else {
                 toast('Upload failed', {
-                    description: 'Failed to upload files.',
+                    description: `Failed to upload file. Server responded with status: ${response.status}`,
                 });
             }
         } catch (error: unknown) {
-            console.error("Error uploading files:", error);
-            toast('Error uploading files', {
-                description: `An error occurred while uploading the files: ${error instanceof Error ? error.message : 'Unknown error'}`,
+            console.error("Error uploading file:", error);
+            toast('Error uploading file', {
+                description: `An error occurred while uploading the file: ${error instanceof Error ? error.message : 'Unknown error'}`,
             });
         }
     };
 
+    // Determine if the document is considered 'readonly' based on its properties
+    const isReadOnly = document?.deleted === true; // Example condition, adjust as needed
+
+    if (isLoading) {
+        return <div>Loading document details...</div>;
+    }
+
+    if (!document) {
+        return <div className="text-red-600">Failed to load document details. Please try again later.</div>;
+    }
+
+
     return (
         <>
-            {
-                verifiedRequest === null ? <div>Loading...</div> :
-                    <Badge>{verifiedRequest ? "Verified" : "Request or its documents were altered."}</Badge>
-            }
-            {
-                request && <Table>
-                    <TableHeader>
-                        <TableRow>
-                            <TableHead className="w-[100px]">Request ID</TableHead>
-                            <TableHead>Uploaded documents</TableHead>
-                            <TableHead>Status</TableHead>
-                            <TableHead>Created Date</TableHead>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        <TableRow key={request.id}>
-                            <TableCell className="font-medium">{request.id}</TableCell>
-                            <TableCell>{request.documents?.length}</TableCell>
-                            <TableCell><Badge>{request.status}</Badge></TableCell>
-                            <TableCell>{request.createdDate}</TableCell>
-                        </TableRow>
-                    </TableBody>
-                </Table>
-            }
+            <Table>
+                <TableHeader>
+                    <TableRow>
+                        <TableHead className="w-[100px]">Document ID</TableHead>
+                        <TableHead>Uploaded Filename</TableHead>
+                        <TableHead>Created Date</TableHead>
+                    </TableRow>
+                </TableHeader>
+                <TableBody>
+                    <TableRow key={document.id}>
+                        <TableCell className="font-medium">{document.id}</TableCell>
+                        <TableCell>
+                            {document.storedDocumentName
+                                ? document.storedDocumentName
+                                : <span className="text-gray-500 italic">No file uploaded yet</span>
+                            }
+                        </TableCell>
+                        <TableCell>
+                            {document.createdDate
+                                ? new Date(document.createdDate).toLocaleString()
+                                : 'N/A'
+                            }
+                        </TableCell>
+                    </TableRow>
+                </TableBody>
+            </Table>
+
             <Separator className="my-4"/>
 
-            {request && <div className="pb-6"><RequestsDocumentTable request={request}/></div>}
-
-            {/* Comments section for the selected document */}
-            {selectedDocumentId && request?.documents && request.documents.length > 0 && (
-                <div className="mb-6">
-                    <div className="flex justify-between items-center mb-4">
-                        <h2 className="text-xl font-bold">Document Comments</h2>
-                        <div className="flex items-center">
-                            <span className="mr-2">Select Document:</span>
-                            <select
-                                className="p-2 border rounded-md"
-                                value={selectedDocumentId}
-                                onChange={(e) => setSelectedDocumentId(Number(e.target.value))}
-                            >
-                                {request.documents.map((doc) => (
-                                    <option key={doc.id} value={doc.id}>
-                                        Document {doc.id} ({new Date(doc.createdDate || '').toLocaleDateString()})
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
-                    </div>
-                    <Separator className="my-4"/>
-                </div>
-            )}
-
-            {
-                (request?.status === "APPROVED" || request?.status === "REJECTED") &&
-                <Alert className="mb-2">
-                    <IoIosWarning className="h-4 w-4" color="orange"/>
-                    <AlertTitle>Readonly request</AlertTitle>
-                    <AlertDescription>This request has been automatically archived and can no longer receive documents
-                        or status updates.</AlertDescription>
+            { isReadOnly &&
+                <Alert className="mb-4" variant="destructive">
+                    <IoIosWarning className="h-4 w-4"/>
+                    <AlertTitle>Document Archived</AlertTitle>
+                    <AlertDescription>
+                        This document is marked as deleted and cannot be modified or receive new file uploads.
+                    </AlertDescription>
                 </Alert>
             }
-            {
+
+            { !isReadOnly && (
                 <>
                     <FileUploader
                         value={files}
                         onValueChange={setFiles}
                         dropzoneOptions={dropzone}
                     >
-                        <FileInput className="border bg-background rounded-md">
+                        <FileInput className={`border bg-background rounded-md ${isReadOnly ? 'cursor-not-allowed opacity-50' : ''}`}>
                             <div className="flex items-center justify-center flex-col pt-3 pb-4 w-full">
                                 <FileSvgDraw/>
                             </div>
                         </FileInput>
-                        <FileUploaderContent className="flex items-center flex-row gap-2">
+                        <FileUploaderContent className="flex items-center flex-row gap-2 mt-2">
                             {files?.map((_file, i) => (
                                 <FileUploaderItem
                                     key={i}
@@ -236,13 +226,13 @@ function RequestPage() {
                     <div className="mt-4 flex justify-between items-center">
                         <Button
                             onClick={handleUpload}
-                            disabled={!files || files.length === 0}
+                            disabled={!files || files.length === 0 || isReadOnly}
                         >
-                            Upload
+                            Upload File
                         </Button>
                     </div>
                 </>
-            }
+            )}
         </>
     );
 }
