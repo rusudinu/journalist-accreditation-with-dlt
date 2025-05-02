@@ -7,9 +7,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 
 @FeignClient(name = "hyperledger-snapshot-service", url = "http://localhost:3000")
 public interface HyperledgerSnapshotRepositoryClient {
-    @GetMapping("/registry/{requestId}")
-    HyperledgerRegistry getHyperledgerRegistryByRegistryId(@PathVariable("requestId") Long requestId);
+	@GetMapping("/registry/{requestId}")
+	HyperledgerRegistry getHyperledgerRegistryByRegistryId(@PathVariable("requestId") Long requestId);
 
-    @PostMapping("/registry")
-    void saveOrUpdateHyperledgerRegistry(HyperledgerRegistry hyperledgerRegistry);
+	@PostMapping("/registry")
+	void saveOrUpdateHyperledgerRegistry(HyperledgerRegistry hyperledgerRegistry);
 }

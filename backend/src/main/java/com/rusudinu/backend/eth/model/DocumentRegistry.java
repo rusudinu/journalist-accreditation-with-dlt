@@ -27,88 +27,88 @@ import org.web3j.tx.gas.ContractGasProvider;
  */
 @SuppressWarnings("rawtypes")
 public class DocumentRegistry extends Contract {
-    public static final String BINARY = "Bin file was not provided";
+	public static final String BINARY = "Bin file was not provided";
 
-    public static final String FUNC_ADDDOCUMENT = "addDocument";
+	public static final String FUNC_ADDDOCUMENT = "addDocument";
 
-    public static final String FUNC_GETDOCUMENTSFORREQUEST = "getDocumentsForRequest";
+	public static final String FUNC_GETDOCUMENTSFORREQUEST = "getDocumentsForRequest";
 
-    public static final String FUNC_OWNER = "owner";
+	public static final String FUNC_OWNER = "owner";
 
-    public static final String FUNC_REQUESTTODOCUMENTS = "requestToDocuments";
+	public static final String FUNC_REQUESTTODOCUMENTS = "requestToDocuments";
 
-    @Deprecated
-    protected DocumentRegistry(String contractAddress, Web3j web3j, Credentials credentials,
-            BigInteger gasPrice, BigInteger gasLimit) {
-        super(BINARY, contractAddress, web3j, credentials, gasPrice, gasLimit);
-    }
+	@Deprecated
+	protected DocumentRegistry(String contractAddress, Web3j web3j, Credentials credentials,
+			BigInteger gasPrice, BigInteger gasLimit) {
+		super(BINARY, contractAddress, web3j, credentials, gasPrice, gasLimit);
+	}
 
-    protected DocumentRegistry(String contractAddress, Web3j web3j, Credentials credentials,
-            ContractGasProvider contractGasProvider) {
-        super(BINARY, contractAddress, web3j, credentials, contractGasProvider);
-    }
+	protected DocumentRegistry(String contractAddress, Web3j web3j, Credentials credentials,
+			ContractGasProvider contractGasProvider) {
+		super(BINARY, contractAddress, web3j, credentials, contractGasProvider);
+	}
 
-    @Deprecated
-    protected DocumentRegistry(String contractAddress, Web3j web3j,
-            TransactionManager transactionManager, BigInteger gasPrice, BigInteger gasLimit) {
-        super(BINARY, contractAddress, web3j, transactionManager, gasPrice, gasLimit);
-    }
+	@Deprecated
+	protected DocumentRegistry(String contractAddress, Web3j web3j,
+			TransactionManager transactionManager, BigInteger gasPrice, BigInteger gasLimit) {
+		super(BINARY, contractAddress, web3j, transactionManager, gasPrice, gasLimit);
+	}
 
-    protected DocumentRegistry(String contractAddress, Web3j web3j,
-            TransactionManager transactionManager, ContractGasProvider contractGasProvider) {
-        super(BINARY, contractAddress, web3j, transactionManager, contractGasProvider);
-    }
+	protected DocumentRegistry(String contractAddress, Web3j web3j,
+			TransactionManager transactionManager, ContractGasProvider contractGasProvider) {
+		super(BINARY, contractAddress, web3j, transactionManager, contractGasProvider);
+	}
 
-    public RemoteFunctionCall<TransactionReceipt> addDocument(String _requestId,
-            String _documentHash) {
-        final Function function = new Function(
-                FUNC_ADDDOCUMENT, 
-                Arrays.<Type>asList(new org.web3j.abi.datatypes.Utf8String(_requestId), 
-                new org.web3j.abi.datatypes.Utf8String(_documentHash)), 
-                Collections.<TypeReference<?>>emptyList());
-        return executeRemoteCallTransaction(function);
-    }
+	@Deprecated
+	public static DocumentRegistry load(String contractAddress, Web3j web3j,
+			Credentials credentials, BigInteger gasPrice, BigInteger gasLimit) {
+		return new DocumentRegistry(contractAddress, web3j, credentials, gasPrice, gasLimit);
+	}
 
-    public RemoteFunctionCall<String> getDocumentsForRequest(String _documentId) {
-        final Function function = new Function(FUNC_GETDOCUMENTSFORREQUEST, 
-                Arrays.<Type>asList(new org.web3j.abi.datatypes.Utf8String(_documentId)), 
-                Arrays.<TypeReference<?>>asList(new TypeReference<Utf8String>() {}));
-        return executeRemoteCallSingleValueReturn(function, String.class);
-    }
+	@Deprecated
+	public static DocumentRegistry load(String contractAddress, Web3j web3j,
+			TransactionManager transactionManager, BigInteger gasPrice, BigInteger gasLimit) {
+		return new DocumentRegistry(contractAddress, web3j, transactionManager, gasPrice, gasLimit);
+	}
 
-    public RemoteFunctionCall<String> owner() {
-        final Function function = new Function(FUNC_OWNER, 
-                Arrays.<Type>asList(), 
-                Arrays.<TypeReference<?>>asList(new TypeReference<Address>() {}));
-        return executeRemoteCallSingleValueReturn(function, String.class);
-    }
+	public static DocumentRegistry load(String contractAddress, Web3j web3j,
+			Credentials credentials, ContractGasProvider contractGasProvider) {
+		return new DocumentRegistry(contractAddress, web3j, credentials, contractGasProvider);
+	}
 
-    public RemoteFunctionCall<String> requestToDocuments(String param0) {
-        final Function function = new Function(FUNC_REQUESTTODOCUMENTS, 
-                Arrays.<Type>asList(new org.web3j.abi.datatypes.Utf8String(param0)), 
-                Arrays.<TypeReference<?>>asList(new TypeReference<Utf8String>() {}));
-        return executeRemoteCallSingleValueReturn(function, String.class);
-    }
+	public static DocumentRegistry load(String contractAddress, Web3j web3j,
+			TransactionManager transactionManager, ContractGasProvider contractGasProvider) {
+		return new DocumentRegistry(contractAddress, web3j, transactionManager, contractGasProvider);
+	}
 
-    @Deprecated
-    public static DocumentRegistry load(String contractAddress, Web3j web3j,
-            Credentials credentials, BigInteger gasPrice, BigInteger gasLimit) {
-        return new DocumentRegistry(contractAddress, web3j, credentials, gasPrice, gasLimit);
-    }
+	public RemoteFunctionCall<TransactionReceipt> addDocument(String _requestId,
+			String _documentHash) {
+		final Function function = new Function(
+				FUNC_ADDDOCUMENT,
+				Arrays.<Type>asList(new org.web3j.abi.datatypes.Utf8String(_requestId),
+						new org.web3j.abi.datatypes.Utf8String(_documentHash)),
+				Collections.<TypeReference<?>>emptyList());
+		return executeRemoteCallTransaction(function);
+	}
 
-    @Deprecated
-    public static DocumentRegistry load(String contractAddress, Web3j web3j,
-            TransactionManager transactionManager, BigInteger gasPrice, BigInteger gasLimit) {
-        return new DocumentRegistry(contractAddress, web3j, transactionManager, gasPrice, gasLimit);
-    }
+	public RemoteFunctionCall<String> getDocumentsForRequest(String _documentId) {
+		final Function function = new Function(FUNC_GETDOCUMENTSFORREQUEST,
+				Arrays.<Type>asList(new org.web3j.abi.datatypes.Utf8String(_documentId)),
+				Arrays.<TypeReference<?>>asList(new TypeReference<Utf8String>() { }));
+		return executeRemoteCallSingleValueReturn(function, String.class);
+	}
 
-    public static DocumentRegistry load(String contractAddress, Web3j web3j,
-            Credentials credentials, ContractGasProvider contractGasProvider) {
-        return new DocumentRegistry(contractAddress, web3j, credentials, contractGasProvider);
-    }
+	public RemoteFunctionCall<String> owner() {
+		final Function function = new Function(FUNC_OWNER,
+				Arrays.<Type>asList(),
+				Arrays.<TypeReference<?>>asList(new TypeReference<Address>() { }));
+		return executeRemoteCallSingleValueReturn(function, String.class);
+	}
 
-    public static DocumentRegistry load(String contractAddress, Web3j web3j,
-            TransactionManager transactionManager, ContractGasProvider contractGasProvider) {
-        return new DocumentRegistry(contractAddress, web3j, transactionManager, contractGasProvider);
-    }
+	public RemoteFunctionCall<String> requestToDocuments(String param0) {
+		final Function function = new Function(FUNC_REQUESTTODOCUMENTS,
+				Arrays.<Type>asList(new org.web3j.abi.datatypes.Utf8String(param0)),
+				Arrays.<TypeReference<?>>asList(new TypeReference<Utf8String>() { }));
+		return executeRemoteCallSingleValueReturn(function, String.class);
+	}
 }

@@ -1,6 +1,7 @@
 package com.rusudinu.backend.document;
 
 import lombok.RequiredArgsConstructor;
+
 import org.springframework.http.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -13,47 +14,47 @@ import java.util.List;
 @RequestMapping("/api/v1/documents")
 @RequiredArgsConstructor
 public class DocumentController {
-    private final DocumentService documentService;
+	private final DocumentService documentService;
 
-    @PostMapping
+	@PostMapping
 //    @PreAuthorize("hasAnyAuthority('MINISTRY', 'JOURNALIST')")
-    public Document uploadDocument(@RequestParam("file") MultipartFile file, @RequestParam Long documentId) {
+	public Document uploadDocument(@RequestParam("file") MultipartFile file, @RequestParam Long documentId) {
 		return documentService.uploadDocument(file, documentId);
-    }
+	}
 
-    @PostMapping("/create-document")
+	@PostMapping("/create-document")
 //    @PreAuthorize("hasAnyAuthority('MINISTRY', 'JOURNALIST')")
-    public Document createDocument() {
-        return documentService.createDocument();
-    }
+	public Document createDocument() {
+		return documentService.createDocument();
+	}
 
-    @GetMapping("/need-review")
-    public List<Document> getNeedReviewDocuments() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        return documentService.getNeedReviewDocuments(authentication.getName());
-    }
+	@GetMapping("/need-review")
+	public List<Document> getNeedReviewDocuments() {
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		return documentService.getNeedReviewDocuments(authentication.getName());
+	}
 
-    @GetMapping("{documentId}")
-    public Document getDocumentById(@PathVariable Long documentId) {
-       return documentService.getDocumentById(documentId);
-    }
+	@GetMapping("{documentId}")
+	public Document getDocumentById(@PathVariable Long documentId) {
+		return documentService.getDocumentById(documentId);
+	}
 
-    @GetMapping("/download/{storedDocumentName}")
-    public ResponseEntity<byte[]> getDocument(@PathVariable String storedDocumentName) {
-        byte[] documentContent = documentService.getDocument(storedDocumentName);
+	@GetMapping("/download/{storedDocumentName}")
+	public ResponseEntity<byte[]> getDocument(@PathVariable String storedDocumentName) {
+		byte[] documentContent = documentService.getDocument(storedDocumentName);
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_PDF);
-        headers.setContentDisposition(ContentDisposition.inline().filename(storedDocumentName).build());
-        headers.set("X-Frame-Options", "SAMEORIGIN");
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.APPLICATION_PDF);
+		headers.setContentDisposition(ContentDisposition.inline().filename(storedDocumentName).build());
+		headers.set("X-Frame-Options", "SAMEORIGIN");
 
-        return new ResponseEntity<>(documentContent, headers, HttpStatus.OK);
-    }
+		return new ResponseEntity<>(documentContent, headers, HttpStatus.OK);
+	}
 
-    @PostMapping("/economic-and-social/{documentId}")
-    public Document addEconomicAndSocialCouncilComment(@PathVariable Long documentId, @RequestParam String comment) {
-        return documentService.addEconomicAndSocialCouncilComment(documentId, comment);
-    }
+	@PostMapping("/economic-and-social/{documentId}")
+	public Document addEconomicAndSocialCouncilComment(@PathVariable Long documentId, @RequestParam String comment) {
+		return documentService.addEconomicAndSocialCouncilComment(documentId, comment);
+	}
 
 	@PostMapping("/general-secretariat/{documentId}")
 	public Document addGeneralSecretariatComment(@PathVariable Long documentId, @RequestParam String comment) {

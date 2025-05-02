@@ -1,6 +1,7 @@
 package com.rusudinu.backend.user;
 
 import lombok.RequiredArgsConstructor;
+
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
@@ -17,24 +18,24 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/v1/users")
 @RequiredArgsConstructor
 public class UserController {
-    private final UserService userService;
-    private final UserMapper userMapper;
+	private final UserService userService;
+	private final UserMapper userMapper;
 
-    @GetMapping
-    public List<UserDTO> getAllUsers() {
-        return userService.getAllUsers().stream().map(userMapper::toUserDTO).collect(Collectors.toList());
-    }
+	@GetMapping
+	public List<UserDTO> getAllUsers() {
+		return userService.getAllUsers().stream().map(userMapper::toUserDTO).collect(Collectors.toList());
+	}
 
-    @GetMapping("/me")
-    public User getMe() {
-        Authentication authToken = SecurityContextHolder.getContext().getAuthentication();
-        Map<String, Object> attributes = ((JwtAuthenticationToken) authToken).getTokenAttributes();
-        String userId = (String) attributes.get("sub");
-        return userService.findOrCreateByKeycloakId(userId);
-    }
+	@GetMapping("/me")
+	public User getMe() {
+		Authentication authToken = SecurityContextHolder.getContext().getAuthentication();
+		Map<String, Object> attributes = ((JwtAuthenticationToken) authToken).getTokenAttributes();
+		String userId = (String) attributes.get("sub");
+		return userService.findOrCreateByKeycloakId(userId);
+	}
 
-    @GetMapping("/{keycloakId}")
-    public User getUserByKeycloakId(@PathVariable String keycloakId) {
-        return userService.findOrCreateByKeycloakId(keycloakId);
-    }
+	@GetMapping("/{keycloakId}")
+	public User getUserByKeycloakId(@PathVariable String keycloakId) {
+		return userService.findOrCreateByKeycloakId(keycloakId);
+	}
 }

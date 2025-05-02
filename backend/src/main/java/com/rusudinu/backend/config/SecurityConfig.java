@@ -31,54 +31,55 @@ import static org.springframework.security.config.Customizer.withDefaults;
 @EnableMethodSecurity
 class SecurityConfig {
 
-    @Bean
-    protected SessionAuthenticationStrategy sessionAuthenticationStrategy() {
-        return new RegisterSessionAuthenticationStrategy(new SessionRegistryImpl());
-    }
+	@Bean
+	protected SessionAuthenticationStrategy sessionAuthenticationStrategy() {
+		return new RegisterSessionAuthenticationStrategy(new SessionRegistryImpl());
+	}
 
-    @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http, LogoutHandler keycloakLogoutHandler) throws Exception {
-        http
-                .cors(withDefaults())
-                .csrf(AbstractHttpConfigurer::disable)
-                .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/auth", "/register", "/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
-                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // Allow pre-flight requests for CORS
-                        .requestMatchers("/**").authenticated()  // Require authentication for all other requests
-                )
-                .oauth2Login(withDefaults())
-                .logout(logout -> logout
-                        .addLogoutHandler(keycloakLogoutHandler)
-                        .logoutSuccessUrl("/")
-                )
-                .oauth2ResourceServer(oauth2 -> oauth2
-                        .jwt(withDefaults())
-                );
+	@Bean
+	public SecurityFilterChain filterChain(HttpSecurity http, LogoutHandler keycloakLogoutHandler) throws Exception {
+		http
+				.cors(withDefaults())
+				.csrf(AbstractHttpConfigurer::disable)
+				.authorizeHttpRequests(authorize -> authorize
+						.requestMatchers("/auth", "/register", "/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**")
+						.permitAll()
+						.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // Allow pre-flight requests for CORS
+						.requestMatchers("/**").authenticated()  // Require authentication for all other requests
+				)
+				.oauth2Login(withDefaults())
+				.logout(logout -> logout
+						.addLogoutHandler(keycloakLogoutHandler)
+						.logoutSuccessUrl("/")
+				)
+				.oauth2ResourceServer(oauth2 -> oauth2
+						.jwt(withDefaults())
+				);
 
-        return http.build();
-    }
+		return http.build();
+	}
 
-    @Bean
-    public JwtAuthenticationConverter jwtAuthenticationConverterForKeycloak() {
-        Converter<Jwt, Collection<GrantedAuthority>> jwtGrantedAuthoritiesConverter = jwt -> {
-            Map<String, Object> resourceAccess = jwt.getClaim("realm_access");
-            Object roles = resourceAccess.get("roles");
-            List<String> clientRoles = new ArrayList<>();
-            if (roles instanceof ArrayList) {
-                for (Object role : (ArrayList) roles) {
-                    clientRoles.add((String) role);
-                }
-            }
+	@Bean
+	public JwtAuthenticationConverter jwtAuthenticationConverterForKeycloak() {
+		Converter<Jwt, Collection<GrantedAuthority>> jwtGrantedAuthoritiesConverter = jwt -> {
+			Map<String, Object> resourceAccess = jwt.getClaim("realm_access");
+			Object roles = resourceAccess.get("roles");
+			List<String> clientRoles = new ArrayList<>();
+			if (roles instanceof ArrayList) {
+				for (Object role : (ArrayList) roles) {
+					clientRoles.add((String) role);
+				}
+			}
 
-            return clientRoles.stream()
-                    .map(SimpleGrantedAuthority::new)
-                    .collect(Collectors.toList());
-        };
+			return clientRoles.stream()
+					.map(SimpleGrantedAuthority::new)
+					.collect(Collectors.toList());
+		};
 
-        JwtAuthenticationConverter jwtAuthenticationConverter = new JwtAuthenticationConverter();
+		JwtAuthenticationConverter jwtAuthenticationConverter = new JwtAuthenticationConverter();
 
-        jwtAuthenticationConverter.setJwtGrantedAuthoritiesConverter(jwtGrantedAuthoritiesConverter);
+		jwtAuthenticationConverter.setJwtGrantedAuthoritiesConverter(jwtGrantedAuthoritiesConverter);
 
-        return jwtAuthenticationConverter;
-    }
+		return jwtAuthenticationConverter;
+	}
 }

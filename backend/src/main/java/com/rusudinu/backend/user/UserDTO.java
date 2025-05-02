@@ -11,8 +11,8 @@ import java.util.List;
 @AllArgsConstructor
 @RequiredArgsConstructor
 public class UserDTO {
-    private Long id;
-    private String keycloakId;
-    private ZonedDateTime createdDate;
-    private boolean isDeleted;
+	private Long id;
+	private String keycloakId;
+	private ZonedDateTime createdDate;
+	private boolean isDeleted;
 }

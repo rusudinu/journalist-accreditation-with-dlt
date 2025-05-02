@@ -10,6 +10,6 @@ import lombok.RequiredArgsConstructor;
 @AllArgsConstructor
 @RequiredArgsConstructor
 public class HyperledgerRegistry {
-    private String id; // the request id
-    private String requestSnapshotHash;
+	private String id; // the request id
+	private String requestSnapshotHash;
 }

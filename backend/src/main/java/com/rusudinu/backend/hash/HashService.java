@@ -1,9 +1,5 @@
 package com.rusudinu.backend.hash;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.rusudinu.backend.document.Document;
-import com.rusudinu.backend.document.DocumentRepository;
-import com.rusudinu.backend.document.DocumentService;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -32,7 +28,7 @@ public class HashService {
 		if (data == null || data.isEmpty()) {
 			log.warn("Data is null or empty, returning empty hash");
 			throw new IllegalArgumentException("Data cannot be null or empty");
-        }
+		}
 		return DigestUtils.sha256Hex(data);
 	}
 

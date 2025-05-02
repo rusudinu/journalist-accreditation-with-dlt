@@ -13,18 +13,18 @@ import java.time.ZonedDateTime;
 @RequiredArgsConstructor
 @Table(name = "app_users")
 public class User {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
 
-    @Column(unique = true)
-    private String keycloakId;
+	@Column(unique = true)
+	private String keycloakId;
 
-    private String name;
+	private String name;
 
-    @CreationTimestamp
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
-    private ZonedDateTime createdDate;
+	@CreationTimestamp
+	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
+	private ZonedDateTime createdDate;
 
-    private boolean isDeleted = false;
+	private boolean isDeleted = false;
 }

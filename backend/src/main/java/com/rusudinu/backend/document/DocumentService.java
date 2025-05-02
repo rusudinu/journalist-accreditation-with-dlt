@@ -6,6 +6,7 @@ import com.rusudinu.backend.user.UserService;
 import java.util.ArrayList;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
+
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -20,54 +21,57 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class DocumentService {
-    private static final String UPLOAD_DIR = "uploads/";
+	private static final String UPLOAD_DIR = "uploads/";
 
-    private final DocumentRepository documentRepository;
-    private final UserService userService;
+	private final DocumentRepository documentRepository;
+	private final UserService userService;
 	private final DistributedStorageService distributedStorageService;
 	private final HashService hashService;
 
-    public Document uploadDocument(MultipartFile file, Long documentId) {
-        File directory = new File(UPLOAD_DIR);
-        if (!directory.exists()) {
-            if (!directory.mkdirs()) {
-                throw new RuntimeException("Failed to create directory: " + UPLOAD_DIR);
-            }
-        }
+	public Document uploadDocument(MultipartFile file, Long documentId) {
+		File directory = new File(UPLOAD_DIR);
+		if (!directory.exists()) {
+			if (!directory.mkdirs()) {
+				throw new RuntimeException("Failed to create directory: " + UPLOAD_DIR);
+			}
+		}
 
 
-        String uniqueFileName = System.currentTimeMillis() + "_" + UUID.randomUUID() + "." + Objects.requireNonNull(file.getOriginalFilename())
+		String uniqueFileName = System.currentTimeMillis() + "_" + UUID.randomUUID() + "." + Objects.requireNonNull(file.getOriginalFilename())
 				.split("\\.")[1];
-        Path filePath = Paths.get(UPLOAD_DIR, uniqueFileName);
+		Path filePath = Paths.get(UPLOAD_DIR, uniqueFileName);
 
-        Document document = documentRepository.findById(documentId).orElseThrow(() -> new RuntimeException("Document not found with id: " + documentId));
-        document.setStoredDocumentName(uniqueFileName);
-        try {
-            Files.write(filePath, file.getBytes());
+		Document document = documentRepository.findById(documentId)
+				.orElseThrow(() -> new RuntimeException("Document not found with id: " + documentId));
+		document.setStoredDocumentName(uniqueFileName);
+		try {
+			Files.write(filePath, file.getBytes());
 			return documentRepository.save(document);
-        } catch (IOException e) {
-            return null;
-        }
-    }
+		}
+		catch (IOException e) {
+			return null;
+		}
+	}
 
-    public byte[] getDocument(String storedDocumentName) {
-        try {
-            Path documentPath = Paths.get(UPLOAD_DIR, storedDocumentName);
-            if (!Files.exists(documentPath)) {
-                throw new IOException("File not found: " + storedDocumentName);
-            }
-            return Files.readAllBytes(documentPath);
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to retrieve document content", e);
-        }
-    }
+	public byte[] getDocument(String storedDocumentName) {
+		try {
+			Path documentPath = Paths.get(UPLOAD_DIR, storedDocumentName);
+			if (!Files.exists(documentPath)) {
+				throw new IOException("File not found: " + storedDocumentName);
+			}
+			return Files.readAllBytes(documentPath);
+		}
+		catch (IOException e) {
+			throw new RuntimeException("Failed to retrieve document content", e);
+		}
+	}
 
-    public Document getDocumentById(Long documentId) {
-        return documentRepository.findById(documentId)
-                .orElseThrow(() -> new RuntimeException("Document not found with id: " + documentId));
-    }
+	public Document getDocumentById(Long documentId) {
+		return documentRepository.findById(documentId)
+				.orElseThrow(() -> new RuntimeException("Document not found with id: " + documentId));
+	}
 
-    // possible names: budgetcommittee,economicandsocialcouncil,generalsecretariat,legalcommittee,legislativecouncil,publicadministration,specialtycommission
+	// possible names: budgetcommittee,economicandsocialcouncil,generalsecretariat,legalcommittee,legislativecouncil,publicadministration,specialtycommission
 	List<Document> getNeedReviewDocuments(String name) {
 		String normalizedName = name.trim().toLowerCase();
 
@@ -106,11 +110,12 @@ public class DocumentService {
 	}
 
 	Document createDocument() {
-        return documentRepository.save(new Document());
-    }
+		return documentRepository.save(new Document());
+	}
 
 	Document addEconomicAndSocialCouncilComment(Long documentId, String comment) {
-		Document document = documentRepository.findById(documentId).orElseThrow(() -> new RuntimeException("Document not found with id: " + documentId));
+		Document document = documentRepository.findById(documentId)
+				.orElseThrow(() -> new RuntimeException("Document not found with id: " + documentId));
 		document.setEconomicAndSocialCouncilComment(comment);
 
 		String commentKey = document.getId() + "_comment_economic_and_social_council";
@@ -120,7 +125,8 @@ public class DocumentService {
 	}
 
 	Document addGeneralSecretariatComment(Long documentId, String comment) {
-		Document document = documentRepository.findById(documentId).orElseThrow(() -> new RuntimeException("Document not found with id: " + documentId));
+		Document document = documentRepository.findById(documentId)
+				.orElseThrow(() -> new RuntimeException("Document not found with id: " + documentId));
 		document.setGeneralSecretariatComment(comment);
 
 		String commentKey = document.getId() + "_comment_general_secretariat";
@@ -130,7 +136,8 @@ public class DocumentService {
 	}
 
 	Document addLegislativeCouncilComment(Long documentId, String comment) {
-		Document document = documentRepository.findById(documentId).orElseThrow(() -> new RuntimeException("Document not found with id: " + documentId));
+		Document document = documentRepository.findById(documentId)
+				.orElseThrow(() -> new RuntimeException("Document not found with id: " + documentId));
 		document.setLegislativeCouncilComment(comment);
 
 		String commentKey = document.getId() + "_comment_legislative_council";
@@ -140,7 +147,8 @@ public class DocumentService {
 	}
 
 	Document addLegalCommitteeComment(Long documentId, String comment) {
-		Document document = documentRepository.findById(documentId).orElseThrow(() -> new RuntimeException("Document not found with id: " + documentId));
+		Document document = documentRepository.findById(documentId)
+				.orElseThrow(() -> new RuntimeException("Document not found with id: " + documentId));
 		document.setLegalCommitteeComment(comment);
 
 		String commentKey = document.getId() + "_comment_legal_committee";
@@ -150,7 +158,8 @@ public class DocumentService {
 	}
 
 	Document addBudgetCommitteeComment(Long documentId, String comment) {
-		Document document = documentRepository.findById(documentId).orElseThrow(() -> new RuntimeException("Document not found with id: " + documentId));
+		Document document = documentRepository.findById(documentId)
+				.orElseThrow(() -> new RuntimeException("Document not found with id: " + documentId));
 		document.setBudgetCommitteeComment(comment);
 
 		String commentKey = document.getId() + "_comment_budget_committee";
@@ -160,7 +169,8 @@ public class DocumentService {
 	}
 
 	Document addPublicAdministrationComment(Long documentId, String comment) {
-		Document document = documentRepository.findById(documentId).orElseThrow(() -> new RuntimeException("Document not found with id: " + documentId));
+		Document document = documentRepository.findById(documentId)
+				.orElseThrow(() -> new RuntimeException("Document not found with id: " + documentId));
 		document.setPublicAdministrationComment(comment);
 
 		String commentKey = document.getId() + "_comment_public_administration";
@@ -170,7 +180,8 @@ public class DocumentService {
 	}
 
 	Document addSpecialtyCommissionComment(Long documentId, String comment) {
-		Document document = documentRepository.findById(documentId).orElseThrow(() -> new RuntimeException("Document not found with id: " + documentId));
+		Document document = documentRepository.findById(documentId)
+				.orElseThrow(() -> new RuntimeException("Document not found with id: " + documentId));
 		document.setSpecialtyCommissionComment(comment);
 
 		String commentKey = document.getId() + "_comment_specialty_commission";
@@ -181,11 +192,12 @@ public class DocumentService {
 
 	boolean isCommentHashValid(Long documentId, String prefix, String comment) {
 		// we'll assume that the comment is valid if it's null or empty
-		if(comment == null || comment.isEmpty()) {
+		if (comment == null || comment.isEmpty()) {
 			return true;
 		}
 
-		Document document = documentRepository.findById(documentId).orElseThrow(() -> new RuntimeException("Document not found with id: " + documentId));
+		Document document = documentRepository.findById(documentId)
+				.orElseThrow(() -> new RuntimeException("Document not found with id: " + documentId));
 		String commentKey = document.getId() + "_comment_" + prefix;
 
 		String blockchainCommentHash = distributedStorageService.getCommentHashByCommentKey(commentKey);
@@ -195,7 +207,8 @@ public class DocumentService {
 	}
 
 	boolean documentHasAllCommentsValid(Long documentId) {
-		Document document = documentRepository.findById(documentId).orElseThrow(() -> new RuntimeException("Document not found with id: " + documentId));
+		Document document = documentRepository.findById(documentId)
+				.orElseThrow(() -> new RuntimeException("Document not found with id: " + documentId));
 
 		return isCommentHashValid(documentId, "economic_and_social_council", document.getEconomicAndSocialCouncilComment())
 				&& isCommentHashValid(documentId, "general_secretariat", document.getGeneralSecretariatComment())
