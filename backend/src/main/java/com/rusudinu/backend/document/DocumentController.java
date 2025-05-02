@@ -3,9 +3,12 @@ package com.rusudinu.backend.document;
 import com.rusudinu.backend.comment.CommentDTO;
 import com.rusudinu.backend.request.RequestStatus;
 import com.rusudinu.backend.request.snapshot.SnapshotService;
+import java.util.ArrayList;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.*;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -24,6 +27,13 @@ public class DocumentController {
         Document document = documentService.uploadDocument(file, status, requestId);
         snapshotService.createAndPersistRequestSnapshot(status, requestId, document.getStoredDocumentName());
         return document;
+    }
+
+    @GetMapping("/need-review")
+    public List<DocumentDTO> getNeedReviewDocuments() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        System.out.println(authentication.getName());
+        return new ArrayList<>();
     }
 
     @GetMapping("{storedDocumentName}")

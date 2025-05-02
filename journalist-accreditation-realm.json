@@ -520,7 +520,7 @@
     "firstName" : "Specialty",
     "lastName" : "Commission",
     "email" : "specialtycommission@gmail.com",
-    "emailVerified" : false,
+    "emailVerified" : true,
     "createdTimestamp" : 1746191959378,
     "enabled" : true,
     "totp" : false,
