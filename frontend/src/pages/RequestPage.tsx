@@ -16,6 +16,9 @@ import { IoIosWarning } from "react-icons/io";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert.tsx";
 import { IDocument } from "@/bemodel/Api.ts";
 import { Eye } from 'lucide-react';
+import { useAppSelector } from "@/hooks.ts";
+import { Textarea } from "@/components/ui/textarea.tsx";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card.tsx";
 
 const FileSvgDraw = () => {
     return (
@@ -51,7 +54,12 @@ function RequestPage() {
     const [files, setFiles] = useState<File[] | null>([]);
     const [document, setDocument] = useState<IDocument | null>(null);
     const [isLoading, setIsLoading] = useState<boolean>(true);
+    const [comment, setComment] = useState<string>("");
+    const [isSubmittingComment, setIsSubmittingComment] = useState<boolean>(false);
     const backendUrl = import.meta.env.VITE_BACKEND_URL;
+
+    // Get the authenticated user's name from Redux store
+    const authenticatedUserName = useAppSelector((state) => state.core.authenticatedUserName);
 
     useEffect(() => {
         fetchDocument();
@@ -169,6 +177,90 @@ function RequestPage() {
         }
     };
 
+    // Function to submit a comment based on user role
+    const submitComment = async () => {
+        if (!comment.trim()) {
+            toast('Error', {
+                description: 'Please enter a comment before submitting.',
+            });
+            return;
+        }
+
+        if (!document?.id) {
+            toast('Error', {
+                description: 'Document ID is missing.',
+            });
+            return;
+        }
+
+        setIsSubmittingComment(true);
+
+        try {
+            // Normalize the username to determine which endpoint to use
+            const normalizedUsername = authenticatedUserName.trim().toLowerCase().replace(/\s+/g, '');
+            let endpoint = '';
+
+            switch (normalizedUsername) {
+                case 'economicandsocialcouncil':
+                    endpoint = 'economic-and-social';
+                    break;
+                case 'generalsecretariat':
+                    endpoint = 'general-secretariat';
+                    break;
+                case 'legislativecouncil':
+                    endpoint = 'legislative-council';
+                    break;
+                case 'legalcommittee':
+                    endpoint = 'legal-committee';
+                    break;
+                case 'budgetcommittee':
+                    endpoint = 'budget-committee';
+                    break;
+                case 'publicadministration':
+                    endpoint = 'public-administration';
+                    break;
+                case 'specialtycommission':
+                    endpoint = 'specialty-commission';
+                    break;
+                default:
+                    toast('Error', {
+                        description: 'You are not authorized to add comments.',
+                    });
+                    setIsSubmittingComment(false);
+                    return;
+            }
+
+            const response = await axios.post(
+                `${backendUrl}/api/v1/documents/${endpoint}/${document.id}`,
+                null,
+                {
+                    params: {
+                        comment: comment
+                    }
+                }
+            );
+
+            if (response.status === 200) {
+                toast('Success', {
+                    description: 'Comment added successfully!',
+                });
+                setComment('');
+                fetchDocument(); // Refresh document data to show the new comment
+            } else {
+                toast('Error', {
+                    description: `Failed to add comment. Server responded with status: ${response.status}`,
+                });
+            }
+        } catch (error: unknown) {
+            console.error("Error adding comment:", error);
+            toast('Error', {
+                description: `An error occurred while adding the comment: ${error instanceof Error ? error.message : 'Unknown error'}`,
+            });
+        } finally {
+            setIsSubmittingComment(false);
+        }
+    };
+
     return (
         <>
             <Table>
@@ -252,6 +344,172 @@ function RequestPage() {
                             Upload File
                         </Button>
                     </div>
+                </>
+            )}
+
+            {/* Comment Section */}
+            <Separator className="my-4"/>
+
+            {!isReadOnly && document && (
+                <>
+                    {/* Display existing comments if they exist */}
+                    <div className="mb-4">
+                        <h3 className="text-lg font-semibold mb-2">Comments</h3>
+
+                        {document.economicAndSocialCouncilComment && (
+                            <Card className="mb-2">
+                                <CardHeader>
+                                    <CardTitle>Economic and Social Council</CardTitle>
+                                </CardHeader>
+                                <CardContent>
+                                    <p>{document.economicAndSocialCouncilComment}</p>
+                                </CardContent>
+                            </Card>
+                        )}
+
+                        {document.generalSecretariatComment && (
+                            <Card className="mb-2">
+                                <CardHeader>
+                                    <CardTitle>General Secretariat</CardTitle>
+                                </CardHeader>
+                                <CardContent>
+                                    <p>{document.generalSecretariatComment}</p>
+                                </CardContent>
+                            </Card>
+                        )}
+
+                        {document.legislativeCouncilComment && (
+                            <Card className="mb-2">
+                                <CardHeader>
+                                    <CardTitle>Legislative Council</CardTitle>
+                                </CardHeader>
+                                <CardContent>
+                                    <p>{document.legislativeCouncilComment}</p>
+                                </CardContent>
+                            </Card>
+                        )}
+
+                        {document.legalCommitteeComment && (
+                            <Card className="mb-2">
+                                <CardHeader>
+                                    <CardTitle>Legal Committee</CardTitle>
+                                </CardHeader>
+                                <CardContent>
+                                    <p>{document.legalCommitteeComment}</p>
+                                </CardContent>
+                            </Card>
+                        )}
+
+                        {document.budgetCommitteeComment && (
+                            <Card className="mb-2">
+                                <CardHeader>
+                                    <CardTitle>Budget Committee</CardTitle>
+                                </CardHeader>
+                                <CardContent>
+                                    <p>{document.budgetCommitteeComment}</p>
+                                </CardContent>
+                            </Card>
+                        )}
+
+                        {document.publicAdministrationComment && (
+                            <Card className="mb-2">
+                                <CardHeader>
+                                    <CardTitle>Public Administration</CardTitle>
+                                </CardHeader>
+                                <CardContent>
+                                    <p>{document.publicAdministrationComment}</p>
+                                </CardContent>
+                            </Card>
+                        )}
+
+                        {document.specialtyCommissionComment && (
+                            <Card className="mb-2">
+                                <CardHeader>
+                                    <CardTitle>Specialty Commission</CardTitle>
+                                </CardHeader>
+                                <CardContent>
+                                    <p>{document.specialtyCommissionComment}</p>
+                                </CardContent>
+                            </Card>
+                        )}
+                    </div>
+
+                    {/* Add Comment Form based on user role */}
+                    {(() => {
+                        // Normalize the username to determine which comment form to show
+                        const normalizedUsername = authenticatedUserName.trim().toLowerCase().replace(/\s+/g, '');
+                        let commentTitle = '';
+                        let existingComment = '';
+
+                        switch (normalizedUsername) {
+                            case 'economicandsocialcouncil':
+                                commentTitle = 'Economic and Social Council Comment';
+                                existingComment = document.economicAndSocialCouncilComment || '';
+                                break;
+                            case 'generalsecretariat':
+                                commentTitle = 'General Secretariat Comment';
+                                existingComment = document.generalSecretariatComment || '';
+                                break;
+                            case 'legislativecouncil':
+                                commentTitle = 'Legislative Council Comment';
+                                existingComment = document.legislativeCouncilComment || '';
+                                break;
+                            case 'legalcommittee':
+                                commentTitle = 'Legal Committee Comment';
+                                existingComment = document.legalCommitteeComment || '';
+                                break;
+                            case 'budgetcommittee':
+                                commentTitle = 'Budget Committee Comment';
+                                existingComment = document.budgetCommitteeComment || '';
+                                break;
+                            case 'publicadministration':
+                                commentTitle = 'Public Administration Comment';
+                                existingComment = document.publicAdministrationComment || '';
+                                break;
+                            case 'specialtycommission':
+                                commentTitle = 'Specialty Commission Comment';
+                                existingComment = document.specialtyCommissionComment || '';
+                                break;
+                            default:
+                                return null; // No comment form for other users
+                        }
+
+                        // If the user has already added a comment, show it and don't allow adding another
+                        if (existingComment) {
+                            return (
+                                <Alert className="mb-4">
+                                    <AlertTitle>Comment Already Added</AlertTitle>
+                                    <AlertDescription>
+                                        You have already added a comment to this document.
+                                    </AlertDescription>
+                                </Alert>
+                            );
+                        }
+
+                        // Otherwise, show the comment form
+                        return (
+                            <Card>
+                                <CardHeader>
+                                    <CardTitle>{commentTitle}</CardTitle>
+                                    <CardDescription>Add your comment to this document</CardDescription>
+                                </CardHeader>
+                                <CardContent>
+                                    <Textarea
+                                        placeholder="Enter your comment here..."
+                                        value={comment}
+                                        onChange={(e) => setComment(e.target.value)}
+                                        className="mb-4"
+                                    />
+                                    <Button 
+                                        onClick={submitComment}
+                                        disabled={isSubmittingComment || !comment.trim()}
+                                    >
+                                        {isSubmittingComment ? 'Submitting...' : 'Submit Comment'}
+                                    </Button>
+                                </CardContent>
+                            </Card>
+                        );
+                    })()}
                 </>
             )}
         </>

@@ -1,7 +1,6 @@
 package com.rusudinu.backend.hash;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.rusudinu.backend.comment.Comment;
 import com.rusudinu.backend.document.Document;
 import com.rusudinu.backend.document.DocumentRepository;
 import com.rusudinu.backend.document.DocumentService;
@@ -18,7 +17,6 @@ import javax.crypto.Cipher;
 import java.security.*;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 @Service
