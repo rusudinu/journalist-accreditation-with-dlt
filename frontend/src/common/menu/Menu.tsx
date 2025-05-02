@@ -1,4 +1,4 @@
-import {useUserHasRole, useUserIsAuthenticated} from '@/common/auth/UserUtils.ts';
+import {useUserIsAuthenticated} from '@/common/auth/UserUtils.ts';
 import {NavigationMenu, NavigationMenuItem, NavigationMenuList, NavigationMenuTrigger, NavigationMenuContent, NavigationMenuLink} from '@/components/ui/navigation-menu.tsx';
 import {cn} from '@/lib/utils.ts';
 import React, {useContext, useEffect} from 'react';
@@ -19,30 +19,11 @@ const generalComponents = [
     },
 ]
 
-const adminComponents: { title: string, href: string, description: string }[] = [
-    {
-        title: 'Requests Without Approval Process',
-        href: '/admin/requests-without-approval-process',
-        description: 'View and assign approval processes to requests',
-    },
-    {
-        title: 'Requests With Approval Process',
-        href: '/admin/requests-with-approval-process',
-        description: 'View requests with approval processes and their status',
-    },
-    {
-        title: 'Create Approval Process',
-        href: '/admin/create-approval-process',
-        description: 'Create a new approval process with multiple steps',
-    },
-];
-
 const pathsWhereMenuIsHidden: string[] = [];
 
 const MenuComponent = () => {
     const keycloak = useContext(AuthContext);
     const location = useLocation();
-    const hasAdminRole = useUserHasRole('ADMIN');
     const userIsAuthenticated = useUserIsAuthenticated();
     const [showMenu, setShowMenu] = React.useState(true);
     const [showLogout, setShowLogout] = React.useState(false);
@@ -78,24 +59,6 @@ const MenuComponent = () => {
                                     </ul>
                                 </NavigationMenuContent>
                             </NavigationMenuItem>
-                            {hasAdminRole && userIsAuthenticated && (
-                                <NavigationMenuItem>
-                                    <NavigationMenuTrigger>Admin</NavigationMenuTrigger>
-                                    <NavigationMenuContent>
-                                        <ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px]">
-                                            {adminComponents.map((component) => (
-                                                <ListItem
-                                                    key={component.title}
-                                                    title={component.title}
-                                                    to={component.href}
-                                                >
-                                                    {component.description}
-                                                </ListItem>
-                                            ))}
-                                        </ul>
-                                    </NavigationMenuContent>
-                                </NavigationMenuItem>
-                            )}
                         </NavigationMenuList>
                     </NavigationMenu>
                     {userIsAuthenticated && (

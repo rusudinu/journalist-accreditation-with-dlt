@@ -97,7 +97,7 @@ function RequestPage() {
             setDefaultStatus(directorStatuses[0]);
         }
 
-    }, [isJournalist, isJuridic, isDirector]);
+    }, [isJournalist, isJuridic, isDirector, journalistStatuses, juridicStatuses, directorStatuses]);
 
     useEffect(() => {
         fetchRequest();
@@ -285,7 +285,7 @@ function RequestPage() {
                             </div>
                         </FileInput>
                         <FileUploaderContent className="flex items-center flex-row gap-2">
-                            {files?.map((file, i) => (
+                            {files?.map((_file, i) => (
                                 <FileUploaderItem
                                     key={i}
                                     index={i}

@@ -30,10 +30,9 @@ public class DocumentController {
     }
 
     @GetMapping("/need-review")
-    public List<DocumentDTO> getNeedReviewDocuments() {
+    public List<Document> getNeedReviewDocuments() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        System.out.println(authentication.getName());
-        return new ArrayList<>();
+        return documentService.getNeedReviewDocuments(authentication.getName());
     }
 
     @GetMapping("{storedDocumentName}")
@@ -46,12 +45,6 @@ public class DocumentController {
         headers.set("X-Frame-Options", "SAMEORIGIN");
 
         return new ResponseEntity<>(documentContent, headers, HttpStatus.OK);
-    }
-
-    @GetMapping("/{documentId}/with-comments")
-//    @PreAuthorize("hasAnyAuthority('MINISTRY', 'JOURNALIST', 'DEPUTY')")
-    public ResponseEntity<DocumentDTO> getDocumentWithComments(@PathVariable Long documentId) {
-        return ResponseEntity.ok(documentService.getDocumentWithComments(documentId));
     }
 
     @PostMapping("/{documentId}/comments")

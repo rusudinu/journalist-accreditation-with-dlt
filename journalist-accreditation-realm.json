@@ -492,6 +492,29 @@
     "notBefore" : 0,
     "groups" : [ ]
   }, {
+    "id" : "069c3888-b6c7-4d11-ac2f-d25368a0e3e7",
+    "username" : "proposer",
+    "firstName" : "Legislative",
+    "lastName" : "Proposer",
+    "email" : "proposer@gmail.com",
+    "emailVerified" : true,
+    "createdTimestamp" : 1746194840061,
+    "enabled" : true,
+    "totp" : false,
+    "credentials" : [ {
+      "id" : "61c7a776-d049-4c92-a5f7-8c2201fd9f44",
+      "type" : "password",
+      "userLabel" : "My password",
+      "createdDate" : 1746194846394,
+      "secretData" : "{\"value\":\"vYZlXSHbLqASu6hY9N8iwxtRI79Y4tXuI1ZWlii0J+xmYc6gToI7Gbpbkcz7z0vfhH632cz/IZf5oXScrjw1eg==\",\"salt\":\"+7p0EnF+rR9Dp2bs0p+Z8g==\",\"additionalParameters\":{}}",
+      "credentialData" : "{\"hashIterations\":210000,\"algorithm\":\"pbkdf2-sha512\",\"additionalParameters\":{}}"
+    } ],
+    "disableableCredentialTypes" : [ ],
+    "requiredActions" : [ ],
+    "realmRoles" : [ "default-roles-journalist-accreditation" ],
+    "notBefore" : 0,
+    "groups" : [ ]
+  }, {
     "id" : "a270aeed-1622-4a13-b29b-0f1962d60191",
     "username" : "publicadministration",
     "firstName" : "Public",

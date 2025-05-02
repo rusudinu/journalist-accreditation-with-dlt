@@ -1,6 +1,5 @@
 package com.rusudinu.backend.user;
 
-import com.rusudinu.backend.document.DocumentDTO;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
@@ -16,5 +15,4 @@ public class UserDTO {
     private String keycloakId;
     private ZonedDateTime createdDate;
     private boolean isDeleted;
-    private List<DocumentDTO> documents;
 }

@@ -7,6 +7,7 @@ import com.rusudinu.backend.comment.CommentRepository;
 import com.rusudinu.backend.request.Request;
 import com.rusudinu.backend.request.RequestService;
 import com.rusudinu.backend.request.RequestStatus;
+import com.rusudinu.backend.user.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -29,7 +30,7 @@ public class DocumentService {
     private final RequestService requestService;
     private final CommentRepository commentRepository;
     private final CommentMapper commentMapper;
-    private final DocumentMapper documentMapper;
+    private final UserService userService;
 
     public Document uploadDocument(MultipartFile file, RequestStatus status, Long requestId) {
         File directory = new File(UPLOAD_DIR);
@@ -71,23 +72,6 @@ public class DocumentService {
         }
     }
 
-    public DocumentDTO getDocumentWithComments(Long documentId) {
-        Document document = documentRepository.findById(documentId)
-                .orElseThrow(() -> new RuntimeException("Document not found with id: " + documentId));
-
-        DocumentDTO documentDTO = documentMapper.toDocumentDTO(document);
-
-        // Get comments for the document
-        List<Comment> comments = commentRepository.findByDocumentId(documentId);
-        List<CommentDTO> commentDTOs = comments.stream()
-                .map(commentMapper::toCommentDTO)
-                .collect(Collectors.toList());
-
-        documentDTO.setComments(commentDTOs);
-
-        return documentDTO;
-    }
-
     public CommentDTO addCommentToDocument(Long documentId, CommentDTO commentDTO) {
         Document document = documentRepository.findById(documentId)
                 .orElseThrow(() -> new RuntimeException("Document not found with id: " + documentId));
@@ -109,5 +93,27 @@ public class DocumentService {
     public Document getDocumentById(Long documentId) {
         return documentRepository.findById(documentId)
                 .orElseThrow(() -> new RuntimeException("Document not found with id: " + documentId));
+    }
+
+    // possible names: budgetcommittee,economicandsocialcouncil,generalsecretariat,legalcommittee,legislativecouncil,publicadministration,specialtycommission
+    List<Document> getNeedReviewDocuments(String name) {
+        String normalizedName = name.trim().toLowerCase();
+
+        if (normalizedName.length() > 20) {
+            normalizedName = userService.findOrCreateByKeycloakId(normalizedName).getName();
+        }
+
+        normalizedName = normalizedName.replaceAll("\\s+", "").toLowerCase();
+
+		return switch (normalizedName) {
+			case "budgetcommittee" -> documentRepository.findByBudgetCommitteeCommentIsNull();
+			case "economicandsocialcouncil" -> documentRepository.findByEconomicAndSocialCouncilCommentIsNull();
+			case "generalsecretariat" -> documentRepository.findByGeneralSecretariatCommentIsNull();
+			case "legalcommittee" -> documentRepository.findByLegalCommitteeCommentIsNull();
+			case "legislativecouncil" -> documentRepository.findByLegislativeCouncilCommentIsNull();
+			case "publicadministration" -> documentRepository.findByPublicAdministrationCommentIsNull();
+			case "specialtycommission" -> documentRepository.findBySpecialtyCommissionCommentIsNull();
+			default -> throw new IllegalArgumentException("Invalid name: " + name);
+		};
     }
 }

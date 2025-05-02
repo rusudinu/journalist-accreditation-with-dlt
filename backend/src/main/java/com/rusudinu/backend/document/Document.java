@@ -63,7 +63,7 @@ public class Document {
     @JsonIgnoreProperties("document")
     @JsonIgnore
     @OneToOne
-    Comment advisoryCommitteeComment;
+    Comment legalCommitteeComment;
 
     @JsonIgnoreProperties("document")
     @JsonIgnore
@@ -74,6 +74,11 @@ public class Document {
     @JsonIgnore
     @OneToOne
     Comment publicAdministrationComment;
+
+    @JsonIgnoreProperties("document")
+    @JsonIgnore
+    @OneToOne
+    Comment specialtyCommissionComment;
 
     Boolean debateAndApprovalInPlenarySession; // true / false
 }

@@ -1,12 +1,11 @@
 import RequestsTable from "@/pages/RequestsTable.tsx";
-import {useUserHasRole} from "@/common/auth/UserUtils.ts";
 import {Button} from "@/components/ui/button.tsx";
 import axios from "axios";
 import {useNavigate} from "react-router-dom";
 
 function Home() {
     const navigate = useNavigate()
-    const isJournalist = useUserHasRole('JOURNALIST');
+    // const isJournalist = useUserHasRole('JOURNALIST');
     
     const createNewRequest = () => {
         axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/v1/requests`, {
@@ -28,7 +27,8 @@ function Home() {
     return (
         <>
             <RequestsTable/>
-            {isJournalist && <Button onClick={createNewRequest}>New request</Button>}
+            {/*{isJournalist && <Button onClick={createNewRequest}>New request</Button>}*/}
+            <Button onClick={createNewRequest}>New request</Button>
         </>
     );
 }
