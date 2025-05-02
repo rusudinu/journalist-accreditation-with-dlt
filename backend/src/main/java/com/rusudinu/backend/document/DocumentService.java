@@ -1,5 +1,7 @@
 package com.rusudinu.backend.document;
 
+import com.rusudinu.backend.distributedStorage.DistributedStorageService;
+import com.rusudinu.backend.hash.HashService;
 import com.rusudinu.backend.user.UserService;
 import java.util.ArrayList;
 import java.util.Objects;
@@ -14,7 +16,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -23,6 +24,8 @@ public class DocumentService {
 
     private final DocumentRepository documentRepository;
     private final UserService userService;
+	private final DistributedStorageService distributedStorageService;
+	private final HashService hashService;
 
     public Document uploadDocument(MultipartFile file, Long documentId) {
         File directory = new File(UPLOAD_DIR);
@@ -109,42 +112,92 @@ public class DocumentService {
 	Document addEconomicAndSocialCouncilComment(Long documentId, String comment) {
 		Document document = documentRepository.findById(documentId).orElseThrow(() -> new RuntimeException("Document not found with id: " + documentId));
 		document.setEconomicAndSocialCouncilComment(comment);
+
+		String commentKey = document.getId() + "_comment_economic_and_social_council";
+		distributedStorageService.persistCommentHash(commentKey, hashService.shaHash(comment));
+
 		return documentRepository.save(document);
 	}
 
 	Document addGeneralSecretariatComment(Long documentId, String comment) {
 		Document document = documentRepository.findById(documentId).orElseThrow(() -> new RuntimeException("Document not found with id: " + documentId));
 		document.setGeneralSecretariatComment(comment);
+
+		String commentKey = document.getId() + "_comment_general_secretariat";
+		distributedStorageService.persistCommentHash(commentKey, hashService.shaHash(comment));
+
 		return documentRepository.save(document);
 	}
 
 	Document addLegislativeCouncilComment(Long documentId, String comment) {
 		Document document = documentRepository.findById(documentId).orElseThrow(() -> new RuntimeException("Document not found with id: " + documentId));
 		document.setLegislativeCouncilComment(comment);
+
+		String commentKey = document.getId() + "_comment_legislative_council";
+		distributedStorageService.persistCommentHash(commentKey, hashService.shaHash(comment));
+
 		return documentRepository.save(document);
 	}
 
 	Document addLegalCommitteeComment(Long documentId, String comment) {
 		Document document = documentRepository.findById(documentId).orElseThrow(() -> new RuntimeException("Document not found with id: " + documentId));
 		document.setLegalCommitteeComment(comment);
+
+		String commentKey = document.getId() + "_comment_legal_committee";
+		distributedStorageService.persistCommentHash(commentKey, hashService.shaHash(comment));
+
 		return documentRepository.save(document);
 	}
 
 	Document addBudgetCommitteeComment(Long documentId, String comment) {
 		Document document = documentRepository.findById(documentId).orElseThrow(() -> new RuntimeException("Document not found with id: " + documentId));
 		document.setBudgetCommitteeComment(comment);
+
+		String commentKey = document.getId() + "_comment_budget_committee";
+		distributedStorageService.persistCommentHash(commentKey, hashService.shaHash(comment));
+
 		return documentRepository.save(document);
 	}
 
 	Document addPublicAdministrationComment(Long documentId, String comment) {
 		Document document = documentRepository.findById(documentId).orElseThrow(() -> new RuntimeException("Document not found with id: " + documentId));
 		document.setPublicAdministrationComment(comment);
+
+		String commentKey = document.getId() + "_comment_public_administration";
+		distributedStorageService.persistCommentHash(commentKey, hashService.shaHash(comment));
+
 		return documentRepository.save(document);
 	}
 
 	Document addSpecialtyCommissionComment(Long documentId, String comment) {
 		Document document = documentRepository.findById(documentId).orElseThrow(() -> new RuntimeException("Document not found with id: " + documentId));
 		document.setSpecialtyCommissionComment(comment);
+
+		String commentKey = document.getId() + "_comment_specialty_commission";
+		distributedStorageService.persistCommentHash(commentKey, hashService.shaHash(comment));
+
 		return documentRepository.save(document);
+	}
+
+	boolean isCommentHashValid(Long documentId, String prefix, String comment) {
+		Document document = documentRepository.findById(documentId).orElseThrow(() -> new RuntimeException("Document not found with id: " + documentId));
+		String commentKey = document.getId() + "_comment_" + prefix;
+
+		String blockchainCommentHash = distributedStorageService.getCommentHashByCommentKey(commentKey);
+		String commentHash = hashService.shaHash(comment);
+
+		return blockchainCommentHash.equals(commentHash);
+	}
+
+	boolean documentHasAllCommentsValid(Long documentId) {
+		Document document = documentRepository.findById(documentId).orElseThrow(() -> new RuntimeException("Document not found with id: " + documentId));
+
+		return isCommentHashValid(documentId, "economic_and_social_council", document.getEconomicAndSocialCouncilComment())
+				&& isCommentHashValid(documentId, "general_secretariat", document.getGeneralSecretariatComment())
+				&& isCommentHashValid(documentId, "legislative_council", document.getLegislativeCouncilComment())
+				&& isCommentHashValid(documentId, "legal_committee", document.getLegalCommitteeComment())
+				&& isCommentHashValid(documentId, "budget_committee", document.getBudgetCommitteeComment())
+				&& isCommentHashValid(documentId, "public_administration", document.getPublicAdministrationComment())
+				&& isCommentHashValid(documentId, "specialty_commission", document.getSpecialtyCommissionComment());
 	}
 }

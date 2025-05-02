@@ -84,4 +84,9 @@ public class DocumentController {
 	public Document addSpecialtyCommissionComment(@PathVariable Long documentId, @RequestParam String comment) {
 		return documentService.addSpecialtyCommissionComment(documentId, comment);
 	}
+
+	@GetMapping("/document-valid/{documentId}")
+	public boolean getDocumentValid(@PathVariable Long documentId) {
+		return documentService.documentHasAllCommentsValid(documentId);
+	}
 }

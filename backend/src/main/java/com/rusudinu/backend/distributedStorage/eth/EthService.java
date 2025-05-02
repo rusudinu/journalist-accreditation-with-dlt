@@ -53,19 +53,15 @@ public class EthService implements DistributedStorageService {
     }
 
     @Override
-    public String getCommentHashByRequestId(Long requestId) {
-        log.info("[ETH] START: Getting comment hash for request id: {}", requestId);
+    public String getCommentHashByCommentKey(String key) {
         DocumentRegistry document = DocumentRegistry.load(contractAddress, web3, Credentials.create(ministryAccountPrivateKey), new DefaultGasProvider());
         try {
-            String commentKey = COMMENT_PREFIX + requestId;
-            log.info("[ETH] Using comment key: {}", commentKey);
-
-            String commentHash = document.getDocumentsForRequest(commentKey).send();
+            String commentHash = document.getDocumentsForRequest(key).send();
 
             if (commentHash != null && !commentHash.isEmpty()) {
                 log.info("[ETH] SUCCESS: Fetched comment hash: {}", commentHash);
             } else {
-                log.info("[ETH] NOTE: No comment hash found for request id: {}", requestId);
+                log.info("[ETH] NOTE: No comment hash found for request id: {}", key);
             }
 
             return commentHash;
@@ -76,19 +72,14 @@ public class EthService implements DistributedStorageService {
     }
 
     @Override
-    public void persistCommentHash(Long requestId, String commentHash) {
-        log.info("[ETH] START: Persisting comment hash for request id: {}", requestId);
+    public void persistCommentHash(String key, String commentHash) {
         log.info("[ETH] Comment hash to persist: {}", commentHash);
         DocumentRegistry document = DocumentRegistry.load(contractAddress, web3, Credentials.create(ministryAccountPrivateKey), new DefaultGasProvider());
         try {
-            String commentKey = COMMENT_PREFIX + requestId;
-            log.info("[ETH] Using comment key: {}", commentKey);
+			log.info("[ETH] Using comment key: {}", key);
 
-            // Send the transaction
-            document.addDocument(commentKey, commentHash).send();
+            document.addDocument(key, commentHash).send();
 
-            // Log success
-            log.info("[ETH] Transaction successful!");
             log.info("[ETH] SUCCESS: Persisted comment hash: {}", commentHash);
         } catch (Exception e) {
             log.error("[ETH] ERROR: Failed to persist comment hash", e);

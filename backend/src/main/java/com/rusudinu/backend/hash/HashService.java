@@ -6,6 +6,7 @@ import com.rusudinu.backend.document.DocumentRepository;
 import com.rusudinu.backend.document.DocumentService;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.DigestInfo;
 import org.bouncycastle.operator.DefaultDigestAlgorithmIdentifierFinder;
@@ -28,6 +29,10 @@ public class HashService {
     private final DocumentService documentService;
     private final DocumentRepository documentRepository;
     private final ObjectMapper objectMapper;
+
+    public String shaHash(String data){
+        return DigestUtils.sha256Hex(data);
+    }
 
     @SneakyThrows
     public byte[] hashString(String data) {

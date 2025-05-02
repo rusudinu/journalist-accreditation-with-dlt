@@ -46,14 +46,14 @@ public class HyperledgerRegistryService implements DistributedStorageService {
     // not implemented because we are only
     // moving forward with ethereum
     @Override
-    public String getCommentHashByRequestId(Long requestId) {
+    public String getCommentHashByCommentKey(String key) {
         return "";
     }
 
     // not implemented because we are only
     // moving forward with ethereum
     @Override
-    public void persistCommentHash(Long requestId, String commentHash) {
+    public void persistCommentHash(String key, String commentHash) {
 
     }
 }

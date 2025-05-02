@@ -5,7 +5,7 @@ public interface DistributedStorageService {
 
     void persistRegistrySnapshot(Long requestId, String snapshotHash);
 
-    String getCommentHashByRequestId(Long requestId);
+    String getCommentHashByCommentKey(String key);
 
-    void persistCommentHash(Long requestId, String commentHash);
+    void persistCommentHash(String key, String commentHash);
 }
