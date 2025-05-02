@@ -1,5 +1,9 @@
 package com.rusudinu.backend.hash;
 
+import com.rusudinu.backend.document.Document;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -33,13 +37,13 @@ public class HashService {
 	}
 
 	@SneakyThrows
-	public byte[] hashString(String data) {
-		return encryptWithRSA(createDigestInfo(data.getBytes()));
+	public byte[] hashDocument(byte[] document) {
+		return encryptWithRSA(createDigestInfo(document));
 	}
 
 	@SneakyThrows
-	public boolean verifyString(byte[] encryptedMessageHash, String data) {
-		return Arrays.equals(decryptWithRSA(encryptedMessageHash), createDigestInfo(data.getBytes()));
+	public boolean verifyDocument(byte[] encryptedMessageHash, byte[] document) {
+		return Arrays.equals(decryptWithRSA(encryptedMessageHash), createDigestInfo(document));
 	}
 
 	@SneakyThrows

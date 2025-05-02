@@ -90,4 +90,9 @@ public class DocumentController {
 	public boolean getDocumentValid(@PathVariable Long documentId) {
 		return documentService.documentHasAllCommentsValid(documentId);
 	}
+
+	@GetMapping("/document-doc-valid/{documentId}")
+	public boolean getDocumentDocValid(@PathVariable Long documentId) {
+		return documentService.validateDocumentHash(documentId);
+	}
 }

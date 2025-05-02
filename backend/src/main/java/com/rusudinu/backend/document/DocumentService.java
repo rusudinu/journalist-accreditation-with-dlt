@@ -3,6 +3,7 @@ package com.rusudinu.backend.document;
 import com.rusudinu.backend.distributedStorage.DistributedStorageService;
 import com.rusudinu.backend.hash.HashService;
 import com.rusudinu.backend.user.UserService;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
@@ -46,6 +47,12 @@ public class DocumentService {
 		document.setStoredDocumentName(uniqueFileName);
 		try {
 			Files.write(filePath, file.getBytes());
+
+			// store the document hash in the blockchain
+			byte[] documentHash = hashService.hashDocument(getDocument(uniqueFileName));
+			String documentHashKey = document.getId() + "_document_hash";
+			distributedStorageService.persistCommentHash(documentHashKey, new String(documentHash, StandardCharsets.UTF_8));
+
 			return documentRepository.save(document);
 		}
 		catch (IOException e) {
@@ -217,5 +224,23 @@ public class DocumentService {
 				&& isCommentHashValid(documentId, "budget_committee", document.getBudgetCommitteeComment())
 				&& isCommentHashValid(documentId, "public_administration", document.getPublicAdministrationComment())
 				&& isCommentHashValid(documentId, "specialty_commission", document.getSpecialtyCommissionComment());
+	}
+
+	boolean validateDocumentHash(Long documentId) {
+		Document document = documentRepository.findById(documentId)
+				.orElseThrow(() -> new RuntimeException("Document not found with id: " + documentId));
+
+		String storedDocumentName = document.getStoredDocumentName();
+		if (storedDocumentName == null || storedDocumentName.isEmpty()) {
+			return false;
+		}
+
+		byte[] documentHash = hashService.hashDocument(getDocument(storedDocumentName));
+		String documentHashKey = document.getId() + "_document_hash";
+
+		String blockchainDocumentHash = distributedStorageService.getCommentHashByCommentKey(documentHashKey);
+		String currentDocumentHash = new String(documentHash, StandardCharsets.UTF_8);
+
+		return blockchainDocumentHash.equals(currentDocumentHash);
 	}
 }
