@@ -20,6 +20,7 @@ import { useAppSelector } from "@/hooks.ts";
 import { Textarea } from "@/components/ui/textarea.tsx";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card.tsx";
 import { Progress } from "@/components/ui/progress.tsx";
+import {IoCheckmark} from "react-icons/io5";
 
 const FileSvgDraw = () => {
     return (
@@ -327,6 +328,17 @@ function RequestPage() {
         }
     };
 
+    const handleSpecialtyCommissionPreview = () => {
+        if (document?.decidingSpecialtyCommissionDocumentName && backendUrl) {
+            const previewUrl = `${backendUrl}/api/v1/documents/download/${document.decidingSpecialtyCommissionDocumentName}`;
+            window.open(previewUrl, '_blank', 'noopener,noreferrer'); // Added rel for security
+        } else {
+            toast('Error', {
+                description: 'Cannot preview file: Specialty Commission document name or backend URL is missing.',
+            });
+        }
+    };
+
     // Function to submit a comment based on user role
     const submitComment = async () => {
         if (!comment.trim()) {
@@ -437,7 +449,7 @@ function RequestPage() {
                                 : 'N/A'
                             }
                         </TableCell>
-                        <TableCell className="text-center"> {/* Added Actions Cell */}
+                        <TableCell className="text-center">
                             <Button
                                 variant="outline"
                                 size="sm"
@@ -445,11 +457,37 @@ function RequestPage() {
                                 disabled={!document.storedDocumentName} // Disable if no stored name
                                 title="Preview Document" // Add tooltip
                             >
-                                <Eye className="h-4 w-4 mr-1" /> {/* Optional icon */}
+                                <Eye className="h-4 w-4 mr-1" />
                                 Preview
                             </Button>
                         </TableCell>
                     </TableRow>
+                    {document.decidingSpecialtyCommissionDocumentName && (
+                        <TableRow key={`${document.id}-specialty`}>
+                            <TableCell className="font-medium">{document.id}</TableCell>
+                            <TableCell>
+                                <span className="font-semibold text-blue-600">Specialty Commission: </span>
+                                {document.decidingSpecialtyCommissionDocumentName}
+                            </TableCell>
+                            <TableCell>
+                                {document.debateAndApprovalStartDate
+                                    ? new Date(document.debateAndApprovalStartDate).toLocaleString()
+                                    : 'N/A'
+                                }
+                            </TableCell>
+                            <TableCell className="text-center">
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={handleSpecialtyCommissionPreview}
+                                    title="Preview Specialty Commission Document"
+                                >
+                                    <Eye className="h-4 w-4 mr-1" />
+                                    Preview
+                                </Button>
+                            </TableCell>
+                        </TableRow>
+                    )}
                 </TableBody>
             </Table>
 
@@ -458,7 +496,7 @@ function RequestPage() {
             {/* Document Comments Validity Status */}
             {isDocumentValid !== null && (
                 <Alert className="mb-4" variant={isDocumentValid ? "default" : "destructive"}>
-                    <IoIosWarning className="h-4 w-4"/>
+                    {isDocumentValid ? <IoCheckmark className="h-4 w-4"/> : <IoIosWarning className="h-4 w-4"/>}
                     <AlertTitle>{isDocumentValid ? "Document Comments Valid" : "Document Comments Invalid"}</AlertTitle>
                     <AlertDescription>
                         {isDocumentValid 
@@ -472,7 +510,7 @@ function RequestPage() {
             {/* Document Upload Validity Status */}
             {isDocumentUploadValid !== null && (
                 <Alert className="mb-4" variant={isDocumentUploadValid ? "default" : "destructive"}>
-                    <IoIosWarning className="h-4 w-4"/>
+                    {isDocumentUploadValid ? <IoCheckmark className="h-4 w-4"/> : <IoIosWarning className="h-4 w-4"/>}
                     <AlertTitle>{isDocumentUploadValid ? "Document Upload Valid" : "Document Upload Invalid"}</AlertTitle>
                     <AlertDescription>
                         {isDocumentUploadValid 
@@ -709,7 +747,7 @@ function RequestPage() {
                     <div className="mb-4">
                         <h3 className="text-lg font-semibold mb-2">Plenary Session</h3>
 
-                        {document.countdownAutoApproval === false ? (
+                        {document.countdownAutoApproval === true ? (
                             <Card>
                                 <CardHeader>
                                     <CardTitle>Plenary Debate Countdown</CardTitle>
