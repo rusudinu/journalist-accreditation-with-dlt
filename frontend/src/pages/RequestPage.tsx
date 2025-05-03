@@ -856,6 +856,13 @@ function RequestPage() {
                                         >
                                             {isSubmittingVote ? 'Submitting...' : 'ABSTAIN'}
                                         </Button>
+                                        <Button 
+                                            onClick={() => submitVote("PRESENT_BUT_REFUSE_TO_VOTE")}
+                                            disabled={isSubmittingVote}
+                                            className="flex-1 bg-blue-500 hover:bg-blue-600"
+                                        >
+                                            {isSubmittingVote ? 'Submitting...' : 'PRESENT BUT REFUSE TO VOTE'}
+                                        </Button>
                                     </div>
                                 </CardContent>
                             </Card>
@@ -947,6 +954,12 @@ function RequestPage() {
                                                     <p className="font-bold text-gray-800">ABSTAIN</p>
                                                     <p className="text-xl">
                                                         {document.debateAndApprovalPlenarySessionVoteResults.filter(vote => vote.includes('ABSTAIN')).length}
+                                                    </p>
+                                                </div>
+                                                <div className="bg-blue-100 p-3 rounded-md flex-1 text-center">
+                                                    <p className="font-bold text-blue-800">PRESENT BUT REFUSE</p>
+                                                    <p className="text-xl">
+                                                        {document.debateAndApprovalPlenarySessionVoteResults.filter(vote => vote.includes('PRESENT_BUT_REFUSE_TO_VOTE')).length}
                                                     </p>
                                                 </div>
                                             </div>
