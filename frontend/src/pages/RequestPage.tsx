@@ -22,6 +22,16 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Progress } from "@/components/ui/progress.tsx";
 import {IoCheckmark} from "react-icons/io5";
 
+// Document status enum matching the backend
+enum DocumentStatus {
+    LEGISLATIVE_PROPOSAL = "LEGISLATIVE_PROPOSAL",
+    REGISTRATION_PARLIAMENT = "REGISTRATION_PARLIAMENT",
+    AMENDMENTS = "AMENDMENTS",
+    AGGREGATION = "AGGREGATION",
+    DEBATE = "DEBATE",
+    APPROVED = "APPROVED"
+}
+
 const FileSvgDraw = () => {
     return (
         <>
@@ -63,6 +73,7 @@ function RequestPage() {
     const [timeRemaining, setTimeRemaining] = useState<number | null>(null);
     const [isStartingPlenarySession, setIsStartingPlenarySession] = useState<boolean>(false);
     const [isSubmittingVote, setIsSubmittingVote] = useState<boolean>(false);
+    const [documentStatus, setDocumentStatus] = useState<DocumentStatus | null>(null);
     const timerIntervalRef = useRef<number | null>(null);
     const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
@@ -238,6 +249,16 @@ function RequestPage() {
                         .catch((uploadValidityError) => {
                             console.error('Error fetching document upload validity:', uploadValidityError);
                             setIsDocumentUploadValid(null);
+                        });
+
+                    // Fetch document status
+                    axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/v1/documents/status/${documentIdParam}`)
+                        .then((statusResponse) => {
+                            setDocumentStatus(statusResponse.data);
+                        })
+                        .catch((statusError) => {
+                            console.error('Error fetching document status:', statusError);
+                            setDocumentStatus(null);
                         });
                 })
                 .catch((error: unknown) => {
@@ -496,6 +517,50 @@ function RequestPage() {
                     )}
                 </h1>
             )}
+
+            {/* Document Status Timeline */}
+            {documentStatus && (
+                <div className="mb-6">
+                    <div className="flex items-center justify-between">
+                        {Object.values(DocumentStatus).map((status, index) => {
+                            const isActive = status === documentStatus;
+                            const isPast = Object.values(DocumentStatus).indexOf(status) < Object.values(DocumentStatus).indexOf(documentStatus);
+
+                            return (
+                                <div key={status} className="flex flex-col items-center relative">
+                                    {/* Step Circle */}
+                                    <div 
+                                        className={`w-8 h-8 rounded-full flex items-center justify-center z-10 
+                                            ${isActive ? 'bg-blue-600 text-white' : 
+                                              isPast ? 'bg-green-500 text-white' : 
+                                              'bg-gray-200 text-gray-500'}`}
+                                    >
+                                        {isPast && <IoCheckmark className="h-5 w-5" />}
+                                        {isActive && (index + 1)}
+                                        {!isPast && !isActive && (index + 1)}
+                                    </div>
+
+                                    {/* Step Label */}
+                                    <div className="mt-2 text-xs text-center">
+                                        {status.replace(/_/g, ' ').split(' ').map(word => 
+                                            word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+                                        ).join(' ')}
+                                    </div>
+
+                                    {/* Connector Line */}
+                                    {index < Object.values(DocumentStatus).length - 1 && (
+                                        <div 
+                                            className={`absolute top-4 left-8 h-0.5 w-full 
+                                                ${isPast ? 'bg-green-500' : 'bg-gray-200'}`}
+                                        ></div>
+                                    )}
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
+            )}
+
             <Table>
                 <TableHeader>
                     <TableRow>

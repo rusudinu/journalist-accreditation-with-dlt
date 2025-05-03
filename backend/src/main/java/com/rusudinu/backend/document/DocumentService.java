@@ -292,10 +292,35 @@ public class DocumentService {
 		document.getDebateAndApprovalPlenarySessionVoteResults().add(voteKey);
 		document.setDebateAndApprovalPlenarySessionVoteResults(document.getDebateAndApprovalPlenarySessionVoteResults());
 
-		if(document.getDebateAndApprovalPlenarySessionVoteResults().size() > 1) {
+		if (document.getDebateAndApprovalPlenarySessionVoteResults().size() > 1) {
 			document.setPlenarySessionFinished(true);
 		}
 
 		return documentRepository.save(document);
+	}
+
+	DocumentStatus getDocumentStatus(Long documentId) {
+		Document document = documentRepository.findById(documentId)
+				.orElseThrow(() -> new RuntimeException("Document not found with id: " + documentId));
+
+		if (document.isPlenarySessionFinished()) {
+			return DocumentStatus.APPROVED;
+		}
+		else if (document.getDebateAndApprovalPlenarySessionVoteResults() != null) {
+			return DocumentStatus.DEBATE;
+		}
+		else if (document.getLegalCommitteeComment() != null && document.getBudgetCommitteeComment()
+				!= null && document.getPublicAdministrationComment() != null) {
+			return DocumentStatus.AGGREGATION;
+		}
+		else if (document.getPublicAdministrationComment() != null || document.getBudgetCommitteeComment()
+				 != null || document.getLegalCommitteeComment() != null) {
+			return DocumentStatus.AMENDMENTS;
+		}
+		else if (document.getGeneralSecretariatComment() != null || document.getLegislativeCouncilComment()
+				 != null || document.getEconomicAndSocialCouncilComment() != null) {
+			return DocumentStatus.REGISTRATION_PARLIAMENT;
+		}
+		return DocumentStatus.LEGISLATIVE_PROPOSAL;
 	}
 }

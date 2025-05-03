@@ -111,4 +111,9 @@ public class DocumentController {
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 		return documentService.vote(documentId, vote, authentication.getName());
 	}
+
+	@GetMapping("/status/{documentId}")
+	public DocumentStatus getDocumentStatus(@PathVariable Long documentId) {
+		return documentService.getDocumentStatus(documentId);
+	}
 }
