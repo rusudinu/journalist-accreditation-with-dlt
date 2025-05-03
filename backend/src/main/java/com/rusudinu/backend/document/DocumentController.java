@@ -100,4 +100,9 @@ public class DocumentController {
 	public boolean getSpecialtyCommissionDocValid(@PathVariable Long documentId) {
 		return documentService.validateSpecialtyCommissionDocumentHash(documentId);
 	}
+
+	@PostMapping("/start-plenary-session/{documentId}")
+	public Document startPlenarySession(@PathVariable Long documentId) {
+		return documentService.startPlenarySession(documentId);
+	}
 }

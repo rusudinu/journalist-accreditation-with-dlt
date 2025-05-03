@@ -100,6 +100,7 @@ public class DocumentService {
 					documentRepository.findByDecidingSpecialtyCommissionDocumentNameIsNull().stream()
 							.filter(d -> d.getEconomicAndSocialCouncilComment() != null && d.getGeneralSecretariatComment() != null && d.getLegislativeCouncilComment() != null && d.getLegalCommitteeComment() != null && d.getBudgetCommitteeComment() != null && d.getPublicAdministrationComment() != null)
 							.toList();
+			case "chamberprezident" -> documentRepository.findByDecidingSpecialtyCommissionDocumentNameIsNotNull();
 			case "proposer" -> new ArrayList<>();
 			default -> throw new IllegalArgumentException("Invalid name: " + name);
 		};
@@ -255,5 +256,12 @@ public class DocumentService {
 
 		String blockchainDocumentHash = distributedStorageService.getCommentHashByCommentKey(documentHashKey);
 		return blockchainDocumentHash.equals(documentHash);
+	}
+
+	Document startPlenarySession(Long documentId) {
+		Document document = documentRepository.findById(documentId)
+				.orElseThrow(() -> new RuntimeException("Document not found with id: " + documentId));
+		document.setCountdownAutoApproval(true);
+		return documentRepository.save(document);
 	}
 }

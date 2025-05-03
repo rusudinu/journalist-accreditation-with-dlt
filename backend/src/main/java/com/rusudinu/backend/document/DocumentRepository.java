@@ -24,4 +24,5 @@ public interface DocumentRepository extends JpaRepository<Document, Long> {
 	List<Document> findByPublicAdministrationCommentIsNull();
 
 	List<Document> findByDecidingSpecialtyCommissionDocumentNameIsNull();
+	List<Document> findByDecidingSpecialtyCommissionDocumentNameIsNotNull();
 }
