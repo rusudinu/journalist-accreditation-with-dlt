@@ -400,6 +400,29 @@
     "notBefore" : 0,
     "groups" : [ ]
   }, {
+    "id" : "84d83145-96d7-495e-9220-b61297c2a003",
+    "username" : "chamberprezident",
+    "firstName" : "Chamber",
+    "lastName" : "Prezident",
+    "email" : "chamberprezident@gmail.com",
+    "emailVerified" : true,
+    "createdTimestamp" : 1746253520967,
+    "enabled" : true,
+    "totp" : false,
+    "credentials" : [ {
+      "id" : "b587099c-74c6-43f6-a3bb-4004dd63cbb6",
+      "type" : "password",
+      "userLabel" : "My password",
+      "createdDate" : 1746253527233,
+      "secretData" : "{\"value\":\"MizZBzIYZrLm6RKFaee4C6cALpWss/WaWD4k70GCNjK71pgt4odPuvBbMFz91SSbTxVDiRPz2y/ZAPbnlSP/Yw==\",\"salt\":\"zcz8J+GWBLvLkZcOZvGt+w==\",\"additionalParameters\":{}}",
+      "credentialData" : "{\"hashIterations\":210000,\"algorithm\":\"pbkdf2-sha512\",\"additionalParameters\":{}}"
+    } ],
+    "disableableCredentialTypes" : [ ],
+    "requiredActions" : [ ],
+    "realmRoles" : [ "default-roles-journalist-accreditation" ],
+    "notBefore" : 0,
+    "groups" : [ ]
+  }, {
     "id" : "11985845-2d1f-47bb-b2ac-f5aca1807b6e",
     "username" : "economicandsocialcouncil",
     "firstName" : "Economic and Social",
@@ -484,6 +507,75 @@
       "userLabel" : "My password",
       "createdDate" : 1746185289157,
       "secretData" : "{\"value\":\"jwaKp2n175uVkD+wMJOIDc4cKGVJkhhEpNM9Dm99i0qFTKF+gvW+CJL4+3FZToDwWkVWpMTKoEmFE4bpoAQeRQ==\",\"salt\":\"9JNEBJZ8M5T57atPZIpztg==\",\"additionalParameters\":{}}",
+      "credentialData" : "{\"hashIterations\":210000,\"algorithm\":\"pbkdf2-sha512\",\"additionalParameters\":{}}"
+    } ],
+    "disableableCredentialTypes" : [ ],
+    "requiredActions" : [ ],
+    "realmRoles" : [ "default-roles-journalist-accreditation" ],
+    "notBefore" : 0,
+    "groups" : [ ]
+  }, {
+    "id" : "c7cdf894-0881-4aab-96a0-416be308fe39",
+    "username" : "mp1",
+    "firstName" : "Member",
+    "lastName" : "Of Parliment 1",
+    "email" : "mp1@gmail.com",
+    "emailVerified" : true,
+    "createdTimestamp" : 1746253608199,
+    "enabled" : true,
+    "totp" : false,
+    "credentials" : [ {
+      "id" : "56f354c0-ff51-40cf-896e-94e0ee416ade",
+      "type" : "password",
+      "userLabel" : "My password",
+      "createdDate" : 1746253613571,
+      "secretData" : "{\"value\":\"O4xeswuH6Jmv76jEgDpSL/aWGuTsHS/yOjh8XZqI3YZjhYhKoCwP6AX1HnhyLky2nhrJqZFMYg2y/dWPHh/ObA==\",\"salt\":\"0aWwW6s1mNkMSaXdPIZGXg==\",\"additionalParameters\":{}}",
+      "credentialData" : "{\"hashIterations\":210000,\"algorithm\":\"pbkdf2-sha512\",\"additionalParameters\":{}}"
+    } ],
+    "disableableCredentialTypes" : [ ],
+    "requiredActions" : [ ],
+    "realmRoles" : [ "default-roles-journalist-accreditation" ],
+    "notBefore" : 0,
+    "groups" : [ ]
+  }, {
+    "id" : "ff1430c4-4b18-4912-8ade-802fc0c23830",
+    "username" : "mp2",
+    "firstName" : "Member",
+    "lastName" : "Of Parliment 2",
+    "email" : "mp2@gmail.com",
+    "emailVerified" : true,
+    "createdTimestamp" : 1746253630263,
+    "enabled" : true,
+    "totp" : false,
+    "credentials" : [ {
+      "id" : "f96ad30e-4973-4269-996a-356441682117",
+      "type" : "password",
+      "userLabel" : "My password",
+      "createdDate" : 1746253637653,
+      "secretData" : "{\"value\":\"cs1LaANAS8iSXE30Dm8Lvs5EVjIL+Mh+AoXMCUZ5XBUgpf9bqVRXVp1gOtrPzE9Hl2cKOGw1YyyvfSllrBJ74Q==\",\"salt\":\"rM77jK/W0MK+8itk2uzlzw==\",\"additionalParameters\":{}}",
+      "credentialData" : "{\"hashIterations\":210000,\"algorithm\":\"pbkdf2-sha512\",\"additionalParameters\":{}}"
+    } ],
+    "disableableCredentialTypes" : [ ],
+    "requiredActions" : [ ],
+    "realmRoles" : [ "default-roles-journalist-accreditation" ],
+    "notBefore" : 0,
+    "groups" : [ ]
+  }, {
+    "id" : "3dd96913-3afc-4604-9065-d74dba6c2e3d",
+    "username" : "mp3",
+    "firstName" : "Member",
+    "lastName" : "Of Parliment 3",
+    "email" : "mp3@gmail.com",
+    "emailVerified" : true,
+    "createdTimestamp" : 1746253667508,
+    "enabled" : true,
+    "totp" : false,
+    "credentials" : [ {
+      "id" : "4fdb69dd-a526-4e2d-a7d6-1ba55a6fa8ea",
+      "type" : "password",
+      "userLabel" : "My password",
+      "createdDate" : 1746253673880,
+      "secretData" : "{\"value\":\"ZsF7Gqv97xCVw5bG19/ATnFdWT/NLqwWS17lTiCbBw2S4I8opz/7T3N5CJnvmNvvqZN4kXIBkR3pAffkPRW5/g==\",\"salt\":\"dRn8UFY25Qdw3R29h+IJ2w==\",\"additionalParameters\":{}}",
       "credentialData" : "{\"hashIterations\":210000,\"algorithm\":\"pbkdf2-sha512\",\"additionalParameters\":{}}"
     } ],
     "disableableCredentialTypes" : [ ],

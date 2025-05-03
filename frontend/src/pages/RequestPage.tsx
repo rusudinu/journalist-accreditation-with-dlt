@@ -63,6 +63,12 @@ function RequestPage() {
     // Get the authenticated user's name from Redux store
     const authenticatedUserName = useAppSelector((state) => state.core.authenticatedUserName);
 
+    // Check if user is allowed to upload files (specialtycommission or proposer)
+    const isAllowedToUpload = () => {
+        const normalizedUsername = authenticatedUserName.trim().toLowerCase().replace(/\s+/g, '');
+        return normalizedUsername === 'specialtycommission' || normalizedUsername === 'proposer';
+    };
+
     useEffect(() => {
         fetchDocument();
     }, [documentIdParam]); // Dependency on the param from URL
@@ -365,7 +371,7 @@ function RequestPage() {
                 </Alert>
             }
 
-            { !isReadOnly && (
+            { !isReadOnly && isAllowedToUpload() && (
                 <>
                     <FileUploader
                         value={files}
