@@ -10,12 +10,23 @@
  */
 
 export interface IDocument {
+  generalSecretariatComment?: string;
+  legislativeCouncilComment?: string;
+  economicAndSocialCouncilComment?: string;
+  legalCommitteeComment?: string;
+  budgetCommitteeComment?: string;
+  publicAdministrationComment?: string;
+  decidingSpecialtyCommissionDocumentName?: string;
+  /** @format date-time */
+  debateAndApprovalStartDate?: string;
+  countdownAutoApproval?: boolean;
+  debateAndApprovalPlenarySessionVoteResults?: string[];
+  plenarySessionFinished?: boolean;
   /** @format int64 */
   id?: number;
   /** @format date-time */
   createdDate?: string;
   storedDocumentName?: string;
-  debateAndApprovalInPlenarySession?: boolean;
   deleted?: boolean;
 }
 
@@ -213,6 +224,166 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * No description
      *
      * @tags document-controller
+     * @name StartPlenarySession
+     * @request POST:/api/v1/documents/start-plenary-session/{documentId}
+     * @secure
+     */
+    startPlenarySession: (documentId: number, params: RequestParams = {}) =>
+      this.request<IDocument, any>({
+        path: `/api/v1/documents/start-plenary-session/${documentId}`,
+        method: "POST",
+        secure: true,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags document-controller
+     * @name AddSpecialtyCommissionDocument
+     * @request POST:/api/v1/documents/specialty-commission
+     * @secure
+     */
+    addSpecialtyCommissionDocument: (
+      query: {
+        /** @format int64 */
+        documentId: number;
+      },
+      data: {
+        /** @format binary */
+        file: File;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<IDocument, any>({
+        path: `/api/v1/documents/specialty-commission`,
+        method: "POST",
+        query: query,
+        body: data,
+        secure: true,
+        type: ContentType.FormData,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags document-controller
+     * @name AddPublicAdministrationComment
+     * @request POST:/api/v1/documents/public-administration/{documentId}
+     * @secure
+     */
+    addPublicAdministrationComment: (
+      documentId: number,
+      query: {
+        comment: string;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<IDocument, any>({
+        path: `/api/v1/documents/public-administration/${documentId}`,
+        method: "POST",
+        query: query,
+        secure: true,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags document-controller
+     * @name AddLegislativeCouncilComment
+     * @request POST:/api/v1/documents/legislative-council/{documentId}
+     * @secure
+     */
+    addLegislativeCouncilComment: (
+      documentId: number,
+      query: {
+        comment: string;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<IDocument, any>({
+        path: `/api/v1/documents/legislative-council/${documentId}`,
+        method: "POST",
+        query: query,
+        secure: true,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags document-controller
+     * @name AddLegalCommitteeComment
+     * @request POST:/api/v1/documents/legal-committee/{documentId}
+     * @secure
+     */
+    addLegalCommitteeComment: (
+      documentId: number,
+      query: {
+        comment: string;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<IDocument, any>({
+        path: `/api/v1/documents/legal-committee/${documentId}`,
+        method: "POST",
+        query: query,
+        secure: true,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags document-controller
+     * @name AddGeneralSecretariatComment
+     * @request POST:/api/v1/documents/general-secretariat/{documentId}
+     * @secure
+     */
+    addGeneralSecretariatComment: (
+      documentId: number,
+      query: {
+        comment: string;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<IDocument, any>({
+        path: `/api/v1/documents/general-secretariat/${documentId}`,
+        method: "POST",
+        query: query,
+        secure: true,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags document-controller
+     * @name AddEconomicAndSocialCouncilComment
+     * @request POST:/api/v1/documents/economic-and-social/{documentId}
+     * @secure
+     */
+    addEconomicAndSocialCouncilComment: (
+      documentId: number,
+      query: {
+        comment: string;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<IDocument, any>({
+        path: `/api/v1/documents/economic-and-social/${documentId}`,
+        method: "POST",
+        query: query,
+        secure: true,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags document-controller
      * @name CreateDocument
      * @request POST:/api/v1/documents/create-document
      * @secure
@@ -221,6 +392,29 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       this.request<IDocument, any>({
         path: `/api/v1/documents/create-document`,
         method: "POST",
+        secure: true,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags document-controller
+     * @name AddBudgetCommitteeComment
+     * @request POST:/api/v1/documents/budget-committee/{documentId}
+     * @secure
+     */
+    addBudgetCommitteeComment: (
+      documentId: number,
+      query: {
+        comment: string;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<IDocument, any>({
+        path: `/api/v1/documents/budget-committee/${documentId}`,
+        method: "POST",
+        query: query,
         secure: true,
         ...params,
       }),
@@ -293,6 +487,22 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * No description
      *
      * @tags document-controller
+     * @name GetSpecialtyCommissionDocValid
+     * @request GET:/api/v1/documents/specialty-commission-doc-valid/{documentId}
+     * @secure
+     */
+    getSpecialtyCommissionDocValid: (documentId: number, params: RequestParams = {}) =>
+      this.request<boolean, any>({
+        path: `/api/v1/documents/specialty-commission-doc-valid/${documentId}`,
+        method: "GET",
+        secure: true,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags document-controller
      * @name GetNeedReviewDocuments
      * @request GET:/api/v1/documents/need-review
      * @secure
@@ -316,6 +526,38 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     getDocument: (storedDocumentName: string, params: RequestParams = {}) =>
       this.request<string, any>({
         path: `/api/v1/documents/download/${storedDocumentName}`,
+        method: "GET",
+        secure: true,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags document-controller
+     * @name GetDocumentValid
+     * @request GET:/api/v1/documents/document-valid/{documentId}
+     * @secure
+     */
+    getDocumentValid: (documentId: number, params: RequestParams = {}) =>
+      this.request<boolean, any>({
+        path: `/api/v1/documents/document-valid/${documentId}`,
+        method: "GET",
+        secure: true,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags document-controller
+     * @name GetDocumentDocValid
+     * @request GET:/api/v1/documents/document-doc-valid/{documentId}
+     * @secure
+     */
+    getDocumentDocValid: (documentId: number, params: RequestParams = {}) =>
+      this.request<boolean, any>({
+        path: `/api/v1/documents/document-doc-valid/${documentId}`,
         method: "GET",
         secure: true,
         ...params,

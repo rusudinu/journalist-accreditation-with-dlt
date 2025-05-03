@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import {
     FileUploader,
     FileUploaderContent,
@@ -19,6 +19,7 @@ import { Eye } from 'lucide-react';
 import { useAppSelector } from "@/hooks.ts";
 import { Textarea } from "@/components/ui/textarea.tsx";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card.tsx";
+import { Progress } from "@/components/ui/progress.tsx";
 
 const FileSvgDraw = () => {
     return (
@@ -58,6 +59,9 @@ function RequestPage() {
     const [isSubmittingComment, setIsSubmittingComment] = useState<boolean>(false);
     const [isDocumentValid, setIsDocumentValid] = useState<boolean | null>(null);
     const [isDocumentUploadValid, setIsDocumentUploadValid] = useState<boolean | null>(null);
+    const [timeRemaining, setTimeRemaining] = useState<number | null>(null);
+    const [isStartingPlenarySession, setIsStartingPlenarySession] = useState<boolean>(false);
+    const timerIntervalRef = useRef<number | null>(null);
     const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
     // Get the authenticated user's name from Redux store
@@ -69,9 +73,119 @@ function RequestPage() {
         return normalizedUsername === 'specialtycommission' || normalizedUsername === 'proposer';
     };
 
+    // Check if user is chamber president
+    const isChamberPresident = () => {
+        const normalizedUsername = authenticatedUserName.trim().toLowerCase().replace(/\s+/g, '');
+        return normalizedUsername === 'chamberprezident';
+    };
+
     useEffect(() => {
         fetchDocument();
     }, [documentIdParam]); // Dependency on the param from URL
+
+    // Effect to update the countdown timer every second
+    useEffect(() => {
+        // Only start the timer if we have a document with a debate start date
+        // and the user is chamber president and countdownAutoApproval is false
+        if (document && 
+            document.debateAndApprovalStartDate && 
+            isChamberPresident() && 
+            document.countdownAutoApproval === false) {
+
+            // Calculate initial time remaining (15 minutes from start date)
+            const startDate = new Date(document.debateAndApprovalStartDate);
+            const endTime = new Date(startDate.getTime() + 15 * 60 * 1000); // 15 minutes in milliseconds
+
+            // Update timer immediately
+            updateTimeRemaining(endTime);
+
+            // Set up interval to update timer every second
+            const intervalId = window.setInterval(() => {
+                updateTimeRemaining(endTime);
+            }, 1000);
+
+            // Store interval ID in ref
+            timerIntervalRef.current = intervalId;
+
+            // Clean up interval on unmount or when document changes
+            return () => {
+                if (timerIntervalRef.current !== null) {
+                    window.clearInterval(timerIntervalRef.current);
+                    timerIntervalRef.current = null;
+                }
+            };
+        } else {
+            // Clear any existing timer if conditions are not met
+            if (timerIntervalRef.current !== null) {
+                window.clearInterval(timerIntervalRef.current);
+                timerIntervalRef.current = null;
+            }
+
+            // Reset time remaining if no timer should be active
+            if (!document || 
+                !document.debateAndApprovalStartDate || 
+                !isChamberPresident() || 
+                document.countdownAutoApproval === true) {
+                setTimeRemaining(null);
+            }
+        }
+    }, [document, isChamberPresident]);
+
+    // Function to update the time remaining
+    const updateTimeRemaining = (endTime: Date) => {
+        const now = new Date();
+        const diff = endTime.getTime() - now.getTime();
+
+        if (diff <= 0) {
+            // Timer has expired
+            setTimeRemaining(0);
+
+            // Clear the interval
+            if (timerIntervalRef.current !== null) {
+                window.clearInterval(timerIntervalRef.current);
+                timerIntervalRef.current = null;
+            }
+        } else {
+            // Update time remaining in seconds
+            setTimeRemaining(Math.floor(diff / 1000));
+        }
+    };
+
+    // Function to handle starting the plenary session
+    const handleStartPlenarySession = async () => {
+        if (!document?.id) {
+            toast('Error', {
+                description: 'Document ID is missing.',
+            });
+            return;
+        }
+
+        setIsStartingPlenarySession(true);
+
+        try {
+            const response = await axios.post(
+                `${backendUrl}/api/v1/documents/start-plenary-session/${document.id}`
+            );
+
+            if (response.status === 200) {
+                toast('Success', {
+                    description: 'Plenary session started successfully!',
+                });
+                fetchDocument(); // Refresh document data
+            } else {
+                toast('Error', {
+                    description: `Failed to start plenary session. Server responded with status: ${response.status}`,
+                });
+            }
+        } catch (error: unknown) {
+            console.error("Error starting plenary session:", error);
+            toast('Error', {
+                description: `An error occurred while starting the plenary session: ${error instanceof Error ? error.message : 'Unknown error'}`,
+            });
+        } finally {
+            setIsStartingPlenarySession(false);
+        }
+    };
 
     const fetchDocument = () => {
         if (documentIdParam) {
@@ -566,6 +680,103 @@ function RequestPage() {
                             </Card>
                         );
                     })()}
+                </>
+            )}
+
+            {/* Chamber President Section */}
+            {!isReadOnly && document && isChamberPresident() && document.decidingSpecialtyCommissionDocumentName && (
+                <>
+                    <Separator className="my-4"/>
+                    <div className="mb-4">
+                        <h3 className="text-lg font-semibold mb-2">Plenary Session</h3>
+
+                        {document.countdownAutoApproval === false ? (
+                            <Card>
+                                <CardHeader>
+                                    <CardTitle>Plenary Debate Countdown</CardTitle>
+                                    <CardDescription>
+                                        Time remaining before automatic approval
+                                    </CardDescription>
+                                </CardHeader>
+                                <CardContent>
+                                    {timeRemaining !== null && (
+                                        <>
+                                            <div className="mb-2">
+                                                {timeRemaining > 0 ? (
+                                                    <>
+                                                        <p className="text-center text-2xl font-bold mb-2">
+                                                            {Math.floor(timeRemaining / 60)}:{(timeRemaining % 60).toString().padStart(2, '0')}
+                                                        </p>
+                                                        <Progress 
+                                                            value={(timeRemaining / (15 * 60)) * 100} 
+                                                            className="h-2 mb-4"
+                                                        />
+                                                    </>
+                                                ) : (
+                                                    <Alert className="mb-4">
+                                                        <AlertTitle>Countdown Complete</AlertTitle>
+                                                        <AlertDescription>
+                                                            The 15-minute countdown has expired. The document has been automatically approved.
+                                                        </AlertDescription>
+                                                    </Alert>
+                                                )}
+                                            </div>
+                                            <Button 
+                                                onClick={handleStartPlenarySession}
+                                                disabled={isStartingPlenarySession || timeRemaining <= 0}
+                                                className="w-full"
+                                            >
+                                                {isStartingPlenarySession ? 'Starting...' : 'Start Plenary Debate'}
+                                            </Button>
+                                        </>
+                                    )}
+                                </CardContent>
+                            </Card>
+                        ) : (
+                            <Card>
+                                <CardHeader>
+                                    <CardTitle>Plenary Debate Started</CardTitle>
+                                </CardHeader>
+                                <CardContent>
+                                    <Alert className="mb-4">
+                                        <AlertTitle>Plenary Debate in Progress</AlertTitle>
+                                        <AlertDescription>
+                                            The plenary debate has been started for this document.
+                                        </AlertDescription>
+                                    </Alert>
+
+                                    {document.debateAndApprovalPlenarySessionVoteResults && 
+                                     document.debateAndApprovalPlenarySessionVoteResults.length > 0 ? (
+                                        <div className="mt-4">
+                                            <h4 className="font-semibold mb-2">Vote Results:</h4>
+                                            <div className="flex gap-4">
+                                                <div className="bg-green-100 p-3 rounded-md flex-1 text-center">
+                                                    <p className="font-bold text-green-800">YES</p>
+                                                    <p className="text-xl">
+                                                        {document.debateAndApprovalPlenarySessionVoteResults.filter(vote => vote === 'YES').length}
+                                                    </p>
+                                                </div>
+                                                <div className="bg-red-100 p-3 rounded-md flex-1 text-center">
+                                                    <p className="font-bold text-red-800">NO</p>
+                                                    <p className="text-xl">
+                                                        {document.debateAndApprovalPlenarySessionVoteResults.filter(vote => vote === 'NO').length}
+                                                    </p>
+                                                </div>
+                                                <div className="bg-gray-100 p-3 rounded-md flex-1 text-center">
+                                                    <p className="font-bold text-gray-800">ABSTAIN</p>
+                                                    <p className="text-xl">
+                                                        {document.debateAndApprovalPlenarySessionVoteResults.filter(vote => vote === 'ABSTAIN').length}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <p className="text-gray-500 italic">No votes have been cast yet.</p>
+                                    )}
+                                </CardContent>
+                            </Card>
+                        )}
+                    </div>
                 </>
             )}
         </>
