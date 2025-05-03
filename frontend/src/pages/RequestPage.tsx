@@ -136,7 +136,7 @@ function RequestPage() {
     const updateTimeRemaining = (endTime: Date) => {
         const now = new Date();
         const diff = endTime.getTime() - now.getTime();
-
+    
         if (diff <= 0) {
             // Timer has expired
             setTimeRemaining(0);

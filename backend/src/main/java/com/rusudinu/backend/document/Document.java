@@ -38,6 +38,7 @@ public class Document {
 	 */
 	private String decidingSpecialtyCommissionDocumentName;
 
+	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSZ")
 	private ZonedDateTime debateAndApprovalStartDate;
 
 	// the deputy chamber president will set this to false

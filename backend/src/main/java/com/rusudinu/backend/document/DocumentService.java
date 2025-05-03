@@ -261,7 +261,7 @@ public class DocumentService {
 	Document startPlenarySession(Long documentId) {
 		Document document = documentRepository.findById(documentId)
 				.orElseThrow(() -> new RuntimeException("Document not found with id: " + documentId));
-		document.setCountdownAutoApproval(true);
+		document.setCountdownAutoApproval(false);
 		return documentRepository.save(document);
 	}
 }
