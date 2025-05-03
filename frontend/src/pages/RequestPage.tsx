@@ -70,7 +70,7 @@ function RequestPage() {
     // Check if user is allowed to upload files (specialtycommission or proposer)
     const isAllowedToUpload = () => {
         const normalizedUsername = authenticatedUserName.trim().toLowerCase().replace(/\s+/g, '');
-        return normalizedUsername === 'specialtycommission' || normalizedUsername === 'proposer';
+        return normalizedUsername === 'specialtycommission' || normalizedUsername === 'legislativeproposer';
     };
 
     // Check if user is chamber president
@@ -270,9 +270,17 @@ function RequestPage() {
         formData.append("file", files[0]);
 
         try {
-            // Assuming POST updates the document file or creates a new version
+            // Determine which endpoint to use based on user role
+            const normalizedUsername = authenticatedUserName.trim().toLowerCase().replace(/\s+/g, '');
+            let endpoint = '/api/v1/documents';
+
+            // If user is specialtycommission, use the specialty-commission endpoint
+            if (normalizedUsername === 'specialtycommission') {
+                endpoint = '/api/v1/documents/specialty-commission';
+            }
+
             // The query parameter identifies which document record to associate the file with
-            const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/v1/documents?documentId=${document.id}`, formData, {
+            const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}${endpoint}?documentId=${document.id}`, formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data'
                 }
@@ -651,6 +659,17 @@ function RequestPage() {
                                     <AlertTitle>Comment Already Added</AlertTitle>
                                     <AlertDescription>
                                         You have already added a comment to this document.
+                                    </AlertDescription>
+                                </Alert>
+                            );
+                        }
+
+                        if (isAllowedToUpload()) {
+                            return (
+                                <Alert className="mb-4">
+                                    <AlertTitle>Comment Not Allowed</AlertTitle>
+                                    <AlertDescription>
+                                        You are not allowed to add comments to this document.
                                     </AlertDescription>
                                 </Alert>
                             );
