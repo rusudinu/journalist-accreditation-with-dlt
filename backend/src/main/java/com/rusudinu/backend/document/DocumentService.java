@@ -3,7 +3,6 @@ package com.rusudinu.backend.document;
 import com.rusudinu.backend.distributedStorage.DistributedStorageService;
 import com.rusudinu.backend.hash.HashService;
 import com.rusudinu.backend.user.UserService;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
@@ -30,8 +29,7 @@ public class DocumentService {
 	private final HashService hashService;
 
 	public Document uploadDocument(MultipartFile file, Long documentId) {
-		File directory = new File(UPLOAD_DIR);
-		if (!directory.exists()) {
+		File directory = new File(UPLOAD_DIR); if (!directory.exists()) {
 			if (!directory.mkdirs()) {
 				throw new RuntimeException("Failed to create directory: " + UPLOAD_DIR);
 			}
@@ -39,13 +37,11 @@ public class DocumentService {
 
 
 		String uniqueFileName = System.currentTimeMillis() + "_" + UUID.randomUUID() + "." + Objects.requireNonNull(file.getOriginalFilename())
-				.split("\\.")[1];
-		Path filePath = Paths.get(UPLOAD_DIR, uniqueFileName);
+				.split("\\.")[1]; Path filePath = Paths.get(UPLOAD_DIR, uniqueFileName);
 
 		Document document = documentRepository.findById(documentId)
 				.orElseThrow(() -> new RuntimeException("Document not found with id: " + documentId));
-		document.setStoredDocumentName(uniqueFileName);
-		try {
+		document.setStoredDocumentName(uniqueFileName); try {
 			Files.write(filePath, file.getBytes());
 
 			// store the document hash in the blockchain
@@ -62,11 +58,9 @@ public class DocumentService {
 
 	public byte[] getDocument(String storedDocumentName) {
 		try {
-			Path documentPath = Paths.get(UPLOAD_DIR, storedDocumentName);
-			if (!Files.exists(documentPath)) {
+			Path documentPath = Paths.get(UPLOAD_DIR, storedDocumentName); if (!Files.exists(documentPath)) {
 				throw new IOException("File not found: " + storedDocumentName);
-			}
-			return Files.readAllBytes(documentPath);
+			} return Files.readAllBytes(documentPath);
 		}
 		catch (IOException e) {
 			throw new RuntimeException("Failed to retrieve document content", e);
@@ -92,25 +86,19 @@ public class DocumentService {
 			case "economicandsocialcouncil" -> documentRepository.findByEconomicAndSocialCouncilCommentIsNull();
 			case "generalsecretariat" -> documentRepository.findByGeneralSecretariatCommentIsNull();
 			case "legislativecouncil" -> documentRepository.findByLegislativeCouncilCommentIsNull();
-			case "specialtycommission" -> documentRepository.findBySpecialtyCommissionCommentIsNull();
-			case "legalcommittee" -> documentRepository.findByLegalCommitteeCommentIsNull()
-					.stream()
-					.filter(d -> d.getEconomicAndSocialCouncilComment() != null
-							&& d.getGeneralSecretariatComment() != null
-							&& d.getLegislativeCouncilComment() != null)
+			case "legalcommittee" -> documentRepository.findByLegalCommitteeCommentIsNull().stream()
+					.filter(d -> d.getEconomicAndSocialCouncilComment() != null && d.getGeneralSecretariatComment() != null && d.getLegislativeCouncilComment() != null)
 					.toList();
-			case "budgetcommittee" -> documentRepository.findByBudgetCommitteeCommentIsNull()
-					.stream()
-					.filter(d -> d.getEconomicAndSocialCouncilComment() != null
-							&& d.getGeneralSecretariatComment() != null
-							&& d.getLegislativeCouncilComment() != null)
+			case "budgetcommittee" -> documentRepository.findByBudgetCommitteeCommentIsNull().stream()
+					.filter(d -> d.getEconomicAndSocialCouncilComment() != null && d.getGeneralSecretariatComment() != null && d.getLegislativeCouncilComment() != null)
 					.toList();
-			case "publicadministration" -> documentRepository.findByPublicAdministrationCommentIsNull()
-					.stream()
-					.filter(d -> d.getEconomicAndSocialCouncilComment() != null
-							&& d.getGeneralSecretariatComment() != null
-							&& d.getLegislativeCouncilComment() != null)
+			case "publicadministration" -> documentRepository.findByPublicAdministrationCommentIsNull().stream()
+					.filter(d -> d.getEconomicAndSocialCouncilComment() != null && d.getGeneralSecretariatComment() != null && d.getLegislativeCouncilComment() != null)
 					.toList();
+			case "specialtycommission" ->
+					documentRepository.findByDecidingSpecialtyCommissionDocumentNameIsNull().stream()
+							.filter(d -> d.getEconomicAndSocialCouncilComment() != null && d.getGeneralSecretariatComment() != null && d.getLegislativeCouncilComment() != null && d.getLegalCommitteeComment() != null && d.getBudgetCommitteeComment() != null && d.getPublicAdministrationComment() != null)
+							.toList();
 			case "proposer" -> new ArrayList<>();
 			default -> throw new IllegalArgumentException("Invalid name: " + name);
 		};
@@ -187,14 +175,15 @@ public class DocumentService {
 	}
 
 	Document addSpecialtyCommissionComment(Long documentId, String comment) {
-		Document document = documentRepository.findById(documentId)
-				.orElseThrow(() -> new RuntimeException("Document not found with id: " + documentId));
-		document.setSpecialtyCommissionComment(comment);
-
-		String commentKey = document.getId() + "_comment_specialty_commission";
-		distributedStorageService.persistCommentHash(commentKey, hashService.shaHash(comment));
-
-		return documentRepository.save(document);
+//		Document document = documentRepository.findById(documentId)
+//				.orElseThrow(() -> new RuntimeException("Document not found with id: " + documentId));
+//		document.setSpecialtyCommissionComment(comment);
+//
+//		String commentKey = document.getId() + "_comment_specialty_commission";
+//		distributedStorageService.persistCommentHash(commentKey, hashService.shaHash(comment));
+//
+//		return documentRepository.save(document);
+		return null;
 	}
 
 	boolean isCommentHashValid(Long documentId, String prefix, String comment) {
@@ -217,13 +206,7 @@ public class DocumentService {
 		Document document = documentRepository.findById(documentId)
 				.orElseThrow(() -> new RuntimeException("Document not found with id: " + documentId));
 
-		return isCommentHashValid(documentId, "economic_and_social_council", document.getEconomicAndSocialCouncilComment())
-				&& isCommentHashValid(documentId, "general_secretariat", document.getGeneralSecretariatComment())
-				&& isCommentHashValid(documentId, "legislative_council", document.getLegislativeCouncilComment())
-				&& isCommentHashValid(documentId, "legal_committee", document.getLegalCommitteeComment())
-				&& isCommentHashValid(documentId, "budget_committee", document.getBudgetCommitteeComment())
-				&& isCommentHashValid(documentId, "public_administration", document.getPublicAdministrationComment())
-				&& isCommentHashValid(documentId, "specialty_commission", document.getSpecialtyCommissionComment());
+		return isCommentHashValid(documentId, "economic_and_social_council", document.getEconomicAndSocialCouncilComment()) && isCommentHashValid(documentId, "general_secretariat", document.getGeneralSecretariatComment()) && isCommentHashValid(documentId, "legislative_council", document.getLegislativeCouncilComment()) && isCommentHashValid(documentId, "legal_committee", document.getLegalCommitteeComment()) && isCommentHashValid(documentId, "budget_committee", document.getBudgetCommitteeComment()) && isCommentHashValid(documentId, "public_administration", document.getPublicAdministrationComment());
 	}
 
 	boolean validateDocumentHash(Long documentId) {
@@ -233,8 +216,7 @@ public class DocumentService {
 		String storedDocumentName = document.getStoredDocumentName();
 		if (storedDocumentName == null || storedDocumentName.isEmpty()) {
 			return false;
-		}
-		String documentHash = hashService.hashDocument(getDocument(storedDocumentName));
+		} String documentHash = hashService.hashDocument(getDocument(storedDocumentName));
 		String documentHashKey = document.getId() + "_document_hash";
 
 		String blockchainDocumentHash = distributedStorageService.getCommentHashByCommentKey(documentHashKey);

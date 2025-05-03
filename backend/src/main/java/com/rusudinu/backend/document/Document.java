@@ -2,6 +2,7 @@ package com.rusudinu.backend.document;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -21,17 +22,28 @@ public class Document {
 	REGISTRATION PARLIMENT
 	general secretariat, legislative council, economic and social council
 	 */
-	String generalSecretariatComment;
-	String legislativeCouncilComment;
-	String economicAndSocialCouncilComment;
+	private String generalSecretariatComment;
+	private String legislativeCouncilComment;
+	private String economicAndSocialCouncilComment;
 	/*
 	AMENDMENTS / OPINIONS
 	advisory committee, budget committee, public administration
 	 */
-	String legalCommitteeComment;
-	String budgetCommitteeComment;
-	String publicAdministrationComment;
-	String specialtyCommissionComment;
+	private String legalCommitteeComment;
+	private String budgetCommitteeComment;
+	private String publicAdministrationComment;
+
+	/*
+	DECIDING SPECIALTY COMMISSION
+	 */
+	private String decidingSpecialtyCommissionDocumentName;
+
+	private ZonedDateTime debateAndApprovalStartDate;
+
+	// list of strings (YES, NO, ABSTAIN)
+	@Column(name = "vote_results", columnDefinition = "TEXT[]")
+	private List<String> debateAndApprovalPlenarySessionVoteResults;
+
 	Boolean debateAndApprovalInPlenarySession; // true / false
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
