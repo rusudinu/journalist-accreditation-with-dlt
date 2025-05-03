@@ -62,6 +62,7 @@ function RequestPage() {
     const [isDocumentUploadValid, setIsDocumentUploadValid] = useState<boolean | null>(null);
     const [timeRemaining, setTimeRemaining] = useState<number | null>(null);
     const [isStartingPlenarySession, setIsStartingPlenarySession] = useState<boolean>(false);
+    const [isSubmittingVote, setIsSubmittingVote] = useState<boolean>(false);
     const timerIntervalRef = useRef<number | null>(null);
     const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
@@ -78,6 +79,24 @@ function RequestPage() {
     const isChamberPresident = () => {
         const normalizedUsername = authenticatedUserName.trim().toLowerCase().replace(/\s+/g, '');
         return normalizedUsername === 'chamberprezident';
+    };
+
+    // Check if user is a member of parliament
+    const isMemberOfParliament = () => {
+        const normalizedUsername = authenticatedUserName.trim().toLowerCase().replace(/\s+/g, '');
+        return normalizedUsername.startsWith('memberofparliment');
+    };
+
+    // Check if user has already voted
+    const hasUserAlreadyVoted = () => {
+        if (!document?.debateAndApprovalPlenarySessionVoteResults) {
+            return false;
+        }
+
+        const normalizedUsername = authenticatedUserName.trim().toLowerCase().replace(/\s+/g, '');
+        return document.debateAndApprovalPlenarySessionVoteResults.some(vote => 
+            vote.startsWith(normalizedUsername + ':')
+        );
     };
 
     useEffect(() => {
@@ -136,7 +155,7 @@ function RequestPage() {
     const updateTimeRemaining = (endTime: Date) => {
         const now = new Date();
         const diff = endTime.getTime() - now.getTime();
-    
+
         if (diff <= 0) {
             // Timer has expired
             setTimeRemaining(0);
@@ -420,6 +439,48 @@ function RequestPage() {
             });
         } finally {
             setIsSubmittingComment(false);
+        }
+    };
+
+    // Function to submit a vote
+    const submitVote = async (voteValue: string) => {
+        if (!document?.id) {
+            toast('Error', {
+                description: 'Document ID is missing.',
+            });
+            return;
+        }
+
+        setIsSubmittingVote(true);
+
+        try {
+            const response = await axios.post(
+                `${backendUrl}/api/v1/documents/vote/${document.id}`,
+                null,
+                {
+                    params: {
+                        vote: voteValue
+                    }
+                }
+            );
+
+            if (response.status === 200) {
+                toast('Success', {
+                    description: `Vote "${voteValue}" cast successfully!`,
+                });
+                fetchDocument(); // Refresh document data to show the updated vote results
+            } else {
+                toast('Error', {
+                    description: `Failed to cast vote. Server responded with status: ${response.status}`,
+                });
+            }
+        } catch (error: unknown) {
+            console.error("Error casting vote:", error);
+            toast('Error', {
+                description: `An error occurred while casting your vote: ${error instanceof Error ? error.message : 'Unknown error'}`,
+            });
+        } finally {
+            setIsSubmittingVote(false);
         }
     };
 
@@ -737,6 +798,59 @@ function RequestPage() {
                             </Card>
                         );
                     })()}
+                </>
+            )}
+
+            {/* Member of Parliament Voting Section */}
+            {!isReadOnly && document && isMemberOfParliament() && document.decidingSpecialtyCommissionDocumentName && document.countdownAutoApproval === false && (
+                <>
+                    <Separator className="my-4"/>
+                    <div className="mb-4">
+                        <h3 className="text-lg font-semibold mb-2">Cast Your Vote</h3>
+
+                        {hasUserAlreadyVoted() ? (
+                            <Alert className="mb-4">
+                                <AlertTitle>Vote Already Cast</AlertTitle>
+                                <AlertDescription>
+                                    You have already cast your vote for this document.
+                                </AlertDescription>
+                            </Alert>
+                        ) : (
+                            <Card>
+                                <CardHeader>
+                                    <CardTitle>Parliamentary Vote</CardTitle>
+                                    <CardDescription>
+                                        Cast your vote on this document
+                                    </CardDescription>
+                                </CardHeader>
+                                <CardContent>
+                                    <div className="flex gap-4">
+                                        <Button 
+                                            onClick={() => submitVote("YES")}
+                                            disabled={isSubmittingVote}
+                                            className="flex-1 bg-green-600 hover:bg-green-700"
+                                        >
+                                            {isSubmittingVote ? 'Submitting...' : 'YES'}
+                                        </Button>
+                                        <Button 
+                                            onClick={() => submitVote("NO")}
+                                            disabled={isSubmittingVote}
+                                            className="flex-1 bg-red-600 hover:bg-red-700"
+                                        >
+                                            {isSubmittingVote ? 'Submitting...' : 'NO'}
+                                        </Button>
+                                        <Button 
+                                            onClick={() => submitVote("ABSTAIN")}
+                                            disabled={isSubmittingVote}
+                                            className="flex-1 bg-gray-500 hover:bg-gray-600"
+                                        >
+                                            {isSubmittingVote ? 'Submitting...' : 'ABSTAIN'}
+                                        </Button>
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        )}
+                    </div>
                 </>
             )}
 

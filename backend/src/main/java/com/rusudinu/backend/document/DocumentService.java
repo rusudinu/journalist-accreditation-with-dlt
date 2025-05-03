@@ -284,6 +284,9 @@ public class DocumentService {
 
 		String voteKey = normalizedName + ":" + vote;
 
+		if (document.getDebateAndApprovalPlenarySessionVoteResults() == null) {
+			document.setDebateAndApprovalPlenarySessionVoteResults(new ArrayList<>());
+		}
 		document.getDebateAndApprovalPlenarySessionVoteResults().add(voteKey);
 		document.setDebateAndApprovalPlenarySessionVoteResults(document.getDebateAndApprovalPlenarySessionVoteResults());
 		return documentRepository.save(document);
