@@ -924,19 +924,19 @@ function RequestPage() {
                                                 <div className="bg-green-100 p-3 rounded-md flex-1 text-center">
                                                     <p className="font-bold text-green-800">YES</p>
                                                     <p className="text-xl">
-                                                        {document.debateAndApprovalPlenarySessionVoteResults.filter(vote => vote === 'YES').length}
+                                                        {document.debateAndApprovalPlenarySessionVoteResults.filter(vote => vote.includes('YES')).length}
                                                     </p>
                                                 </div>
                                                 <div className="bg-red-100 p-3 rounded-md flex-1 text-center">
                                                     <p className="font-bold text-red-800">NO</p>
                                                     <p className="text-xl">
-                                                        {document.debateAndApprovalPlenarySessionVoteResults.filter(vote => vote === 'NO').length}
+                                                        {document.debateAndApprovalPlenarySessionVoteResults.filter(vote => vote.includes('NO')).length}
                                                     </p>
                                                 </div>
                                                 <div className="bg-gray-100 p-3 rounded-md flex-1 text-center">
                                                     <p className="font-bold text-gray-800">ABSTAIN</p>
                                                     <p className="text-xl">
-                                                        {document.debateAndApprovalPlenarySessionVoteResults.filter(vote => vote === 'ABSTAIN').length}
+                                                        {document.debateAndApprovalPlenarySessionVoteResults.filter(vote => vote.includes('ABSTAIN')).length}
                                                     </p>
                                                 </div>
                                             </div>

@@ -289,6 +289,11 @@ public class DocumentService {
 		}
 		document.getDebateAndApprovalPlenarySessionVoteResults().add(voteKey);
 		document.setDebateAndApprovalPlenarySessionVoteResults(document.getDebateAndApprovalPlenarySessionVoteResults());
+
+		if(document.getDebateAndApprovalPlenarySessionVoteResults().size() > 1) {
+			document.setPlenarySessionFinished(true);
+		}
+
 		return documentRepository.save(document);
 	}
 }
