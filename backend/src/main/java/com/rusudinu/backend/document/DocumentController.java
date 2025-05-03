@@ -81,9 +81,9 @@ public class DocumentController {
 		return documentService.addPublicAdministrationComment(documentId, comment);
 	}
 
-	@PostMapping("/specialty-commission/{documentId}")
-	public Document addSpecialtyCommissionComment(@PathVariable Long documentId, @RequestParam String comment) {
-		return documentService.addSpecialtyCommissionComment(documentId, comment);
+	@PostMapping("/specialty-commission")
+	public Document addSpecialtyCommissionDocument(@RequestParam("file") MultipartFile file, @RequestParam Long documentId) {
+		return documentService.addSpecialtyCommissionDocument(file, documentId);
 	}
 
 	@GetMapping("/document-valid/{documentId}")
@@ -94,5 +94,10 @@ public class DocumentController {
 	@GetMapping("/document-doc-valid/{documentId}")
 	public boolean getDocumentDocValid(@PathVariable Long documentId) {
 		return documentService.validateDocumentHash(documentId);
+	}
+
+	@GetMapping("/specialty-commission-doc-valid/{documentId}")
+	public boolean getSpecialtyCommissionDocValid(@PathVariable Long documentId) {
+		return documentService.validateSpecialtyCommissionDocumentHash(documentId);
 	}
 }

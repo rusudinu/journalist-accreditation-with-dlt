@@ -3,6 +3,7 @@ package com.rusudinu.backend.document;
 import com.rusudinu.backend.distributedStorage.DistributedStorageService;
 import com.rusudinu.backend.hash.HashService;
 import com.rusudinu.backend.user.UserService;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
@@ -174,16 +175,35 @@ public class DocumentService {
 		return documentRepository.save(document);
 	}
 
-	Document addSpecialtyCommissionComment(Long documentId, String comment) {
-//		Document document = documentRepository.findById(documentId)
-//				.orElseThrow(() -> new RuntimeException("Document not found with id: " + documentId));
-//		document.setSpecialtyCommissionComment(comment);
-//
-//		String commentKey = document.getId() + "_comment_specialty_commission";
-//		distributedStorageService.persistCommentHash(commentKey, hashService.shaHash(comment));
-//
-//		return documentRepository.save(document);
-		return null;
+	Document addSpecialtyCommissionDocument(MultipartFile file, Long documentId) {
+		File directory = new File(UPLOAD_DIR); if (!directory.exists()) {
+			if (!directory.mkdirs()) {
+				throw new RuntimeException("Failed to create directory: " + UPLOAD_DIR);
+			}
+		}
+
+
+		String uniqueFileName = System.currentTimeMillis() + "_" + UUID.randomUUID() + "." + Objects.requireNonNull(file.getOriginalFilename())
+				.split("\\.")[1]; Path filePath = Paths.get(UPLOAD_DIR, uniqueFileName);
+
+		Document document = documentRepository.findById(documentId)
+				.orElseThrow(() -> new RuntimeException("Document not found with id: " + documentId));
+		document.setDecidingSpecialtyCommissionDocumentName(uniqueFileName);
+		document.setDebateAndApprovalStartDate(ZonedDateTime.now());
+		try {
+			Files.write(filePath, file.getBytes());
+
+			// store the document hash in the blockchain
+			String documentHash = hashService.hashDocument(getDocument(uniqueFileName));
+			String documentHashKey = document.getId() + "_specialty_commission_document_hash";
+			distributedStorageService.persistCommentHash(documentHashKey, documentHash);
+
+			return documentRepository.save(document);
+		}
+
+		catch (IOException e) {
+			return null;
+		}
 	}
 
 	boolean isCommentHashValid(Long documentId, String prefix, String comment) {
@@ -218,6 +238,20 @@ public class DocumentService {
 			return false;
 		} String documentHash = hashService.hashDocument(getDocument(storedDocumentName));
 		String documentHashKey = document.getId() + "_document_hash";
+
+		String blockchainDocumentHash = distributedStorageService.getCommentHashByCommentKey(documentHashKey);
+		return blockchainDocumentHash.equals(documentHash);
+	}
+
+	boolean validateSpecialtyCommissionDocumentHash(Long documentId) {
+		Document document = documentRepository.findById(documentId)
+				.orElseThrow(() -> new RuntimeException("Document not found with id: " + documentId));
+
+		String storedDocumentName = document.getDecidingSpecialtyCommissionDocumentName();
+		if (storedDocumentName == null || storedDocumentName.isEmpty()) {
+			return false;
+		} String documentHash = hashService.hashDocument(getDocument(storedDocumentName));
+		String documentHashKey = document.getId() + "_specialty_commission_document_hash";
 
 		String blockchainDocumentHash = distributedStorageService.getCommentHashByCommentKey(documentHashKey);
 		return blockchainDocumentHash.equals(documentHash);

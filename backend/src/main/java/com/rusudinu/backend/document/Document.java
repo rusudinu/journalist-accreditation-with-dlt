@@ -40,11 +40,19 @@ public class Document {
 
 	private ZonedDateTime debateAndApprovalStartDate;
 
+	// the deputy chamber president will set this to false
+	// if he presses the 'Start plenary session' button,
+	// we no longer start the 15-minute countdown
+	// which will auto-approve the document
+	private boolean countdownAutoApproval = true;
+
 	// list of strings (YES, NO, ABSTAIN)
-	@Column(name = "vote_results", columnDefinition = "TEXT[]")
+	@Column(columnDefinition = "TEXT[]")
 	private List<String> debateAndApprovalPlenarySessionVoteResults;
 
-	Boolean debateAndApprovalInPlenarySession; // true / false
+	// this will mark the document as finished
+	private boolean plenarySessionFinished = false;
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
