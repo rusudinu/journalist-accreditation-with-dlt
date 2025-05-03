@@ -9,7 +9,7 @@ import { DropzoneOptions } from "react-dropzone";
 import { Button } from "@/components/ui/button.tsx";
 import axios from 'axios';
 import { toast } from "sonner";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table.tsx";
 import { Separator } from "@/components/ui/separator.tsx";
 import { IoIosWarning } from "react-icons/io";
@@ -63,6 +63,7 @@ const FileSvgDraw = () => {
 
 function RequestPage() {
     const { requestId: documentIdParam } = useParams<{ requestId: string }>();
+    const navigate = useNavigate();
     const [files, setFiles] = useState<File[] | null>([]);
     const [document, setDocument] = useState<IDocument | null>(null);
     const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -1069,6 +1070,16 @@ function RequestPage() {
                                 </CardContent>
                             </Card>
                         )}
+                    </div>
+
+                    {/* Button to navigate to next stage request page */}
+                    <div className="mt-6">
+                        <Button 
+                            onClick={() => navigate(`/next-stage-request/${document.id}`)}
+                            className="w-full bg-orange-600 hover:bg-orange-700 text-white"
+                        >
+                            View Document in Next Stage
+                        </Button>
                     </div>
                 </>
             )}

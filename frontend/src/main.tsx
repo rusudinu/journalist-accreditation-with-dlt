@@ -8,6 +8,7 @@ import React from 'react';
 import {store} from "@/store.ts";
 import Menu from "@/common/menu/Menu.tsx";
 import RequestPage from "@/pages/RequestPage.tsx";
+import NextStageRequestPage from "@/pages/NextStageRequestPage.tsx";
 import Home from "@/pages/Home.tsx";
 
 const router = createBrowserRouter([
@@ -26,6 +27,10 @@ const router = createBrowserRouter([
             {
                 path: '/request/:requestId',
                 element: <RequestPage/>,
+            },
+            {
+                path: '/next-stage-request/:requestId',
+                element: <NextStageRequestPage/>,
             },
         ],
     },
