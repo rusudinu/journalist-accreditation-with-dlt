@@ -62,4 +62,5 @@ public class Document {
 	private ZonedDateTime createdDate;
 	private boolean isDeleted = false;
 	private String storedDocumentName;
+	private String lawName;
 }
