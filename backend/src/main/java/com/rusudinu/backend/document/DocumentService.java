@@ -101,7 +101,7 @@ public class DocumentService {
 							.filter(d -> d.getEconomicAndSocialCouncilComment() != null && d.getGeneralSecretariatComment() != null && d.getLegislativeCouncilComment() != null && d.getLegalCommitteeComment() != null && d.getBudgetCommitteeComment() != null && d.getPublicAdministrationComment() != null)
 							.toList();
 			case "chamberprezident" -> documentRepository.findByDecidingSpecialtyCommissionDocumentNameIsNotNull();
-			case "proposer" -> new ArrayList<>();
+			case "legislativeproposer" -> new ArrayList<>();
 			default -> {
 				if (normalizedName.startsWith("memberofparliment")) {
 					yield documentRepository.findDocumentsThatNeedVote();
@@ -111,8 +111,10 @@ public class DocumentService {
 		};
 	}
 
-	Document createDocument() {
-		return documentRepository.save(new Document());
+	Document createDocument(String documentName) {
+		Document document = new Document();
+		document.setLawName(documentName);
+		return documentRepository.save(document);
 	}
 
 	Document addEconomicAndSocialCouncilComment(Long documentId, String comment) {

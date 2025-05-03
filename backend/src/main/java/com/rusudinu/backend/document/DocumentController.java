@@ -24,8 +24,8 @@ public class DocumentController {
 
 	@PostMapping("/create-document")
 //    @PreAuthorize("hasAnyAuthority('MINISTRY', 'JOURNALIST')")
-	public Document createDocument() {
-		return documentService.createDocument();
+	public Document createDocument(@RequestParam(required = true) String documentName) {
+		return documentService.createDocument(documentName);
 	}
 
 	@GetMapping("/need-review")
