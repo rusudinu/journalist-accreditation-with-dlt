@@ -105,4 +105,10 @@ public class DocumentController {
 	public Document startPlenarySession(@PathVariable Long documentId) {
 		return documentService.startPlenarySession(documentId);
 	}
+
+	@PostMapping("/vote/{documentId}")
+	public Document vote(@PathVariable Long documentId, @RequestParam String vote) {
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		return documentService.vote(documentId, vote, authentication.getName());
+	}
 }

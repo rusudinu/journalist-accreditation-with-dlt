@@ -102,7 +102,12 @@ public class DocumentService {
 							.toList();
 			case "chamberprezident" -> documentRepository.findByDecidingSpecialtyCommissionDocumentNameIsNotNull();
 			case "proposer" -> new ArrayList<>();
-			default -> throw new IllegalArgumentException("Invalid name: " + name);
+			default -> {
+				if (normalizedName.startsWith("memberofparliment")) {
+					yield documentRepository.findDocumentsThatNeedVote();
+				}
+				throw new IllegalArgumentException("Invalid name: " + normalizedName);
+			}
 		};
 	}
 
@@ -262,6 +267,25 @@ public class DocumentService {
 		Document document = documentRepository.findById(documentId)
 				.orElseThrow(() -> new RuntimeException("Document not found with id: " + documentId));
 		document.setCountdownAutoApproval(false);
+		return documentRepository.save(document);
+	}
+
+	Document vote(Long documentId, String vote, String name) {
+		String normalizedName = name.trim().toLowerCase();
+
+		if (normalizedName.length() > 20) {
+			normalizedName = userService.findOrCreateByKeycloakId(normalizedName).getName();
+		}
+
+		normalizedName = normalizedName.replaceAll("\\s+", "").toLowerCase();
+
+		Document document = documentRepository.findById(documentId)
+				.orElseThrow(() -> new RuntimeException("Document not found with id: " + documentId));
+
+		String voteKey = normalizedName + ":" + vote;
+
+		document.getDebateAndApprovalPlenarySessionVoteResults().add(voteKey);
+		document.setDebateAndApprovalPlenarySessionVoteResults(document.getDebateAndApprovalPlenarySessionVoteResults());
 		return documentRepository.save(document);
 	}
 }

@@ -25,4 +25,14 @@ public interface DocumentRepository extends JpaRepository<Document, Long> {
 
 	List<Document> findByDecidingSpecialtyCommissionDocumentNameIsNull();
 	List<Document> findByDecidingSpecialtyCommissionDocumentNameIsNotNull();
+
+	// countdownAutoApproval must be false
+	// and plenarySessionFinished must also be false
+	@Query("""
+				SELECT d FROM Document d
+				WHERE d.countdownAutoApproval = false
+				AND d.plenarySessionFinished = false
+			"""
+	)
+	List<Document> findDocumentsThatNeedVote();
 }
