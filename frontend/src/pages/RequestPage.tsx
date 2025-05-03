@@ -486,6 +486,16 @@ function RequestPage() {
 
     return (
         <>
+            {document.lawName && (
+                <h1 className="text-2xl font-bold mb-4">
+                    {document.lawName}
+                    {document.createdDate && (
+                        <span className="text-lg font-normal text-gray-500 ml-2">
+                            - since {new Date(document.createdDate).toLocaleDateString('en-US', { month: '2-digit', year: 'numeric' })}
+                        </span>
+                    )}
+                </h1>
+            )}
             <Table>
                 <TableHeader>
                     <TableRow>
