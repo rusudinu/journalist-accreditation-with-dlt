@@ -91,7 +91,7 @@ function RequestPage() {
         if (document && 
             document.debateAndApprovalStartDate && 
             isChamberPresident() && 
-            document.countdownAutoApproval === false) {
+            document.countdownAutoApproval === true) {
 
             // Calculate initial time remaining (15 minutes from start date)
             const startDate = new Date(document.debateAndApprovalStartDate);
@@ -126,7 +126,7 @@ function RequestPage() {
             if (!document || 
                 !document.debateAndApprovalStartDate || 
                 !isChamberPresident() || 
-                document.countdownAutoApproval === true) {
+                document.countdownAutoApproval === false) {
                 setTimeRemaining(null);
             }
         }
