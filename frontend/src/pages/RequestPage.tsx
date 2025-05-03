@@ -520,45 +520,79 @@ function RequestPage() {
 
             {/* Document Status Timeline */}
             {documentStatus && (
-                <div className="mb-6">
-                    <div className="flex items-center justify-between">
-                        {Object.values(DocumentStatus).map((status, index) => {
+                // Optional: Add padding/background to the container if you want the card effect, otherwise keep mb-6
+                // <div className="p-4 md:p-6 bg-white rounded-lg shadow-md">
+                <div className="mb-6 w-full py-6"> {/* Adjust container padding/margin as needed */}
+                    <div className="flex items-start"> {/* Use items-start for better label alignment if labels wrap */}
+                        {Object.values(DocumentStatus).map((status, index, arr) => {
+                            // Calculate status directly inside map using indexOf on the array (arr)
+                            const currentStatusIndex = arr.indexOf(documentStatus);
+                            const statusIndex = index; // The index of the current status being mapped
+
                             const isActive = status === documentStatus;
-                            const isPast = Object.values(DocumentStatus).indexOf(status) < Object.values(DocumentStatus).indexOf(documentStatus);
+                            // isPast: True if the index of the status we're rendering is less than the index of the *actual* current status
+                            const isPast = statusIndex < currentStatusIndex;
+
+                            // Determine connector color: Line *leading to* this step is colored if this step is active or past
+                            const connectorIsColored = isActive || isPast;
 
                             return (
-                                <div key={status} className="flex flex-col items-center relative">
-                                    {/* Step Circle */}
-                                    <div 
-                                        className={`w-8 h-8 rounded-full flex items-center justify-center z-10 
-                                            ${isActive ? 'bg-blue-600 text-white' : 
-                                              isPast ? 'bg-green-500 text-white' : 
-                                              'bg-gray-200 text-gray-500'}`}
-                                    >
-                                        {isPast && <IoCheckmark className="h-5 w-5" />}
-                                        {isActive && (index + 1)}
-                                        {!isPast && !isActive && (index + 1)}
-                                    </div>
+                                // Use flex-1 to distribute space evenly; relative positioning context for the line
+                                <div key={status} className="flex-1 relative px-1 group"> {/* Added padding for spacing */}
 
-                                    {/* Step Label */}
-                                    <div className="mt-2 text-xs text-center">
-                                        {status.replace(/_/g, ' ').split(' ').map(word => 
-                                            word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
-                                        ).join(' ')}
-                                    </div>
-
-                                    {/* Connector Line */}
-                                    {index < Object.values(DocumentStatus).length - 1 && (
-                                        <div 
-                                            className={`absolute top-4 left-8 h-0.5 w-full 
-                                                ${isPast ? 'bg-green-500' : 'bg-gray-200'}`}
+                                    {/* Connector Line (draws from previous step's center to this step's center) */}
+                                    {/* Only draw if not the first item */}
+                                    {index > 0 && (
+                                        <div
+                                            aria-hidden="true"
+                                            // Position line in the space *before* this step's circle
+                                            // top-4 aligns vertically with circle center, right-1/2 starts from parent center extending left, h-1 thickness
+                                            // z-0 places it behind the circle (which will have z-10)
+                                            className={`absolute top-4 right-1/2 w-full h-1 z-0
+                                    ${connectorIsColored ? 'bg-indigo-500' : 'bg-gray-300'}
+                                    transition-colors duration-300 ease-in-out`} // Added transition
                                         ></div>
                                     )}
+
+                                    {/* Step Content (Circle and Label) */}
+                                    <div className="flex flex-col items-center relative"> {/* Added relative for potential future use */}
+
+                                        {/* Step Circle */}
+                                        <div
+                                            className={`w-8 h-8 rounded-full flex items-center justify-center relative // z-10 ensures circle is above line
+                                            border-2 z-10 transition-all duration-300 ease-in-out
+                                ${isActive
+                                                // Enhanced active state: primary color, scale, shadow, ring
+                                                ? 'bg-indigo-600 border-indigo-600 text-white shadow-lg scale-110 ring-2 ring-indigo-300 ring-offset-2'
+                                                // Past state: primary color fill
+                                                : isPast
+                                                    ? 'bg-indigo-500 border-indigo-500 text-white'
+                                                    // Future state: outlined with gray border/text
+                                                    : 'bg-white border-gray-300 text-gray-400'
+                                            }`}
+                                        >
+                                            {/* Icon for past, number for active/future */}
+                                            {isPast && <IoCheckmark className="w-5 h-5" />}
+                                            {!isPast && <span className={`text-xs font-semibold ${isActive ? 'text-white' : 'text-gray-500'}`}>{index + 1}</span>}
+                                        </div>
+
+                                        {/* Step Label */}
+                                        <div className={`mt-3 text-xs sm:text-sm font-medium text-center break-words // Added break-words
+                                        ${isActive ? 'text-indigo-700' : isPast ? 'text-gray-700' : 'text-gray-500'}
+                                        transition-colors duration-300 ease-in-out`} // Added transition
+                                        >
+                                            {/* Formatting label text */}
+                                            {status.replace(/_/g, ' ').split(' ').map(word =>
+                                                word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+                                            ).join(' ')}
+                                        </div>
+                                    </div>
                                 </div>
                             );
                         })}
                     </div>
                 </div>
+                // </div> // Optional: closing tag for the card container if you used it
             )}
 
             <Table>
