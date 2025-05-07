@@ -113,6 +113,13 @@ function RequestPage() {
         );
     };
 
+    // Check if user is allowed to add comments
+    const isAllowedToComment = () => {
+        const normalizedUsername = authenticatedUserName.trim().toLowerCase().replace(/\s+/g, '');
+        return ['economicandsocialcouncil', 'generalsecretariat', 'legislativecouncil', 
+                'legalcommittee', 'budgetcommittee', 'publicadministration', 'specialtycommission'].includes(normalizedUsername);
+    };
+
     useEffect(() => {
         fetchDocument();
     }, [documentIdParam]); // Dependency on the param from URL
@@ -439,6 +446,47 @@ function RequestPage() {
                 commentEndpoint = `${backendUrl}/api/v1/documents/public-administration/${document.id}`;
                 documentEndpoint = `${backendUrl}/api/v1/documents/public-administration-document/${document.id}`;
                 break;
+            case 'specialtycommission':
+                // Specialty commission uploads a document directly without comment
+                documentEndpoint = `${backendUrl}/api/v1/documents/specialty-commission`;
+                // Handle this as a special case
+                try {
+                    // Only upload document, no comment
+                    const documentFormData = new FormData();
+                    documentFormData.append('file', commentFile);
+                    documentFormData.append('documentId', document.id.toString());
+
+                    const documentResponse = await axios.post(
+                        documentEndpoint,
+                        documentFormData,
+                        {
+                            headers: {
+                                'Content-Type': 'multipart/form-data',
+                            },
+                        }
+                    );
+
+                    if (documentResponse.status === 200) {
+                        toast('Success', {
+                            description: 'Document uploaded successfully!',
+                        });
+                        fetchDocument(); // Refresh document data
+                        setComment(''); // Clear comment input
+                        setCommentFile(null); // Clear file input
+                    } else {
+                        toast('Error', {
+                            description: `Failed to upload document. Server responded with status: ${documentResponse.status}`,
+                        });
+                    }
+                } catch (error: unknown) {
+                    console.error("Error uploading document:", error);
+                    toast('Error', {
+                        description: `An error occurred while uploading the document: ${error instanceof Error ? error.message : 'Unknown error'}`,
+                    });
+                } finally {
+                    setIsSubmittingComment(false);
+                }
+                return; // Return early to skip the rest of the function
             default:
                 toast('Error', {
                     description: 'You are not authorized to add comments to this document.',
@@ -979,7 +1027,46 @@ function RequestPage() {
                             );
                         }
 
-                        if (isAllowedToUpload()) {
+                        if (isAllowedToComment()) {
+                            if (normalizedUsername === 'specialtycommission') {
+                                // Special case for specialtycommission - only need file upload, no comment
+                                return (
+                                    <Card>
+                                        <CardHeader>
+                                            <CardTitle>Specialty Commission Document</CardTitle>
+                                            <CardDescription>Upload the final document for this item</CardDescription>
+                                        </CardHeader>
+                                        <CardContent>
+                                            <div className="mt-8 border rounded-lg p-4">
+                                                <h3 className="text-lg font-semibold mb-2">Upload Document</h3>
+                                                
+                                                <div className="mb-4">
+                                                    <label className="block text-sm font-medium mb-1">Upload Specialty Commission Document (Required)</label>
+                                                    <Input
+                                                        type="file"
+                                                        accept=".pdf"
+                                                        onChange={handleCommentFileChange}
+                                                    />
+                                                    {commentFile && (
+                                                        <div className="mt-2 text-sm text-gray-500">
+                                                            Selected file: {commentFile.name}
+                                                        </div>
+                                                    )}
+                                                </div>
+
+                                                <Button 
+                                                    onClick={submitComment} 
+                                                    disabled={isSubmittingComment || !commentFile}
+                                                    className="mt-2"
+                                                >
+                                                    {isSubmittingComment ? 'Uploading...' : 'Upload Document'}
+                                                </Button>
+                                            </div>
+                                        </CardContent>
+                                    </Card>
+                                );
+                            }
+                            
                             return (
                                 <Card>
                                     <CardHeader>
@@ -1024,7 +1111,7 @@ function RequestPage() {
                             );
                         }
 
-                        // Otherwise, show the comment form
+                        // Only show this if user is not allowed to comment
                         return (
                             <Card>
                                 <CardHeader>
