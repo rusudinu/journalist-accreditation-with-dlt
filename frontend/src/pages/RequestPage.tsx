@@ -1073,14 +1073,18 @@ function RequestPage() {
                     </div>
 
                     {/* Button to navigate to next stage request page */}
-                    <div className="mt-6">
-                        <Button 
-                            onClick={() => navigate(`/next-stage-request/${document.id}`)}
-                            className="w-full bg-orange-600 hover:bg-orange-700 text-white"
-                        >
-                            View Document in Next Stage
-                        </Button>
-                    </div>
+                    {
+                        document.debateAndApprovalPlenarySessionVoteResults?.length > 1 && (
+                            <div className="mt-6">
+                                <Button
+                                    onClick={() => navigate(`/next-stage-request/${document.id}`)}
+                                    className="w-full bg-orange-600 hover:bg-orange-700 text-white"
+                                >
+                                    View Document in Next Stage
+                                </Button>
+                            </div>
+                        )
+                    }
                 </>
             )}
         </>
