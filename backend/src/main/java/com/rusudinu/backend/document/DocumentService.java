@@ -304,7 +304,7 @@ public class DocumentService {
 				.orElseThrow(() -> new RuntimeException("Document not found with id: " + documentId));
 
 		if (document.isPlenarySessionFinished()) {
-			return DocumentStatus.APPROVED;
+			return DocumentStatus.FINALIZED;
 		}
 		else if (document.getDebateAndApprovalPlenarySessionVoteResults() != null) {
 			return DocumentStatus.DEBATE;

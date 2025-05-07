@@ -29,7 +29,7 @@ enum DocumentStatus {
     AMENDMENTS = "AMENDMENTS",
     AGGREGATION = "AGGREGATION",
     DEBATE = "DEBATE",
-    APPROVED = "APPROVED"
+    FINALIZED = "FINALIZED"
 }
 
 const FileSvgDraw = () => {
@@ -1004,7 +1004,7 @@ function RequestPage() {
                                                     <Alert className="mb-4">
                                                         <AlertTitle>Countdown Complete</AlertTitle>
                                                         <AlertDescription>
-                                                            The 15-minute countdown has expired. The document has been automatically approved.
+                                                            The 15-minute countdown has expired. The document has been automatically finalized.
                                                         </AlertDescription>
                                                     </Alert>
                                                 )}

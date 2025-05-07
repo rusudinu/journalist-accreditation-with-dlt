@@ -6,5 +6,5 @@ public enum DocumentStatus {
 	AMENDMENTS,
 	AGGREGATION,
 	DEBATE,
-	APPROVED
+	FINALIZED
 }

@@ -18,7 +18,7 @@ const badgeVariants = cva(
                 CREATED: "bg-amber-500 text-white",
                 VALIDATED: "bg-blue-500 text-white",
                 REJECTED: "bg-red-500 text-white",
-                APPROVED: "bg-green-500 text-white",
+                FINALIZED: "bg-green-500 text-white",
                 true: "bg-green-500 text-white",
                 false: "bg-red-500 text-white",
             },
