@@ -25,6 +25,12 @@ public class Document {
 	private String generalSecretariatComment;
 	private String legislativeCouncilComment;
 	private String economicAndSocialCouncilComment;
+	
+	// Document names for the comments
+	private String generalSecretariatDocumentName;
+	private String legislativeCouncilDocumentName;
+	private String economicAndSocialCouncilDocumentName;
+	
 	/*
 	AMENDMENTS / OPINIONS
 	advisory committee, budget committee, public administration
@@ -32,6 +38,11 @@ public class Document {
 	private String legalCommitteeComment;
 	private String budgetCommitteeComment;
 	private String publicAdministrationComment;
+	
+	// Document names for the comments
+	private String legalCommitteeDocumentName;
+	private String budgetCommitteeDocumentName;
+	private String publicAdministrationDocumentName;
 
 	/*
 	DECIDING SPECIALTY COMMISSION

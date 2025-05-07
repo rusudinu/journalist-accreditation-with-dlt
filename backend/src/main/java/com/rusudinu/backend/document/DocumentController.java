@@ -56,9 +56,19 @@ public class DocumentController {
 		return documentService.addEconomicAndSocialCouncilComment(documentId, comment);
 	}
 
+	@PostMapping("/economic-and-social-document/{documentId}")
+	public Document addEconomicAndSocialCouncilDocument(@RequestParam("file") MultipartFile file, @PathVariable Long documentId) {
+		return documentService.addEconomicAndSocialCouncilDocument(file, documentId);
+	}
+
 	@PostMapping("/general-secretariat/{documentId}")
 	public Document addGeneralSecretariatComment(@PathVariable Long documentId, @RequestParam String comment) {
 		return documentService.addGeneralSecretariatComment(documentId, comment);
+	}
+
+	@PostMapping("/general-secretariat-document/{documentId}")
+	public Document addGeneralSecretariatDocument(@RequestParam("file") MultipartFile file, @PathVariable Long documentId) {
+		return documentService.addGeneralSecretariatDocument(file, documentId);
 	}
 
 	@PostMapping("/legislative-council/{documentId}")
@@ -66,9 +76,19 @@ public class DocumentController {
 		return documentService.addLegislativeCouncilComment(documentId, comment);
 	}
 
+	@PostMapping("/legislative-council-document/{documentId}")
+	public Document addLegislativeCouncilDocument(@RequestParam("file") MultipartFile file, @PathVariable Long documentId) {
+		return documentService.addLegislativeCouncilDocument(file, documentId);
+	}
+
 	@PostMapping("/legal-committee/{documentId}")
 	public Document addLegalCommitteeComment(@PathVariable Long documentId, @RequestParam String comment) {
 		return documentService.addLegalCommitteeComment(documentId, comment);
+	}
+
+	@PostMapping("/legal-committee-document/{documentId}")
+	public Document addLegalCommitteeDocument(@RequestParam("file") MultipartFile file, @PathVariable Long documentId) {
+		return documentService.addLegalCommitteeDocument(file, documentId);
 	}
 
 	@PostMapping("/budget-committee/{documentId}")
@@ -76,9 +96,19 @@ public class DocumentController {
 		return documentService.addBudgetCommitteeComment(documentId, comment);
 	}
 
+	@PostMapping("/budget-committee-document/{documentId}")
+	public Document addBudgetCommitteeDocument(@RequestParam("file") MultipartFile file, @PathVariable Long documentId) {
+		return documentService.addBudgetCommitteeDocument(file, documentId);
+	}
+
 	@PostMapping("/public-administration/{documentId}")
 	public Document addPublicAdministrationComment(@PathVariable Long documentId, @RequestParam String comment) {
 		return documentService.addPublicAdministrationComment(documentId, comment);
+	}
+
+	@PostMapping("/public-administration-document/{documentId}")
+	public Document addPublicAdministrationDocument(@RequestParam("file") MultipartFile file, @PathVariable Long documentId) {
+		return documentService.addPublicAdministrationDocument(file, documentId);
 	}
 
 	@PostMapping("/specialty-commission")

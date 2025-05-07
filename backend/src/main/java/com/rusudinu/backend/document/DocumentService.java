@@ -128,6 +128,36 @@ public class DocumentService {
 		return documentRepository.save(document);
 	}
 
+	Document addEconomicAndSocialCouncilDocument(MultipartFile file, Long documentId) {
+		File directory = new File(UPLOAD_DIR); 
+		if (!directory.exists()) {
+			if (!directory.mkdirs()) {
+				throw new RuntimeException("Failed to create directory: " + UPLOAD_DIR);
+			}
+		}
+
+		String uniqueFileName = System.currentTimeMillis() + "_" + UUID.randomUUID() + "." + Objects.requireNonNull(file.getOriginalFilename())
+				.split("\\.")[1]; 
+		Path filePath = Paths.get(UPLOAD_DIR, uniqueFileName);
+
+		Document document = documentRepository.findById(documentId)
+				.orElseThrow(() -> new RuntimeException("Document not found with id: " + documentId));
+		document.setEconomicAndSocialCouncilDocumentName(uniqueFileName); 
+		try {
+			Files.write(filePath, file.getBytes());
+
+			// store the document hash in the blockchain
+			String documentHash = hashService.hashDocument(getDocument(uniqueFileName));
+			String documentHashKey = document.getId() + "_economic_and_social_council_document_hash";
+			distributedStorageService.persistCommentHash(documentHashKey, documentHash);
+
+			return documentRepository.save(document);
+		}
+		catch (IOException e) {
+			return null;
+		}
+	}
+
 	Document addGeneralSecretariatComment(Long documentId, String comment) {
 		Document document = documentRepository.findById(documentId)
 				.orElseThrow(() -> new RuntimeException("Document not found with id: " + documentId));
@@ -137,6 +167,36 @@ public class DocumentService {
 		distributedStorageService.persistCommentHash(commentKey, hashService.shaHash(comment));
 
 		return documentRepository.save(document);
+	}
+	
+	Document addGeneralSecretariatDocument(MultipartFile file, Long documentId) {
+		File directory = new File(UPLOAD_DIR); 
+		if (!directory.exists()) {
+			if (!directory.mkdirs()) {
+				throw new RuntimeException("Failed to create directory: " + UPLOAD_DIR);
+			}
+		}
+
+		String uniqueFileName = System.currentTimeMillis() + "_" + UUID.randomUUID() + "." + Objects.requireNonNull(file.getOriginalFilename())
+				.split("\\.")[1]; 
+		Path filePath = Paths.get(UPLOAD_DIR, uniqueFileName);
+
+		Document document = documentRepository.findById(documentId)
+				.orElseThrow(() -> new RuntimeException("Document not found with id: " + documentId));
+		document.setGeneralSecretariatDocumentName(uniqueFileName); 
+		try {
+			Files.write(filePath, file.getBytes());
+
+			// store the document hash in the blockchain
+			String documentHash = hashService.hashDocument(getDocument(uniqueFileName));
+			String documentHashKey = document.getId() + "_general_secretariat_document_hash";
+			distributedStorageService.persistCommentHash(documentHashKey, documentHash);
+
+			return documentRepository.save(document);
+		}
+		catch (IOException e) {
+			return null;
+		}
 	}
 
 	Document addLegislativeCouncilComment(Long documentId, String comment) {
@@ -149,6 +209,36 @@ public class DocumentService {
 
 		return documentRepository.save(document);
 	}
+	
+	Document addLegislativeCouncilDocument(MultipartFile file, Long documentId) {
+		File directory = new File(UPLOAD_DIR); 
+		if (!directory.exists()) {
+			if (!directory.mkdirs()) {
+				throw new RuntimeException("Failed to create directory: " + UPLOAD_DIR);
+			}
+		}
+
+		String uniqueFileName = System.currentTimeMillis() + "_" + UUID.randomUUID() + "." + Objects.requireNonNull(file.getOriginalFilename())
+				.split("\\.")[1]; 
+		Path filePath = Paths.get(UPLOAD_DIR, uniqueFileName);
+
+		Document document = documentRepository.findById(documentId)
+				.orElseThrow(() -> new RuntimeException("Document not found with id: " + documentId));
+		document.setLegislativeCouncilDocumentName(uniqueFileName); 
+		try {
+			Files.write(filePath, file.getBytes());
+
+			// store the document hash in the blockchain
+			String documentHash = hashService.hashDocument(getDocument(uniqueFileName));
+			String documentHashKey = document.getId() + "_legislative_council_document_hash";
+			distributedStorageService.persistCommentHash(documentHashKey, documentHash);
+
+			return documentRepository.save(document);
+		}
+		catch (IOException e) {
+			return null;
+		}
+	}
 
 	Document addLegalCommitteeComment(Long documentId, String comment) {
 		Document document = documentRepository.findById(documentId)
@@ -159,6 +249,36 @@ public class DocumentService {
 		distributedStorageService.persistCommentHash(commentKey, hashService.shaHash(comment));
 
 		return documentRepository.save(document);
+	}
+	
+	Document addLegalCommitteeDocument(MultipartFile file, Long documentId) {
+		File directory = new File(UPLOAD_DIR); 
+		if (!directory.exists()) {
+			if (!directory.mkdirs()) {
+				throw new RuntimeException("Failed to create directory: " + UPLOAD_DIR);
+			}
+		}
+
+		String uniqueFileName = System.currentTimeMillis() + "_" + UUID.randomUUID() + "." + Objects.requireNonNull(file.getOriginalFilename())
+				.split("\\.")[1]; 
+		Path filePath = Paths.get(UPLOAD_DIR, uniqueFileName);
+
+		Document document = documentRepository.findById(documentId)
+				.orElseThrow(() -> new RuntimeException("Document not found with id: " + documentId));
+		document.setLegalCommitteeDocumentName(uniqueFileName); 
+		try {
+			Files.write(filePath, file.getBytes());
+
+			// store the document hash in the blockchain
+			String documentHash = hashService.hashDocument(getDocument(uniqueFileName));
+			String documentHashKey = document.getId() + "_legal_committee_document_hash";
+			distributedStorageService.persistCommentHash(documentHashKey, documentHash);
+
+			return documentRepository.save(document);
+		}
+		catch (IOException e) {
+			return null;
+		}
 	}
 
 	Document addBudgetCommitteeComment(Long documentId, String comment) {
@@ -171,6 +291,36 @@ public class DocumentService {
 
 		return documentRepository.save(document);
 	}
+	
+	Document addBudgetCommitteeDocument(MultipartFile file, Long documentId) {
+		File directory = new File(UPLOAD_DIR); 
+		if (!directory.exists()) {
+			if (!directory.mkdirs()) {
+				throw new RuntimeException("Failed to create directory: " + UPLOAD_DIR);
+			}
+		}
+
+		String uniqueFileName = System.currentTimeMillis() + "_" + UUID.randomUUID() + "." + Objects.requireNonNull(file.getOriginalFilename())
+				.split("\\.")[1]; 
+		Path filePath = Paths.get(UPLOAD_DIR, uniqueFileName);
+
+		Document document = documentRepository.findById(documentId)
+				.orElseThrow(() -> new RuntimeException("Document not found with id: " + documentId));
+		document.setBudgetCommitteeDocumentName(uniqueFileName); 
+		try {
+			Files.write(filePath, file.getBytes());
+
+			// store the document hash in the blockchain
+			String documentHash = hashService.hashDocument(getDocument(uniqueFileName));
+			String documentHashKey = document.getId() + "_budget_committee_document_hash";
+			distributedStorageService.persistCommentHash(documentHashKey, documentHash);
+
+			return documentRepository.save(document);
+		}
+		catch (IOException e) {
+			return null;
+		}
+	}
 
 	Document addPublicAdministrationComment(Long documentId, String comment) {
 		Document document = documentRepository.findById(documentId)
@@ -181,6 +331,36 @@ public class DocumentService {
 		distributedStorageService.persistCommentHash(commentKey, hashService.shaHash(comment));
 
 		return documentRepository.save(document);
+	}
+	
+	Document addPublicAdministrationDocument(MultipartFile file, Long documentId) {
+		File directory = new File(UPLOAD_DIR); 
+		if (!directory.exists()) {
+			if (!directory.mkdirs()) {
+				throw new RuntimeException("Failed to create directory: " + UPLOAD_DIR);
+			}
+		}
+
+		String uniqueFileName = System.currentTimeMillis() + "_" + UUID.randomUUID() + "." + Objects.requireNonNull(file.getOriginalFilename())
+				.split("\\.")[1]; 
+		Path filePath = Paths.get(UPLOAD_DIR, uniqueFileName);
+
+		Document document = documentRepository.findById(documentId)
+				.orElseThrow(() -> new RuntimeException("Document not found with id: " + documentId));
+		document.setPublicAdministrationDocumentName(uniqueFileName); 
+		try {
+			Files.write(filePath, file.getBytes());
+
+			// store the document hash in the blockchain
+			String documentHash = hashService.hashDocument(getDocument(uniqueFileName));
+			String documentHashKey = document.getId() + "_public_administration_document_hash";
+			distributedStorageService.persistCommentHash(documentHashKey, documentHash);
+
+			return documentRepository.save(document);
+		}
+		catch (IOException e) {
+			return null;
+		}
 	}
 
 	Document addSpecialtyCommissionDocument(MultipartFile file, Long documentId) {

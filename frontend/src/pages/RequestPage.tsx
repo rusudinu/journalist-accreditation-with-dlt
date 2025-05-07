@@ -21,6 +21,7 @@ import { Textarea } from "@/components/ui/textarea.tsx";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card.tsx";
 import { Progress } from "@/components/ui/progress.tsx";
 import {IoCheckmark} from "react-icons/io5";
+import { Input } from "@/components/ui/input.tsx";
 
 // Document status enum matching the backend
 enum DocumentStatus {
@@ -68,6 +69,7 @@ function RequestPage() {
     const [document, setDocument] = useState<IDocument | null>(null);
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [comment, setComment] = useState<string>("");
+    const [commentFile, setCommentFile] = useState<File | null>(null);
     const [isSubmittingComment, setIsSubmittingComment] = useState<boolean>(false);
     const [isDocumentValid, setIsDocumentValid] = useState<boolean | null>(null);
     const [isDocumentUploadValid, setIsDocumentUploadValid] = useState<boolean | null>(null);
@@ -382,13 +384,6 @@ function RequestPage() {
 
     // Function to submit a comment based on user role
     const submitComment = async () => {
-        if (!comment.trim()) {
-            toast('Error', {
-                description: 'Please enter a comment before submitting.',
-            });
-            return;
-        }
-
         if (!document?.id) {
             toast('Error', {
                 description: 'Document ID is missing.',
@@ -396,71 +391,115 @@ function RequestPage() {
             return;
         }
 
+        // If comment is empty, show error
+        if (!comment?.trim()) {
+            toast('Error', {
+                description: 'Comment cannot be empty.',
+            });
+            return;
+        }
+
+        // If no file selected, show error
+        if (!commentFile) {
+            toast('Error', {
+                description: 'Please upload a document for your comment.',
+            });
+            return;
+        }
+
         setIsSubmittingComment(true);
 
-        try {
-            // Normalize the username to determine which endpoint to use
-            const normalizedUsername = authenticatedUserName.trim().toLowerCase().replace(/\s+/g, '');
-            let endpoint = '';
+        // Determine which API to call based on the user's role
+        const normalizedUsername = authenticatedUserName.trim().toLowerCase().replace(/\s+/g, '');
+        let commentEndpoint = '';
+        let documentEndpoint = '';
 
-            switch (normalizedUsername) {
-                case 'economicandsocialcouncil':
-                    endpoint = 'economic-and-social';
-                    break;
-                case 'generalsecretariat':
-                    endpoint = 'general-secretariat';
-                    break;
-                case 'legislativecouncil':
-                    endpoint = 'legislative-council';
-                    break;
-                case 'legalcommittee':
-                    endpoint = 'legal-committee';
-                    break;
-                case 'budgetcommittee':
-                    endpoint = 'budget-committee';
-                    break;
-                case 'publicadministration':
-                    endpoint = 'public-administration';
-                    break;
-                case 'specialtycommission':
-                    endpoint = 'specialty-commission';
-                    break;
-                default:
-                    toast('Error', {
-                        description: 'You are not authorized to add comments.',
-                    });
-                    setIsSubmittingComment(false);
-                    return;
-            }
-
-            const response = await axios.post(
-                `${backendUrl}/api/v1/documents/${endpoint}/${document.id}`,
-                null,
-                {
-                    params: {
-                        comment: comment
-                    }
-                }
-            );
-
-            if (response.status === 200) {
-                toast('Success', {
-                    description: 'Comment added successfully!',
+        switch (normalizedUsername) {
+            case 'generalsecretariat':
+                commentEndpoint = `${backendUrl}/api/v1/documents/general-secretariat/${document.id}`;
+                documentEndpoint = `${backendUrl}/api/v1/documents/general-secretariat-document/${document.id}`;
+                break;
+            case 'legislativecouncil':
+                commentEndpoint = `${backendUrl}/api/v1/documents/legislative-council/${document.id}`;
+                documentEndpoint = `${backendUrl}/api/v1/documents/legislative-council-document/${document.id}`;
+                break;
+            case 'economicandsocialcouncil':
+                commentEndpoint = `${backendUrl}/api/v1/documents/economic-and-social/${document.id}`;
+                documentEndpoint = `${backendUrl}/api/v1/documents/economic-and-social-document/${document.id}`;
+                break;
+            case 'legalcommittee':
+                commentEndpoint = `${backendUrl}/api/v1/documents/legal-committee/${document.id}`;
+                documentEndpoint = `${backendUrl}/api/v1/documents/legal-committee-document/${document.id}`;
+                break;
+            case 'budgetcommittee':
+                commentEndpoint = `${backendUrl}/api/v1/documents/budget-committee/${document.id}`;
+                documentEndpoint = `${backendUrl}/api/v1/documents/budget-committee-document/${document.id}`;
+                break;
+            case 'publicadministration':
+                commentEndpoint = `${backendUrl}/api/v1/documents/public-administration/${document.id}`;
+                documentEndpoint = `${backendUrl}/api/v1/documents/public-administration-document/${document.id}`;
+                break;
+            default:
+                toast('Error', {
+                    description: 'You are not authorized to add comments to this document.',
                 });
-                setComment('');
-                fetchDocument(); // Refresh document data to show the new comment
+                setIsSubmittingComment(false);
+                return;
+        }
+
+        try {
+            const formData = new FormData();
+            formData.append('comment', comment);
+
+            // First submit the comment
+            const commentResponse = await axios.post(commentEndpoint, formData);
+
+            if (commentResponse.status === 200) {
+                // Then upload the document
+                const documentFormData = new FormData();
+                documentFormData.append('file', commentFile);
+
+                const documentResponse = await axios.post(
+                    documentEndpoint,
+                    documentFormData,
+                    {
+                        headers: {
+                            'Content-Type': 'multipart/form-data',
+                        },
+                    }
+                );
+
+                if (documentResponse.status === 200) {
+                    toast('Success', {
+                        description: 'Comment and document uploaded successfully!',
+                    });
+                    fetchDocument(); // Refresh document data
+                    setComment(''); // Clear comment input
+                    setCommentFile(null); // Clear file input
+                } else {
+                    toast('Error', {
+                        description: `Failed to upload document. Server responded with status: ${documentResponse.status}`,
+                    });
+                }
             } else {
                 toast('Error', {
-                    description: `Failed to add comment. Server responded with status: ${response.status}`,
+                    description: `Failed to submit comment. Server responded with status: ${commentResponse.status}`,
                 });
             }
         } catch (error: unknown) {
-            console.error("Error adding comment:", error);
+            console.error("Error submitting comment:", error);
             toast('Error', {
-                description: `An error occurred while adding the comment: ${error instanceof Error ? error.message : 'Unknown error'}`,
+                description: `An error occurred while submitting your comment: ${error instanceof Error ? error.message : 'Unknown error'}`,
             });
         } finally {
             setIsSubmittingComment(false);
+        }
+    };
+
+    // Modify the handleCommentFileChange function to handle document file upload
+    const handleCommentFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        if (event.target.files && event.target.files.length > 0) {
+            setCommentFile(event.target.files[0]);
         }
     };
 
@@ -875,12 +914,46 @@ function RequestPage() {
 
                         if (isAllowedToUpload()) {
                             return (
-                                <Alert className="mb-4">
-                                    <AlertTitle>Comment Not Allowed</AlertTitle>
-                                    <AlertDescription>
-                                        You are not allowed to add comments to this document.
-                                    </AlertDescription>
-                                </Alert>
+                                <Card>
+                                    <CardHeader>
+                                        <CardTitle>{commentTitle}</CardTitle>
+                                        <CardDescription>Add your comment to this document</CardDescription>
+                                    </CardHeader>
+                                    <CardContent>
+                                        <div className="mt-8 border rounded-lg p-4">
+                                            <h3 className="text-lg font-semibold mb-2">Add Your Comment</h3>
+                                            <Textarea
+                                                placeholder="Enter your comment here..."
+                                                value={comment}
+                                                onChange={(e) => setComment(e.target.value)}
+                                                className="mb-4"
+                                                rows={5}
+                                            />
+                                            
+                                            <div className="mb-4">
+                                                <label className="block text-sm font-medium mb-1">Upload Supporting Document (Required)</label>
+                                                <Input
+                                                    type="file"
+                                                    accept=".pdf"
+                                                    onChange={handleCommentFileChange}
+                                                />
+                                                {commentFile && (
+                                                    <div className="mt-2 text-sm text-gray-500">
+                                                        Selected file: {commentFile.name}
+                                                    </div>
+                                                )}
+                                            </div>
+
+                                            <Button 
+                                                onClick={submitComment} 
+                                                disabled={isSubmittingComment || !comment.trim() || !commentFile}
+                                                className="mt-2"
+                                            >
+                                                {isSubmittingComment ? 'Submitting...' : 'Submit Comment'}
+                                            </Button>
+                                        </div>
+                                    </CardContent>
+                                </Card>
                             );
                         }
 
@@ -888,22 +961,18 @@ function RequestPage() {
                         return (
                             <Card>
                                 <CardHeader>
-                                    <CardTitle>{commentTitle}</CardTitle>
-                                    <CardDescription>Add your comment to this document</CardDescription>
+                                    <CardTitle>Comment Not Allowed</CardTitle>
+                                    <CardDescription>
+                                        You are not allowed to add comments to this document.
+                                    </CardDescription>
                                 </CardHeader>
                                 <CardContent>
-                                    <Textarea
-                                        placeholder="Enter your comment here..."
-                                        value={comment}
-                                        onChange={(e) => setComment(e.target.value)}
-                                        className="mb-4"
-                                    />
-                                    <Button 
-                                        onClick={submitComment}
-                                        disabled={isSubmittingComment || !comment.trim()}
-                                    >
-                                        {isSubmittingComment ? 'Submitting...' : 'Submit Comment'}
-                                    </Button>
+                                    <Alert className="mb-4">
+                                        <AlertTitle>Comment Not Allowed</AlertTitle>
+                                        <AlertDescription>
+                                            You are not allowed to add comments to this document.
+                                        </AlertDescription>
+                                    </Alert>
                                 </CardContent>
                             </Card>
                         );
@@ -1033,8 +1102,7 @@ function RequestPage() {
                                         </AlertDescription>
                                     </Alert>
 
-                                    {document.debateAndApprovalPlenarySessionVoteResults && 
-                                     document.debateAndApprovalPlenarySessionVoteResults.length > 0 ? (
+                                    {document.debateAndApprovalPlenarySessionVoteResults && document.debateAndApprovalPlenarySessionVoteResults.length > 0 ? (
                                         <div className="mt-4">
                                             <h4 className="font-semibold mb-2">Vote Results:</h4>
                                             <div className="flex gap-4">

@@ -16,6 +16,15 @@ export interface IDocument {
   legalCommitteeComment?: string;
   budgetCommitteeComment?: string;
   publicAdministrationComment?: string;
+  
+  // New document name fields
+  generalSecretariatDocumentName?: string;
+  legislativeCouncilDocumentName?: string;
+  economicAndSocialCouncilDocumentName?: string;
+  legalCommitteeDocumentName?: string;
+  budgetCommitteeDocumentName?: string;
+  publicAdministrationDocumentName?: string;
+  
   decidingSpecialtyCommissionDocumentName?: string;
   /** @format date-time */
   debateAndApprovalStartDate?: string;
@@ -28,6 +37,7 @@ export interface IDocument {
   createdDate?: string;
   storedDocumentName?: string;
   deleted?: boolean;
+  lawName?: string;
 }
 
 export interface IUserDTO {
