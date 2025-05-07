@@ -789,6 +789,19 @@ function RequestPage() {
                                 </CardHeader>
                                 <CardContent>
                                     <p>{document.economicAndSocialCouncilComment}</p>
+                                    {document.economicAndSocialCouncilDocumentName && (
+                                        <div className="mt-2">
+                                            <a 
+                                                href={`${backendUrl}/api/v1/documents/download/${document.economicAndSocialCouncilDocumentName}`} 
+                                                target="_blank" 
+                                                rel="noopener noreferrer"
+                                                className="inline-flex items-center text-blue-600 hover:underline"
+                                            >
+                                                <Eye className="w-4 h-4 mr-1" /> 
+                                                View Supporting Document
+                                            </a>
+                                        </div>
+                                    )}
                                 </CardContent>
                             </Card>
                         )}
@@ -800,6 +813,19 @@ function RequestPage() {
                                 </CardHeader>
                                 <CardContent>
                                     <p>{document.generalSecretariatComment}</p>
+                                    {document.generalSecretariatDocumentName && (
+                                        <div className="mt-2">
+                                            <a 
+                                                href={`${backendUrl}/api/v1/documents/download/${document.generalSecretariatDocumentName}`} 
+                                                target="_blank" 
+                                                rel="noopener noreferrer"
+                                                className="inline-flex items-center text-blue-600 hover:underline"
+                                            >
+                                                <Eye className="w-4 h-4 mr-1" /> 
+                                                View Supporting Document
+                                            </a>
+                                        </div>
+                                    )}
                                 </CardContent>
                             </Card>
                         )}
@@ -811,6 +837,19 @@ function RequestPage() {
                                 </CardHeader>
                                 <CardContent>
                                     <p>{document.legislativeCouncilComment}</p>
+                                    {document.legislativeCouncilDocumentName && (
+                                        <div className="mt-2">
+                                            <a 
+                                                href={`${backendUrl}/api/v1/documents/download/${document.legislativeCouncilDocumentName}`} 
+                                                target="_blank" 
+                                                rel="noopener noreferrer"
+                                                className="inline-flex items-center text-blue-600 hover:underline"
+                                            >
+                                                <Eye className="w-4 h-4 mr-1" /> 
+                                                View Supporting Document
+                                            </a>
+                                        </div>
+                                    )}
                                 </CardContent>
                             </Card>
                         )}
@@ -822,6 +861,19 @@ function RequestPage() {
                                 </CardHeader>
                                 <CardContent>
                                     <p>{document.legalCommitteeComment}</p>
+                                    {document.legalCommitteeDocumentName && (
+                                        <div className="mt-2">
+                                            <a 
+                                                href={`${backendUrl}/api/v1/documents/download/${document.legalCommitteeDocumentName}`} 
+                                                target="_blank" 
+                                                rel="noopener noreferrer"
+                                                className="inline-flex items-center text-blue-600 hover:underline"
+                                            >
+                                                <Eye className="w-4 h-4 mr-1" /> 
+                                                View Supporting Document
+                                            </a>
+                                        </div>
+                                    )}
                                 </CardContent>
                             </Card>
                         )}
@@ -833,6 +885,19 @@ function RequestPage() {
                                 </CardHeader>
                                 <CardContent>
                                     <p>{document.budgetCommitteeComment}</p>
+                                    {document.budgetCommitteeDocumentName && (
+                                        <div className="mt-2">
+                                            <a 
+                                                href={`${backendUrl}/api/v1/documents/download/${document.budgetCommitteeDocumentName}`} 
+                                                target="_blank" 
+                                                rel="noopener noreferrer"
+                                                className="inline-flex items-center text-blue-600 hover:underline"
+                                            >
+                                                <Eye className="w-4 h-4 mr-1" /> 
+                                                View Supporting Document
+                                            </a>
+                                        </div>
+                                    )}
                                 </CardContent>
                             </Card>
                         )}
@@ -844,17 +909,19 @@ function RequestPage() {
                                 </CardHeader>
                                 <CardContent>
                                     <p>{document.publicAdministrationComment}</p>
-                                </CardContent>
-                            </Card>
-                        )}
-
-                        {document.specialtyCommissionComment && (
-                            <Card className="mb-2">
-                                <CardHeader>
-                                    <CardTitle>Specialty Commission</CardTitle>
-                                </CardHeader>
-                                <CardContent>
-                                    <p>{document.specialtyCommissionComment}</p>
+                                    {document.publicAdministrationDocumentName && (
+                                        <div className="mt-2">
+                                            <a 
+                                                href={`${backendUrl}/api/v1/documents/download/${document.publicAdministrationDocumentName}`} 
+                                                target="_blank" 
+                                                rel="noopener noreferrer"
+                                                className="inline-flex items-center text-blue-600 hover:underline"
+                                            >
+                                                <Eye className="w-4 h-4 mr-1" /> 
+                                                View Supporting Document
+                                            </a>
+                                        </div>
+                                    )}
                                 </CardContent>
                             </Card>
                         )}
@@ -894,7 +961,7 @@ function RequestPage() {
                                 break;
                             case 'specialtycommission':
                                 commentTitle = 'Specialty Commission Comment';
-                                existingComment = document.specialtyCommissionComment || '';
+                                existingComment = ''; // There is no specialtyCommissionComment field
                                 break;
                             default:
                                 return null; // No comment form for other users
@@ -1142,7 +1209,8 @@ function RequestPage() {
 
                     {/* Button to navigate to next stage request page */}
                     {
-                        document.debateAndApprovalPlenarySessionVoteResults?.length > 1 && (
+                        document.debateAndApprovalPlenarySessionVoteResults && 
+                        document.debateAndApprovalPlenarySessionVoteResults.length > 1 && (
                             <div className="mt-6">
                                 <Button
                                     onClick={() => navigate(`/next-stage-request/${document.id}`)}

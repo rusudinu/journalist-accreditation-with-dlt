@@ -88,17 +88,27 @@ public class DocumentService {
 			case "generalsecretariat" -> documentRepository.findByGeneralSecretariatCommentIsNull();
 			case "legislativecouncil" -> documentRepository.findByLegislativeCouncilCommentIsNull();
 			case "legalcommittee" -> documentRepository.findByLegalCommitteeCommentIsNull().stream()
-					.filter(d -> d.getEconomicAndSocialCouncilComment() != null && d.getGeneralSecretariatComment() != null && d.getLegislativeCouncilComment() != null)
+					.filter(d -> d.getEconomicAndSocialCouncilComment() != null && d.getGeneralSecretariatComment() != null && d.getLegislativeCouncilComment() != null 
+					// Check that all required documents exist
+					&& d.getEconomicAndSocialCouncilDocumentName() != null && d.getGeneralSecretariatDocumentName() != null && d.getLegislativeCouncilDocumentName() != null)
 					.toList();
 			case "budgetcommittee" -> documentRepository.findByBudgetCommitteeCommentIsNull().stream()
-					.filter(d -> d.getEconomicAndSocialCouncilComment() != null && d.getGeneralSecretariatComment() != null && d.getLegislativeCouncilComment() != null)
+					.filter(d -> d.getEconomicAndSocialCouncilComment() != null && d.getGeneralSecretariatComment() != null && d.getLegislativeCouncilComment() != null 
+					// Check that all required documents exist
+					&& d.getEconomicAndSocialCouncilDocumentName() != null && d.getGeneralSecretariatDocumentName() != null && d.getLegislativeCouncilDocumentName() != null)
 					.toList();
 			case "publicadministration" -> documentRepository.findByPublicAdministrationCommentIsNull().stream()
-					.filter(d -> d.getEconomicAndSocialCouncilComment() != null && d.getGeneralSecretariatComment() != null && d.getLegislativeCouncilComment() != null)
+					.filter(d -> d.getEconomicAndSocialCouncilComment() != null && d.getGeneralSecretariatComment() != null && d.getLegislativeCouncilComment() != null 
+					// Check that all required documents exist
+					&& d.getEconomicAndSocialCouncilDocumentName() != null && d.getGeneralSecretariatDocumentName() != null && d.getLegislativeCouncilDocumentName() != null)
 					.toList();
 			case "specialtycommission" ->
 					documentRepository.findByDecidingSpecialtyCommissionDocumentNameIsNull().stream()
-							.filter(d -> d.getEconomicAndSocialCouncilComment() != null && d.getGeneralSecretariatComment() != null && d.getLegislativeCouncilComment() != null && d.getLegalCommitteeComment() != null && d.getBudgetCommitteeComment() != null && d.getPublicAdministrationComment() != null)
+							.filter(d -> d.getEconomicAndSocialCouncilComment() != null && d.getGeneralSecretariatComment() != null && d.getLegislativeCouncilComment() != null 
+							&& d.getLegalCommitteeComment() != null && d.getBudgetCommitteeComment() != null && d.getPublicAdministrationComment() != null
+							// Check that all required documents exist
+							&& d.getEconomicAndSocialCouncilDocumentName() != null && d.getGeneralSecretariatDocumentName() != null && d.getLegislativeCouncilDocumentName() != null
+							&& d.getLegalCommitteeDocumentName() != null && d.getBudgetCommitteeDocumentName() != null && d.getPublicAdministrationDocumentName() != null)
 							.toList();
 			case "chamberprezident" -> documentRepository.findByDecidingSpecialtyCommissionDocumentNameIsNotNull();
 			case "legislativeproposer" -> new ArrayList<>();
@@ -414,7 +424,41 @@ public class DocumentService {
 		Document document = documentRepository.findById(documentId)
 				.orElseThrow(() -> new RuntimeException("Document not found with id: " + documentId));
 
-		return isCommentHashValid(documentId, "economic_and_social_council", document.getEconomicAndSocialCouncilComment()) && isCommentHashValid(documentId, "general_secretariat", document.getGeneralSecretariatComment()) && isCommentHashValid(documentId, "legislative_council", document.getLegislativeCouncilComment()) && isCommentHashValid(documentId, "legal_committee", document.getLegalCommitteeComment()) && isCommentHashValid(documentId, "budget_committee", document.getBudgetCommitteeComment()) && isCommentHashValid(documentId, "public_administration", document.getPublicAdministrationComment());
+		boolean commentsValid = isCommentHashValid(documentId, "economic_and_social_council", document.getEconomicAndSocialCouncilComment()) 
+				&& isCommentHashValid(documentId, "general_secretariat", document.getGeneralSecretariatComment()) 
+				&& isCommentHashValid(documentId, "legislative_council", document.getLegislativeCouncilComment()) 
+				&& isCommentHashValid(documentId, "legal_committee", document.getLegalCommitteeComment()) 
+				&& isCommentHashValid(documentId, "budget_committee", document.getBudgetCommitteeComment()) 
+				&& isCommentHashValid(documentId, "public_administration", document.getPublicAdministrationComment());
+				
+		// Now also check if all required documents are present for submitted comments
+		boolean documentsPresent = true;
+		
+		if (document.getEconomicAndSocialCouncilComment() != null && document.getEconomicAndSocialCouncilDocumentName() == null) {
+			documentsPresent = false;
+		}
+		
+		if (document.getGeneralSecretariatComment() != null && document.getGeneralSecretariatDocumentName() == null) {
+			documentsPresent = false;
+		}
+		
+		if (document.getLegislativeCouncilComment() != null && document.getLegislativeCouncilDocumentName() == null) {
+			documentsPresent = false;
+		}
+		
+		if (document.getLegalCommitteeComment() != null && document.getLegalCommitteeDocumentName() == null) {
+			documentsPresent = false;
+		}
+		
+		if (document.getBudgetCommitteeComment() != null && document.getBudgetCommitteeDocumentName() == null) {
+			documentsPresent = false;
+		}
+		
+		if (document.getPublicAdministrationComment() != null && document.getPublicAdministrationDocumentName() == null) {
+			documentsPresent = false;
+		}
+		
+		return commentsValid && documentsPresent;
 	}
 
 	boolean validateDocumentHash(Long documentId) {
@@ -489,16 +533,21 @@ public class DocumentService {
 		else if (document.getDebateAndApprovalPlenarySessionVoteResults() != null) {
 			return DocumentStatus.DEBATE;
 		}
-		else if (document.getLegalCommitteeComment() != null && document.getBudgetCommitteeComment()
-				!= null && document.getPublicAdministrationComment() != null) {
+		else if (document.getLegalCommitteeComment() != null && document.getBudgetCommitteeComment() != null 
+				&& document.getPublicAdministrationComment() != null
+				// Check that all required documents exist
+				&& document.getLegalCommitteeDocumentName() != null && document.getBudgetCommitteeDocumentName() != null 
+				&& document.getPublicAdministrationDocumentName() != null) {
 			return DocumentStatus.AGGREGATION;
 		}
-		else if (document.getPublicAdministrationComment() != null || document.getBudgetCommitteeComment()
-				 != null || document.getLegalCommitteeComment() != null) {
+		else if ((document.getPublicAdministrationComment() != null && document.getPublicAdministrationDocumentName() != null) 
+				|| (document.getBudgetCommitteeComment() != null && document.getBudgetCommitteeDocumentName() != null) 
+				|| (document.getLegalCommitteeComment() != null && document.getLegalCommitteeDocumentName() != null)) {
 			return DocumentStatus.AMENDMENTS;
 		}
-		else if (document.getGeneralSecretariatComment() != null || document.getLegislativeCouncilComment()
-				 != null || document.getEconomicAndSocialCouncilComment() != null) {
+		else if ((document.getGeneralSecretariatComment() != null && document.getGeneralSecretariatDocumentName() != null) 
+				|| (document.getLegislativeCouncilComment() != null && document.getLegislativeCouncilDocumentName() != null) 
+				|| (document.getEconomicAndSocialCouncilComment() != null && document.getEconomicAndSocialCouncilDocumentName() != null)) {
 			return DocumentStatus.REGISTRATION_PARLIAMENT;
 		}
 		return DocumentStatus.LEGISLATIVE_PROPOSAL;
