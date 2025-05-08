@@ -13,17 +13,15 @@ export interface IDocument {
   generalSecretariatComment?: string;
   legislativeCouncilComment?: string;
   economicAndSocialCouncilComment?: string;
-  legalCommitteeComment?: string;
-  budgetCommitteeComment?: string;
-  publicAdministrationComment?: string;
+  transportCommitteeComment?: string;
+  politicsCommitteeComment?: string;
   
   // New document name fields
   generalSecretariatDocumentName?: string;
   legislativeCouncilDocumentName?: string;
   economicAndSocialCouncilDocumentName?: string;
-  legalCommitteeDocumentName?: string;
-  budgetCommitteeDocumentName?: string;
-  publicAdministrationDocumentName?: string;
+  transportCommitteeDocumentName?: string;
+  politicsCommitteeDocumentName?: string;
   
   decidingSpecialtyCommissionDocumentName?: string;
   /** @format date-time */

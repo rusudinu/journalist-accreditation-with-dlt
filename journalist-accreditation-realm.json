@@ -584,6 +584,29 @@
     "notBefore" : 0,
     "groups" : [ ]
   }, {
+    "id" : "397064e9-7e32-494f-bd03-25168afe5dd1",
+    "username" : "politicscommittee",
+    "firstName" : "Politics",
+    "lastName" : "Committee",
+    "email" : "politicscommittee@gmail.com",
+    "emailVerified" : true,
+    "createdTimestamp" : 1746700512234,
+    "enabled" : true,
+    "totp" : false,
+    "credentials" : [ {
+      "id" : "c799ebde-72a5-4216-b625-0a1226c88995",
+      "type" : "password",
+      "userLabel" : "My password",
+      "createdDate" : 1746700519449,
+      "secretData" : "{\"value\":\"DJEL/CcJd7P3xWV2Q5kNflH9IakorQDEDPIYb3AWRP6jv28uMrPh7ReiRcb7HxXipK/P2xmwWrRCPDJJxeGDeQ==\",\"salt\":\"EoOI95rqmd0ltCB0hqKACg==\",\"additionalParameters\":{}}",
+      "credentialData" : "{\"hashIterations\":210000,\"algorithm\":\"pbkdf2-sha512\",\"additionalParameters\":{}}"
+    } ],
+    "disableableCredentialTypes" : [ ],
+    "requiredActions" : [ ],
+    "realmRoles" : [ "default-roles-journalist-accreditation" ],
+    "notBefore" : 0,
+    "groups" : [ ]
+  }, {
     "id" : "069c3888-b6c7-4d11-ac2f-d25368a0e3e7",
     "username" : "proposer",
     "firstName" : "Legislative",
@@ -645,6 +668,29 @@
       "userLabel" : "My password",
       "createdDate" : 1746191966654,
       "secretData" : "{\"value\":\"y19MeWemomRaU7s1R5XeJ3L3Y1nM49w16Go2MY3EtD6R1l36UR5EmkeBl8Rk8WHtrTXAu9MH1TwjKK/93LrDuQ==\",\"salt\":\"IsAyjFctvYniZTi9eHXs4g==\",\"additionalParameters\":{}}",
+      "credentialData" : "{\"hashIterations\":210000,\"algorithm\":\"pbkdf2-sha512\",\"additionalParameters\":{}}"
+    } ],
+    "disableableCredentialTypes" : [ ],
+    "requiredActions" : [ ],
+    "realmRoles" : [ "default-roles-journalist-accreditation" ],
+    "notBefore" : 0,
+    "groups" : [ ]
+  }, {
+    "id" : "aae528a0-98dd-4c0b-96ee-b53b12bba732",
+    "username" : "transportcommittee",
+    "firstName" : "Transport",
+    "lastName" : "Committee",
+    "email" : "transportcommittee@gmail.com",
+    "emailVerified" : true,
+    "createdTimestamp" : 1746700481735,
+    "enabled" : true,
+    "totp" : false,
+    "credentials" : [ {
+      "id" : "c0f2fe60-0512-44e2-adc9-e0775d3a201f",
+      "type" : "password",
+      "userLabel" : "My password",
+      "createdDate" : 1746700491401,
+      "secretData" : "{\"value\":\"M2350PAAiIMl4ZYohuDg9/mnEt+/lehR+MsgEitqpCU5ZevZtaJkWQ+b3e/hgPOUWwiB9CPwR9cR98X+2bsuyQ==\",\"salt\":\"NKvyn96/iJBPzXxalOaIcQ==\",\"additionalParameters\":{}}",
       "credentialData" : "{\"hashIterations\":210000,\"algorithm\":\"pbkdf2-sha512\",\"additionalParameters\":{}}"
     } ],
     "disableableCredentialTypes" : [ ],

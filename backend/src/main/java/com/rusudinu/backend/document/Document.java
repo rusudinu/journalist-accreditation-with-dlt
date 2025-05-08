@@ -33,16 +33,14 @@ public class Document {
 	
 	/*
 	AMENDMENTS / OPINIONS
-	advisory committee, budget committee, public administration
+	transport committee, politics committee
 	 */
-	private String legalCommitteeComment;
-	private String budgetCommitteeComment;
-	private String publicAdministrationComment;
+	private String transportCommitteeComment;
+	private String politicsCommitteeComment;
 	
 	// Document names for the comments
-	private String legalCommitteeDocumentName;
-	private String budgetCommitteeDocumentName;
-	private String publicAdministrationDocumentName;
+	private String transportCommitteeDocumentName;
+	private String politicsCommitteeDocumentName;
 
 	/*
 	DECIDING SPECIALTY COMMISSION

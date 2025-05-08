@@ -17,11 +17,9 @@ public interface DocumentRepository extends JpaRepository<Document, Long> {
 	)
 	List<Document> findByEconomicAndSocialCouncilCommentIsNull();
 
-	List<Document> findByLegalCommitteeCommentIsNull();
+	List<Document> findByTransportCommitteeCommentIsNull();
 
-	List<Document> findByBudgetCommitteeCommentIsNull();
-
-	List<Document> findByPublicAdministrationCommentIsNull();
+	List<Document> findByPoliticsCommitteeCommentIsNull();
 
 	List<Document> findByDecidingSpecialtyCommissionDocumentNameIsNull();
 	List<Document> findByDecidingSpecialtyCommissionDocumentNameIsNotNull();

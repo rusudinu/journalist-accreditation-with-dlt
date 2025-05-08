@@ -44,3 +44,14 @@ We need to extend the project to also handle bills. New bills can be created by 
 Admins can see the bills that need to be assigned to an approval process.
 
 The admin can configure the phases of the approval process. For each phase he will be presented with a randomly chosen set of reviewers. He can choose the reviewers he wants to assign to that phase if he is not satisfied with that list.
+
+
+# Export keycloak realm
+
+```bash
+docker exec -it journalist-accreditation-keycloak /bin/sh
+```
+
+```bash
+/opt/keycloak/bin/kc.sh export --dir /opt/keycloak/data/import --realm journalist-accreditation --users realm_file
+```

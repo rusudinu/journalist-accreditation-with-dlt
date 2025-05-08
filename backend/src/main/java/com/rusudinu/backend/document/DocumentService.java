@@ -73,7 +73,7 @@ public class DocumentService {
 				.orElseThrow(() -> new RuntimeException("Document not found with id: " + documentId));
 	}
 
-	// possible names: budgetcommittee,economicandsocialcouncil,generalsecretariat,legalcommittee,legislativecouncil,publicadministration,specialtycommission
+	// possible names: politicscommittee,economicandsocialcouncil,generalsecretariat,transportcommittee,legislativecouncil,specialtycommission
 	List<Document> getNeedReviewDocuments(String name) {
 		String normalizedName = name.trim().toLowerCase();
 
@@ -87,17 +87,12 @@ public class DocumentService {
 			case "economicandsocialcouncil" -> documentRepository.findByEconomicAndSocialCouncilCommentIsNull();
 			case "generalsecretariat" -> documentRepository.findByGeneralSecretariatCommentIsNull();
 			case "legislativecouncil" -> documentRepository.findByLegislativeCouncilCommentIsNull();
-			case "legalcommittee" -> documentRepository.findByLegalCommitteeCommentIsNull().stream()
+			case "transportcommittee" -> documentRepository.findByTransportCommitteeCommentIsNull().stream()
 					.filter(d -> d.getEconomicAndSocialCouncilComment() != null && d.getGeneralSecretariatComment() != null && d.getLegislativeCouncilComment() != null 
 					// Check that all required documents exist
 					&& d.getEconomicAndSocialCouncilDocumentName() != null && d.getGeneralSecretariatDocumentName() != null && d.getLegislativeCouncilDocumentName() != null)
 					.toList();
-			case "budgetcommittee" -> documentRepository.findByBudgetCommitteeCommentIsNull().stream()
-					.filter(d -> d.getEconomicAndSocialCouncilComment() != null && d.getGeneralSecretariatComment() != null && d.getLegislativeCouncilComment() != null 
-					// Check that all required documents exist
-					&& d.getEconomicAndSocialCouncilDocumentName() != null && d.getGeneralSecretariatDocumentName() != null && d.getLegislativeCouncilDocumentName() != null)
-					.toList();
-			case "publicadministration" -> documentRepository.findByPublicAdministrationCommentIsNull().stream()
+			case "politicscommittee" -> documentRepository.findByPoliticsCommitteeCommentIsNull().stream()
 					.filter(d -> d.getEconomicAndSocialCouncilComment() != null && d.getGeneralSecretariatComment() != null && d.getLegislativeCouncilComment() != null 
 					// Check that all required documents exist
 					&& d.getEconomicAndSocialCouncilDocumentName() != null && d.getGeneralSecretariatDocumentName() != null && d.getLegislativeCouncilDocumentName() != null)
@@ -105,10 +100,10 @@ public class DocumentService {
 			case "specialtycommission" ->
 					documentRepository.findByDecidingSpecialtyCommissionDocumentNameIsNull().stream()
 							.filter(d -> d.getEconomicAndSocialCouncilComment() != null && d.getGeneralSecretariatComment() != null && d.getLegislativeCouncilComment() != null 
-							&& d.getLegalCommitteeComment() != null && d.getBudgetCommitteeComment() != null && d.getPublicAdministrationComment() != null
+							&& d.getTransportCommitteeComment() != null && d.getPoliticsCommitteeComment() != null
 							// Check that all required documents exist
 							&& d.getEconomicAndSocialCouncilDocumentName() != null && d.getGeneralSecretariatDocumentName() != null && d.getLegislativeCouncilDocumentName() != null
-							&& d.getLegalCommitteeDocumentName() != null && d.getBudgetCommitteeDocumentName() != null && d.getPublicAdministrationDocumentName() != null)
+							&& d.getTransportCommitteeDocumentName() != null && d.getPoliticsCommitteeDocumentName() != null)
 							.toList();
 			case "chamberprezident" -> documentRepository.findByDecidingSpecialtyCommissionDocumentNameIsNotNull();
 			case "legislativeproposer" -> new ArrayList<>();
@@ -250,18 +245,18 @@ public class DocumentService {
 		}
 	}
 
-	Document addLegalCommitteeComment(Long documentId, String comment) {
+	Document addTransportCommitteeComment(Long documentId, String comment) {
 		Document document = documentRepository.findById(documentId)
 				.orElseThrow(() -> new RuntimeException("Document not found with id: " + documentId));
-		document.setLegalCommitteeComment(comment);
+		document.setTransportCommitteeComment(comment);
 
-		String commentKey = document.getId() + "_comment_legal_committee";
+		String commentKey = document.getId() + "_comment_transport_committee";
 		distributedStorageService.persistCommentHash(commentKey, hashService.shaHash(comment));
 
 		return documentRepository.save(document);
 	}
 	
-	Document addLegalCommitteeDocument(MultipartFile file, Long documentId) {
+	Document addTransportCommitteeDocument(MultipartFile file, Long documentId) {
 		File directory = new File(UPLOAD_DIR); 
 		if (!directory.exists()) {
 			if (!directory.mkdirs()) {
@@ -275,13 +270,13 @@ public class DocumentService {
 
 		Document document = documentRepository.findById(documentId)
 				.orElseThrow(() -> new RuntimeException("Document not found with id: " + documentId));
-		document.setLegalCommitteeDocumentName(uniqueFileName); 
+		document.setTransportCommitteeDocumentName(uniqueFileName); 
 		try {
 			Files.write(filePath, file.getBytes());
 
 			// store the document hash in the blockchain
 			String documentHash = hashService.hashDocument(getDocument(uniqueFileName));
-			String documentHashKey = document.getId() + "_legal_committee_document_hash";
+			String documentHashKey = document.getId() + "_transport_committee_document_hash";
 			distributedStorageService.persistCommentHash(documentHashKey, documentHash);
 
 			return documentRepository.save(document);
@@ -291,18 +286,18 @@ public class DocumentService {
 		}
 	}
 
-	Document addBudgetCommitteeComment(Long documentId, String comment) {
+	Document addPoliticsCommitteeComment(Long documentId, String comment) {
 		Document document = documentRepository.findById(documentId)
 				.orElseThrow(() -> new RuntimeException("Document not found with id: " + documentId));
-		document.setBudgetCommitteeComment(comment);
+		document.setPoliticsCommitteeComment(comment);
 
-		String commentKey = document.getId() + "_comment_budget_committee";
+		String commentKey = document.getId() + "_comment_politics_committee";
 		distributedStorageService.persistCommentHash(commentKey, hashService.shaHash(comment));
 
 		return documentRepository.save(document);
 	}
 	
-	Document addBudgetCommitteeDocument(MultipartFile file, Long documentId) {
+	Document addPoliticsCommitteeDocument(MultipartFile file, Long documentId) {
 		File directory = new File(UPLOAD_DIR); 
 		if (!directory.exists()) {
 			if (!directory.mkdirs()) {
@@ -316,54 +311,13 @@ public class DocumentService {
 
 		Document document = documentRepository.findById(documentId)
 				.orElseThrow(() -> new RuntimeException("Document not found with id: " + documentId));
-		document.setBudgetCommitteeDocumentName(uniqueFileName); 
+		document.setPoliticsCommitteeDocumentName(uniqueFileName); 
 		try {
 			Files.write(filePath, file.getBytes());
 
 			// store the document hash in the blockchain
 			String documentHash = hashService.hashDocument(getDocument(uniqueFileName));
-			String documentHashKey = document.getId() + "_budget_committee_document_hash";
-			distributedStorageService.persistCommentHash(documentHashKey, documentHash);
-
-			return documentRepository.save(document);
-		}
-		catch (IOException e) {
-			return null;
-		}
-	}
-
-	Document addPublicAdministrationComment(Long documentId, String comment) {
-		Document document = documentRepository.findById(documentId)
-				.orElseThrow(() -> new RuntimeException("Document not found with id: " + documentId));
-		document.setPublicAdministrationComment(comment);
-
-		String commentKey = document.getId() + "_comment_public_administration";
-		distributedStorageService.persistCommentHash(commentKey, hashService.shaHash(comment));
-
-		return documentRepository.save(document);
-	}
-	
-	Document addPublicAdministrationDocument(MultipartFile file, Long documentId) {
-		File directory = new File(UPLOAD_DIR); 
-		if (!directory.exists()) {
-			if (!directory.mkdirs()) {
-				throw new RuntimeException("Failed to create directory: " + UPLOAD_DIR);
-			}
-		}
-
-		String uniqueFileName = System.currentTimeMillis() + "_" + UUID.randomUUID() + "." + Objects.requireNonNull(file.getOriginalFilename())
-				.split("\\.")[1]; 
-		Path filePath = Paths.get(UPLOAD_DIR, uniqueFileName);
-
-		Document document = documentRepository.findById(documentId)
-				.orElseThrow(() -> new RuntimeException("Document not found with id: " + documentId));
-		document.setPublicAdministrationDocumentName(uniqueFileName); 
-		try {
-			Files.write(filePath, file.getBytes());
-
-			// store the document hash in the blockchain
-			String documentHash = hashService.hashDocument(getDocument(uniqueFileName));
-			String documentHashKey = document.getId() + "_public_administration_document_hash";
+			String documentHashKey = document.getId() + "_politics_committee_document_hash";
 			distributedStorageService.persistCommentHash(documentHashKey, documentHash);
 
 			return documentRepository.save(document);
@@ -427,9 +381,8 @@ public class DocumentService {
 		boolean commentsValid = isCommentHashValid(documentId, "economic_and_social_council", document.getEconomicAndSocialCouncilComment()) 
 				&& isCommentHashValid(documentId, "general_secretariat", document.getGeneralSecretariatComment()) 
 				&& isCommentHashValid(documentId, "legislative_council", document.getLegislativeCouncilComment()) 
-				&& isCommentHashValid(documentId, "legal_committee", document.getLegalCommitteeComment()) 
-				&& isCommentHashValid(documentId, "budget_committee", document.getBudgetCommitteeComment()) 
-				&& isCommentHashValid(documentId, "public_administration", document.getPublicAdministrationComment());
+				&& isCommentHashValid(documentId, "transport_committee", document.getTransportCommitteeComment()) 
+				&& isCommentHashValid(documentId, "politics_committee", document.getPoliticsCommitteeComment());
 				
 		// Now also check if all required documents are present for submitted comments
 		boolean documentsPresent = true;
@@ -446,15 +399,11 @@ public class DocumentService {
 			documentsPresent = false;
 		}
 		
-		if (document.getLegalCommitteeComment() != null && document.getLegalCommitteeDocumentName() == null) {
+		if (document.getTransportCommitteeComment() != null && document.getTransportCommitteeDocumentName() == null) {
 			documentsPresent = false;
 		}
 		
-		if (document.getBudgetCommitteeComment() != null && document.getBudgetCommitteeDocumentName() == null) {
-			documentsPresent = false;
-		}
-		
-		if (document.getPublicAdministrationComment() != null && document.getPublicAdministrationDocumentName() == null) {
+		if (document.getPoliticsCommitteeComment() != null && document.getPoliticsCommitteeDocumentName() == null) {
 			documentsPresent = false;
 		}
 		
@@ -533,16 +482,13 @@ public class DocumentService {
 		else if (document.getDebateAndApprovalPlenarySessionVoteResults() != null) {
 			return DocumentStatus.DEBATE;
 		}
-		else if (document.getLegalCommitteeComment() != null && document.getBudgetCommitteeComment() != null 
-				&& document.getPublicAdministrationComment() != null
+		else if (document.getTransportCommitteeComment() != null && document.getPoliticsCommitteeComment() != null
 				// Check that all required documents exist
-				&& document.getLegalCommitteeDocumentName() != null && document.getBudgetCommitteeDocumentName() != null 
-				&& document.getPublicAdministrationDocumentName() != null) {
+				&& document.getTransportCommitteeDocumentName() != null && document.getPoliticsCommitteeDocumentName() != null) {
 			return DocumentStatus.AGGREGATION;
 		}
-		else if ((document.getPublicAdministrationComment() != null && document.getPublicAdministrationDocumentName() != null) 
-				|| (document.getBudgetCommitteeComment() != null && document.getBudgetCommitteeDocumentName() != null) 
-				|| (document.getLegalCommitteeComment() != null && document.getLegalCommitteeDocumentName() != null)) {
+		else if ((document.getTransportCommitteeComment() != null && document.getTransportCommitteeDocumentName() != null) 
+				|| (document.getPoliticsCommitteeComment() != null && document.getPoliticsCommitteeDocumentName() != null)) {
 			return DocumentStatus.AMENDMENTS;
 		}
 		else if ((document.getGeneralSecretariatComment() != null && document.getGeneralSecretariatDocumentName() != null) 

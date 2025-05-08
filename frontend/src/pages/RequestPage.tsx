@@ -117,7 +117,7 @@ function RequestPage() {
     const isAllowedToComment = () => {
         const normalizedUsername = authenticatedUserName.trim().toLowerCase().replace(/\s+/g, '');
         return ['economicandsocialcouncil', 'generalsecretariat', 'legislativecouncil', 
-                'legalcommittee', 'budgetcommittee', 'publicadministration', 'specialtycommission'].includes(normalizedUsername);
+                'transportcommittee', 'politicscommittee', 'specialtycommission'].includes(normalizedUsername);
     };
 
     useEffect(() => {
@@ -434,17 +434,13 @@ function RequestPage() {
                 commentEndpoint = `${backendUrl}/api/v1/documents/economic-and-social/${document.id}`;
                 documentEndpoint = `${backendUrl}/api/v1/documents/economic-and-social-document/${document.id}`;
                 break;
-            case 'legalcommittee':
-                commentEndpoint = `${backendUrl}/api/v1/documents/legal-committee/${document.id}`;
-                documentEndpoint = `${backendUrl}/api/v1/documents/legal-committee-document/${document.id}`;
+            case 'transportcommittee':
+                commentEndpoint = `${backendUrl}/api/v1/documents/transport-committee/${document.id}`;
+                documentEndpoint = `${backendUrl}/api/v1/documents/transport-committee-document/${document.id}`;
                 break;
-            case 'budgetcommittee':
-                commentEndpoint = `${backendUrl}/api/v1/documents/budget-committee/${document.id}`;
-                documentEndpoint = `${backendUrl}/api/v1/documents/budget-committee-document/${document.id}`;
-                break;
-            case 'publicadministration':
-                commentEndpoint = `${backendUrl}/api/v1/documents/public-administration/${document.id}`;
-                documentEndpoint = `${backendUrl}/api/v1/documents/public-administration-document/${document.id}`;
+            case 'politicscommittee':
+                commentEndpoint = `${backendUrl}/api/v1/documents/politics-committee/${document.id}`;
+                documentEndpoint = `${backendUrl}/api/v1/documents/politics-committee-document/${document.id}`;
                 break;
             case 'specialtycommission':
                 // Specialty commission uploads a document directly without comment
@@ -902,17 +898,17 @@ function RequestPage() {
                             </Card>
                         )}
 
-                        {document.legalCommitteeComment && (
+                        {document.transportCommitteeComment && (
                             <Card className="mb-2">
                                 <CardHeader>
-                                    <CardTitle>Legal Committee</CardTitle>
+                                    <CardTitle>Transport Committee</CardTitle>
                                 </CardHeader>
                                 <CardContent>
-                                    <p>{document.legalCommitteeComment}</p>
-                                    {document.legalCommitteeDocumentName && (
+                                    <p>{document.transportCommitteeComment}</p>
+                                    {document.transportCommitteeDocumentName && (
                                         <div className="mt-2">
                                             <a 
-                                                href={`${backendUrl}/api/v1/documents/download/${document.legalCommitteeDocumentName}`} 
+                                                href={`${backendUrl}/api/v1/documents/download/${document.transportCommitteeDocumentName}`} 
                                                 target="_blank" 
                                                 rel="noopener noreferrer"
                                                 className="inline-flex items-center text-blue-600 hover:underline"
@@ -926,41 +922,17 @@ function RequestPage() {
                             </Card>
                         )}
 
-                        {document.budgetCommitteeComment && (
+                        {document.politicsCommitteeComment && (
                             <Card className="mb-2">
                                 <CardHeader>
-                                    <CardTitle>Budget Committee</CardTitle>
+                                    <CardTitle>Politics Committee</CardTitle>
                                 </CardHeader>
                                 <CardContent>
-                                    <p>{document.budgetCommitteeComment}</p>
-                                    {document.budgetCommitteeDocumentName && (
+                                    <p>{document.politicsCommitteeComment}</p>
+                                    {document.politicsCommitteeDocumentName && (
                                         <div className="mt-2">
                                             <a 
-                                                href={`${backendUrl}/api/v1/documents/download/${document.budgetCommitteeDocumentName}`} 
-                                                target="_blank" 
-                                                rel="noopener noreferrer"
-                                                className="inline-flex items-center text-blue-600 hover:underline"
-                                            >
-                                                <Eye className="w-4 h-4 mr-1" /> 
-                                                View Supporting Document
-                                            </a>
-                                        </div>
-                                    )}
-                                </CardContent>
-                            </Card>
-                        )}
-
-                        {document.publicAdministrationComment && (
-                            <Card className="mb-2">
-                                <CardHeader>
-                                    <CardTitle>Public Administration</CardTitle>
-                                </CardHeader>
-                                <CardContent>
-                                    <p>{document.publicAdministrationComment}</p>
-                                    {document.publicAdministrationDocumentName && (
-                                        <div className="mt-2">
-                                            <a 
-                                                href={`${backendUrl}/api/v1/documents/download/${document.publicAdministrationDocumentName}`} 
+                                                href={`${backendUrl}/api/v1/documents/download/${document.politicsCommitteeDocumentName}`} 
                                                 target="_blank" 
                                                 rel="noopener noreferrer"
                                                 className="inline-flex items-center text-blue-600 hover:underline"
@@ -995,17 +967,13 @@ function RequestPage() {
                                 commentTitle = 'Legislative Council Comment';
                                 existingComment = document.legislativeCouncilComment || '';
                                 break;
-                            case 'legalcommittee':
-                                commentTitle = 'Legal Committee Comment';
-                                existingComment = document.legalCommitteeComment || '';
+                            case 'transportcommittee':
+                                commentTitle = 'Transport Committee Comment';
+                                existingComment = document.transportCommitteeComment || '';
                                 break;
-                            case 'budgetcommittee':
-                                commentTitle = 'Budget Committee Comment';
-                                existingComment = document.budgetCommitteeComment || '';
-                                break;
-                            case 'publicadministration':
-                                commentTitle = 'Public Administration Comment';
-                                existingComment = document.publicAdministrationComment || '';
+                            case 'politicscommittee':
+                                commentTitle = 'Politics Committee Comment';
+                                existingComment = document.politicsCommitteeComment || '';
                                 break;
                             case 'specialtycommission':
                                 commentTitle = 'Specialty Commission Comment';
