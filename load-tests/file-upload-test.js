@@ -1,20 +1,20 @@
 import http from 'k6/http';
 import {check} from 'k6';
 
-// do 100 iterations of the test
 export const options = {
-    vus: 1,
-    iterations: 100,
+    vus: 20,
+    iterations: 1000,
 };
 
 const document = open('./test-document.pdf', 'b');
 
 export default function () {
     // define URL and request body
-    const url = 'http://localhost:8080/api/v1/documents?status=CREATED&requestId=11';
+    const url = 'http://localhost:8080/api/v1/documents';
 
     const data = {
         file: http.file(document, 'test-document.pdf'),
+        documentId: '11',
     }
 
     const params = {
