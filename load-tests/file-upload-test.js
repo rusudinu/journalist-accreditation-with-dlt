@@ -31,3 +31,27 @@ export default function () {
         'response code was 200': (res) => res.status == 200,
     });
 }
+
+/*
+import http from 'k6/http';
+import {check} from 'k6';
+
+// do 100 iterations of the test
+export const options = {
+    vus: 1000,
+    duration: '1m',
+};
+
+export default function () {
+    // define URL and request body
+    const url = 'http://localhost:8080/quick/demo';
+
+    // send a post request and save response as a variable
+    const res = http.get(url);
+
+    // check that response is 200
+    check(res, {
+        'response code was 200': (res) => res.status == 200,
+    });
+}
+*/
